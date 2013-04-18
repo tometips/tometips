@@ -1,3 +1,3 @@
 html/js/spoilers.js: spoilers.lua
-	echo "spoilers = " > $@
+	echo "tome = " > $@
 	lua spoilers.lua >> $@
