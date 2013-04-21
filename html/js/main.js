@@ -1,11 +1,25 @@
 ///Simplistic title-case function that capitalizes the beginning of every word.
 function toTitleCase(s)
 {
+    // FIXME: Handle "of"
     return s.replace(/\b[a-z]/g, function(match) { return match.toUpperCase(); });
 }
 
+Handlebars.registerHelper('eachProperty', function(context, options) {
+    var ret = "";
+    for(var prop in context)
+    {
+        ret = ret + options.fn({property:prop,value:context[prop]});
+    }
+    return ret;
+});
+
+Handlebars.registerHelper('toTitleCase', function(context, options) {
+    return toTitleCase(context);
+});
+
 /**Does additional processing to the raw spoilers (in tome) and stores the
- * processing results to tomex.
+ * results to tomex.
  */
 function process_spoilers(tome, tomex) {
     // FIXME: Polyfill for Object.keys
@@ -16,27 +30,22 @@ function process_spoilers(tome, tomex) {
     for (var i = 0; i < talent_types.length; i++) {
         category = talent_types[i].split("/")[0];
         tomex.talentsByCategory[category] = tomex.talentsByCategory[category] || []; 
-        tomex.talentsByCategory[category].push(talent_types[i]);
+        tomex.talentsByCategory[category].push(tome.talents_types_def[talent_types[i]]);
     }
 }
 
+var talent_by_type_template = Handlebars.compile(
+    "{{#eachProperty talentsByCategory}}" +
+    "<h1>{{toTitleCase property}}</h1>" +
+    "{{#each value}}" +
+    "<h2>{{toTitleCase name}}</h2>" +
+    "<p>{{description}}</p>" +
+    "{{/each}}" +
+    "{{/eachProperty}}"
+);
+
 function list_talents(tome, tomex) {
-    // FIXME: Escape HTML throughout (or switch to a templating language)
-    var html = "",
-        category,
-        type;
-    for (category in tomex.talentsByCategory) {
-        if (!tomex.talentsByCategory.hasOwnProperty(category)) {
-            continue;
-        }
-        html += '<h1>' + toTitleCase(category) + '</h1>';
-        for (var i = 0; i < tomex.talentsByCategory[category].length; i++) {
-            type = tomex.talentsByCategory[category][i];
-            html += '<h2>' + toTitleCase(tome.talents_types_def[type].name) + '</h2>' +
-                '<p>' + tome.talents_types_def[type].description + '</p>';
-        }
-    }
-    return html;
+    return talent_by_type_template(tomex);
 }
 
 $(document).ready(function() {
