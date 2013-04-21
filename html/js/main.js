@@ -30,17 +30,27 @@ function process_spoilers(tome, tomex) {
     for (var i = 0; i < talent_types.length; i++) {
         category = talent_types[i].split("/")[0];
         tomex.talentsByCategory[category] = tomex.talentsByCategory[category] || []; 
+        for (var j = 0; j < tome.talents_types_def[talent_types[i]].length; j++) {
+            tome.talents_types_def[talent_types[i]][j].sort(function(a, b) {
+                return a.type[1] < b.type[1] ||
+                    (a.type[1] == b.type[1] && a.name < b.name);
+            });
+        }
         tomex.talentsByCategory[category].push(tome.talents_types_def[talent_types[i]]);
     }
 }
 
 var talent_by_type_template = Handlebars.compile(
     "{{#eachProperty talentsByCategory}}" +
-    "<h1>{{toTitleCase property}}</h1>" +
-    "{{#each value}}" +
-    "<h2>{{toTitleCase name}}</h2>" +
-    "<p>{{description}}</p>" +
-    "{{/each}}" +
+        '<h1>{{toTitleCase property}}</h1><div class="sub-accordion">' +
+        "{{#each value}}" +
+            '<h2>{{toTitleCase name}}</h2><div>' +
+            '<p>{{description}}</p><div class="sub-accordion">' +
+            "{{#each talents}}" +
+                "<h3>{{name}}</h3><div>" +
+                "TBD</div>" +
+            "{{/each}}</div></div>" +
+        "{{/each}}</div>" +
     "{{/eachProperty}}"
 );
 
@@ -53,5 +63,7 @@ $(document).ready(function() {
     tomex = {};
     process_spoilers(tome, tomex);
     $("#content").html(list_talents(tome, tomex));
+    $(".sub-accordion").accordion({active: false, collapsible: true, heightStyle: "content" });
+    $("#content").accordion({active: false, collapsible: true, heightStyle: "content" });
 });
 
