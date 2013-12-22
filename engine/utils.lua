@@ -21,3 +21,12 @@ function table.clone(tbl, deep, k_skip)
 	return n
 end
 
+util = {}
+
+function util.getval(val, ...)
+	if type(val) == "function" then return val(...)
+	elseif type(val) == "table" then return val[rng.range(1, #val)]
+	else return val
+	end
+end
+

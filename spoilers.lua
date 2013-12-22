@@ -1,5 +1,5 @@
 require 'engine.utils'
-require('lib.json4lua.json.json')
+require 'lib.json4lua.json.json'
 
 -- FIXME: Figure out where these should go and what they should do
 resolvers = {
@@ -38,39 +38,39 @@ end
 -- from engine.interface.ActorTalents
 talents_types_def = {}
 function newTalentType(t)
-	t.description = t.description or ""
-	t.points = t.points or 1
-	t.talents = {}
+    t.description = t.description or ""
+    t.points = t.points or 1
+    t.talents = {}
     -- Omit for cleaner JSON
-	-- table.insert(self.talents_types_def, t)
-	talents_types_def[t.type] = t
+    -- table.insert(self.talents_types_def, t)
+    talents_types_def[t.type] = t
 end
 
 -- from engine.interface.ActorTalents
 talents_def = {}
 function newTalent(t)
-	if type(t.type) == "string" then t.type = {t.type, 1} end
-	if not t.type[2] then t.type[2] = 1 end
-	t.short_name = t.short_name or t.name
-	t.short_name = t.short_name:upper():gsub("[ ']", "_")
-	t.mode = t.mode or "activated"
-	t.points = t.points or 1
+    if type(t.type) == "string" then t.type = {t.type, 1} end
+    if not t.type[2] then t.type[2] = 1 end
+    t.short_name = t.short_name or t.name
+    t.short_name = t.short_name:upper():gsub("[ ']", "_")
+    t.mode = t.mode or "activated"
+    t.points = t.points or 1
 
-	-- Can pass a string, make it into a function
-	if type(t.info) == "string" then
-		local infostr = t.info
-		t.info = function() return infostr end
-	end
+    -- Can pass a string, make it into a function
+    if type(t.info) == "string" then
+        local infostr = t.info
+        t.info = function() return infostr end
+    end
 
-	-- Remove line stat with tabs to be cleaner ..
-	local info = t.info
-	t.info = function(self, t) return info(self, t):gsub("\n\t+", "\n") end
+    -- Remove line stat with tabs to be cleaner ..
+    local info = t.info
+    t.info = function(self, t) return info(self, t):gsub("\n\t+", "\n") end
 
-	t.id = "T_"..t.short_name
-	talents_def[t.id] = t
+    t.id = "T_"..t.short_name
+    talents_def[t.id] = t
 
-	-- Register in the type
-	table.insert(talents_types_def[t.type[1]].talents, t)
+    -- Register in the type
+    table.insert(talents_types_def[t.type[1]].talents, t)
 end
 
 load("/engine/colors.lua")
@@ -90,10 +90,33 @@ load("/data/talents/chronomancy/chronomancer.lua")
 load("/data/talents/psionic/psionic.lua")
 load("/data/talents/uber/uber.lua")
 
+local raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback' }
+
+local resources = {}
+for i, v in ipairs(raw_resources) do
+    resources[v] = v:gsub("_", " ")
+    resources[v] = v:gsub("positive", "positive energy")
+    resources[v] = v:gsub("negative", "negative energy")
+end
+
+local player = {}
+
+for tid, t in pairs(talents_def) do
+    t.mode = t.mode or "activated"
+
+    for i, v in ipairs(raw_resources) do
+        if t[v] then
+            t.cost = t.cost and (t.cost .. ", ") or ""
+            t.cost = t.cost .. string.format("%i %s", util.getval(t[v], player, t), resources[v])
+        end
+    end
+end
+
 print(json.encode({
     colors = colors,
     -- FIXME: Strip death_message
     DamageType = DamageType,
-    talents_types_def = talents_types_def
+    talents_types_def = talents_types_def,
+    talents_def = talents_def
 }))
 

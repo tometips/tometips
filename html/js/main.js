@@ -47,8 +47,13 @@ var talent_by_type_template = Handlebars.compile(
             '<h2>{{toTitleCase name}}</h2><div>' +
             '<p>{{description}}</p><div class="sub-accordion">' +
             "{{#each talents}}" +
-                "<h3>{{name}}</h3><div>" +
-                "TBD</div>" +
+                '<h3>{{name}}</h3><div class="talent-details">' +
+                "<dl>" +
+                "{{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}" +
+                "{{#if cost}}<dt>Cost</dt><dd>{{cost}}</dd>{{/if}}" +
+                "{{#if cooldown}}<dt>Cooldown</dt><dd>{{cooldown}}</dd>{{/if}}" +
+                "<dt>Use Speed</dt><dd>{{#if no_energy}}instant{{else}}1 turn{{/if}}</dd>" +
+                "</dl></div>" +
             "{{/each}}</div></div>" +
         "{{/each}}</div>" +
     "{{/eachProperty}}"
