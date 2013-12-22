@@ -94,29 +94,68 @@ local raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positiv
 
 local resources = {}
 for i, v in ipairs(raw_resources) do
-    resources[v] = v:gsub("_", " ")
-    resources[v] = v:gsub("positive", "positive energy")
-    resources[v] = v:gsub("negative", "negative energy")
+    resources[v] = v
+    resources[v] = resources[v]:gsub("sustain_", "")
+    resources[v] = resources[v]:gsub("_", " ")
+    resources[v] = resources[v]:gsub("positive", "positive energy")
+    resources[v] = resources[v]:gsub("negative", "negative energy")
 end
 
+game = {}
 local player = {}
+
+function get_talent_level_val(val, actor, t)
+    if type(val) == "function" then
+        local result = {}
+        for i = 1, 5 do
+            actor.getTalentLevel = function() return i end
+            result[#result+1] = tostring(val(actor, t))
+        end
+        actor.getTalentLevel = nil
+        return table.concat(result, ", ")
+    elseif type(val) == "table" then
+        return val[rng.range(1, #val)]
+    else
+        return val
+    end
+end
 
 for tid, t in pairs(talents_def) do
     t.mode = t.mode or "activated"
 
-    for i, v in ipairs(raw_resources) do
-        if t[v] then
-            t.cost = t.cost and (t.cost .. ", ") or ""
-            t.cost = t.cost .. string.format("%i %s", util.getval(t[v], player, t), resources[v])
+    if t.mode ~= "passive" then
+        if t.no_energy and type(t.no_energy) == "boolean" and t.no_energy == true then
+            t.use_speed = "instant"
+        else
+            t.use_speed = "1 turn"
         end
+    end
+
+    for i, v in ipairs(raw_resources) do
+        cost = {}
+        if t[v] then
+            cost[#cost+1] = string.format("%s %s", get_talent_level_val(t[v], player, t), resources[v])
+        end
+        if #cost > 0 then t.cost = table.concat(cost, ", ") end
     end
 end
 
-print(json.encode({
-    colors = colors,
-    -- FIXME: Strip death_message
-    DamageType = DamageType,
-    talents_types_def = talents_types_def,
-    talents_def = talents_def
-}))
+-- TODO: travel speed, range, requirements, description
+-- 		if self:getTalentRange(t) > 1 then d:add({"color",0x6f,0xff,0x83}, "Range: ", {"color",0xFF,0xFF,0xFF}, ("%0.1f"):format(self:getTalentRange(t)), true)
+--		else d:add({"color",0x6f,0xff,0x83}, "Range: ", {"color",0xFF,0xFF,0xFF}, "melee/personal", true)
+--		end
+--		local speed = self:getTalentProjectileSpeed(t)
+--		if speed then d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, ""..(speed * 100).."% of base", true)
+--		else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)
+--		end
+
+if true then
+    print(json.encode({
+        colors = colors,
+        -- FIXME: Strip death_message
+        DamageType = DamageType,
+        talents_types_def = talents_types_def,
+        talents_def = talents_def
+    }))
+end
 

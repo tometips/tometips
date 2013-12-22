@@ -23,6 +23,12 @@ end
 
 util = {}
 
+function util.bound(i, min, max)
+	if min and i < min then i = min
+	elseif max and i > max then i = max end
+	return i
+end
+
 function util.getval(val, ...)
 	if type(val) == "function" then return val(...)
 	elseif type(val) == "table" then return val[rng.range(1, #val)]
