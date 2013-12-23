@@ -104,12 +104,47 @@ end
 game = {}
 local player = {}
 
+-- Compute a diminishing returns value based on talent level that scales with a power
+-- t = talent def table or a numeric value
+-- low = value to match at talent level 1
+-- high = value to match at talent level 5
+-- power = scaling factor (default 0.5) or "log" for log10
+-- add = amount to add the result (default 0)
+-- shift = amount to add to the talent level before computation (default 0)
+-- raw if true specifies use of raw talent level
+player.combatTalentScale = function(self, t, low, high, power, add, shift, raw)
+    local tl = type(t) == "table" and (raw and self:getTalentLevelRaw(t) or self:getTalentLevel(t)) or t
+    power, add, shift = power or 0.5, add or 0, shift or 0
+    local x_low, x_high = 1, 5 -- Implied talent levels to fit
+    local x_low_adj, x_high_adj
+    if power == "log" then
+        x_low_adj, x_high_adj = math.log10(x_low+shift), math.log10(x_high+shift)
+        tl = math.max(1, tl)
+    else
+        x_low_adj, x_high_adj = (x_low+shift)^power, (x_high+shift)^power
+    end
+    local m = (high - low)/(x_high_adj - x_low_adj)
+    local b = low - m*x_low_adj
+    if power == "log" then -- always >= 0
+        return math.max(0, m * math.log10(tl + shift) + b + add)
+--        return math.max(0, m * math.log10(tl + shift) + b + add), m, b
+    else 
+        return math.max(0, m * (tl + shift)^power + b + add)
+--        return math.max(0, m * (tl + shift)^power + b + add), m, b
+    end
+end
+
+player.hasEffect = function() return false end
+player.getSoul = function() return math.huge end
+player.knowTalent = function() return false end
+
 function get_talent_level_val(val, actor, t)
     if type(val) == "function" then
         local result = {}
         for i = 1, 5 do
             actor.getTalentLevel = function() return i end
             result[#result+1] = tostring(val(actor, t))
+            if result[#result] == result[#result-1] then result[#result] = nil end
         end
         actor.getTalentLevel = nil
         return table.concat(result, ", ")
@@ -141,13 +176,14 @@ for tid, t in pairs(talents_def) do
 end
 
 -- TODO: travel speed, range, requirements, description
--- 		if self:getTalentRange(t) > 1 then d:add({"color",0x6f,0xff,0x83}, "Range: ", {"color",0xFF,0xFF,0xFF}, ("%0.1f"):format(self:getTalentRange(t)), true)
---		else d:add({"color",0x6f,0xff,0x83}, "Range: ", {"color",0xFF,0xFF,0xFF}, "melee/personal", true)
---		end
---		local speed = self:getTalentProjectileSpeed(t)
---		if speed then d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, ""..(speed * 100).."% of base", true)
---		else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)
---		end
+--         if self:getTalentRange(t) > 1 then d:add({"color",0x6f,0xff,0x83}, "Range: ", {"color",0xFF,0xFF,0xFF}, ("%0.1f"):format(self:getTalentRange(t)), true)
+--        else d:add({"color",0x6f,0xff,0x83}, "Range: ", {"color",0xFF,0xFF,0xFF}, "melee/personal", true)
+--        end
+--        local speed = self:getTalentProjectileSpeed(t)
+--        if speed then d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, ""..(speed * 100).."% of base", true)
+--        else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)
+--        end
+-- TODO: cooldown for Rush and similar
 
 if true then
     print(json.encode({
