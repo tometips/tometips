@@ -76,6 +76,16 @@ function newTalent(t)
     table.insert(Actor.talents_types_def[t.type[1]].talents, t)
 end
 
+-- from talents.lua
+damDesc = function(self, type, dam)
+    -- Increases damage
+    if self.inc_damage then
+        local inc = self:combatGetDamageIncrease(type)
+        dam = dam + (dam * inc / 100)
+    end
+    return dam
+end
+
 load("/engine/colors.lua")
 load("/data/damage_types.lua")
 
@@ -113,11 +123,23 @@ player.getTalentRange = function(self, t)
     return t.range
 end
 
+player.getTalentRadius = function(self, t)
+    if not t.radius then return 0 end
+    if type(t.radius) == "function" then return t.radius(self, t) end
+    return t.radius
+end
+
 --- Trigger a talent method
 player.callTalent = function(self, tid, name, ...)
     local t = Actor.talents_def[tid]
     name = name or "trigger"
     if t[name] then return t[name](self, t, ...) end
+end
+
+player.rescaleDamage = function(self, dam)
+    if dam <= 0 then return dam end
+--	return dam * (1 - math.log10(dam * 2) / 7) --this is the old version, pre-combat-stat-rescale
+    return dam ^ 1.04
 end
 
 -- Compute a diminishing returns value based on talent level that scales with a power
@@ -206,6 +228,42 @@ player.combatTalentLimit = function(self, t, limit, low, high, raw)
     end
 end
 
+--- Gets damage based on talent
+player.combatTalentSpellDamage = function(self, t, base, max, spellpower_override)
+    -- Compute at "max"
+    local mod = max / ((base + 100) * ((math.sqrt(5) - 1) * 0.8 + 1))
+    -- Compute real
+    return self:rescaleDamage((base + (spellpower_override or self:combatSpellpower())) * ((math.sqrt(self:getTalentLevel(t)) - 1) * 0.8 + 1) * mod)
+end
+
+--- Gets damage based on talent
+player.combatTalentStatDamage = function(self, t, stat, base, max)
+    -- Compute at "max"
+    local mod = max / ((base + 100) * ((math.sqrt(5) - 1) * 0.8 + 1))
+    -- Compute real
+    local dam = (base + (self:getStat(stat))) * ((math.sqrt(self:getTalentLevel(t)) - 1) * 0.8 + 1) * mod
+    dam =  dam * (1 - math.log10(dam * 2) / 7)
+    dam = dam ^ (1 / 1.04)
+    return self:rescaleDamage(dam)
+end
+
+player.getStat = function(self, stat)
+    return 100 -- TODO: Configurable
+end
+
+player.combatSpellpower = function(self, mod, add)
+    mod = mod or 1
+    if add then
+        io.stderr:write("Unsupported add to combatSpellpower")
+    end
+    return 100 * mod   -- TODO: Configurable
+end
+
+player.getParadox = function(self)
+    -- According to chronomancer.lua, 300 is "the optimal balance"
+    return 300 -- TODO: Configurable, or at least report it
+end
+
 player.isTalentActive = function() return false end  -- TODO: Doesn't handle spiked auras
 player.hasEffect = function() return false end
 player.getSoul = function() return math.huge end
@@ -244,6 +302,7 @@ function getvalByTalentLevel(val, actor, t)
     end
 end
 
+-- Process each talent, adding text descriptions of the various attributes
 for tid, t in pairs(Actor.talents_def) do
     t.mode = t.mode or "activated"
 
@@ -274,6 +333,12 @@ for tid, t in pairs(Actor.talents_def) do
         end
         if #cost > 0 then t.cost = table.concat(cost, ", ") end
     end
+
+    player.getTalentLevel = function() return 5 end
+    player.getTalentLevelRaw = function() return 5 end
+    t.info_text = t.info(player, t)
+    player.getTalentLevel = nil
+    player.getTalentLevelRaw = nil
 end
 
 -- TODO: travel speed, range, requirements, description
