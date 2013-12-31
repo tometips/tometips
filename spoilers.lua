@@ -1,7 +1,69 @@
+-- T-Engine's C core.  Unimplemented as much as possible.
+local surface_metatable = { __index = {} }
+local font_metatable = { __index = {} }
+__uids = {}
+core = {
+    display = {
+        newSurface = function(x, y)
+            local result = {}
+            setmetatable(result, surface_metatable)
+            return result
+        end,
+        newFont = function(font, size, no_cache)
+            local result = { size = function(s) return 1 end, lineSkip = function() return 1 end }
+            setmetatable(result, font_metatable)
+            return result
+        end,
+    },
+    fov = {},
+    game = {},
+    shader = {},
+}
+fs = {
+    exists = function(path)
+        --io.stderr:write(string.format("fs.exists(%s)\n", path))
+        return false
+    end,
+    list = function(path)
+        --io.stderr:write(string.format("fs.list(%s)\n", path))
+        return {}
+    end,
+}
+rng = {
+    percent = function(chance) return false end, -- This shouldn't be needed, but data/talents/misc/horrors.lua calls it in its description
+}
+
+game = {
+    level = {
+        entities = {},
+    },
+    party = {
+        hasMember = function(actor) return false end,
+    },
+}
+
+local old_loadfile = loadfile
+loadfile = function(file)
+    -- Remove leading '/'
+    return old_loadfile(file:sub(2))
+end
+
+function loadfile_and_execute(file)
+    f = loadfile(file)
+    assert(f)
+    f()
+end
+load = loadfile_and_execute
+
+require 'engine.dialogs.Chat'
+
 require 'engine.utils'
 require 'lib.json4lua.json.json'
-
-Actor = {}
+local DamageType = require "engine.DamageType"
+local ActorStats = require "engine.interface.ActorStats"
+local ActorResource = require "engine.interface.ActorResource"
+local ActorTalents = require 'engine.interface.ActorTalents'
+local ActorInventory = require "engine.interface.ActorInventory"
 
 -- FIXME: Figure out where these should go and what they should do
 resolvers = {
@@ -21,87 +83,55 @@ resolvers = {
 function setDefaultProjector()
 end
 
-function loadfile_and_execute(file)
-    -- Remove leading '/'
-    -- Idiomatic version:
-    -- assert(loadfile(file:sub(2)))()
-    -- lua2js-compatible version:
-    f = loadfile(file:sub(2))
-    assert(f)
-    f()
-end
-load = loadfile_and_execute
-
-DamageType = {}
-function newDamageType(t)
-    DamageType[t.type] = t
-end
-
--- from engine.interface.ActorTalents
-Actor.talents_types_def = {}
-function newTalentType(t)
-    t.description = t.description or ""
-    t.points = t.points or 1
-    t.talents = {}
-    -- Omit for cleaner JSON
-    -- table.insert(self.talents_types_def, t)
-    Actor.talents_types_def[t.type] = t
-end
-
--- from engine.interface.ActorTalents
-Actor.talents_def = {}
-function newTalent(t)
-    if type(t.type) == "string" then t.type = {t.type, 1} end
-    if not t.type[2] then t.type[2] = 1 end
-    t.short_name = t.short_name or t.name
-    t.short_name = t.short_name:upper():gsub("[ ']", "_")
-    t.mode = t.mode or "activated"
-    t.points = t.points or 1
-
-    -- Can pass a string, make it into a function
-    if type(t.info) == "string" then
-        local infostr = t.info
-        t.info = function() return infostr end
-    end
-
-    -- Remove line stat with tabs to be cleaner ..
-    local info = t.info
-    t.info = function(self, t) return info(self, t):gsub("\n\t+", "\n") end
-
-    t.id = "T_"..t.short_name
-    Actor.talents_def[t.id] = t
-    Actor[t.id] = t.id
-
-    -- Register in the type
-    table.insert(Actor.talents_types_def[t.type[1]].talents, t)
-end
-
--- from talents.lua
-damDesc = function(self, type, dam)
-    -- Increases damage
-    if self.inc_damage then
-        local inc = self:combatGetDamageIncrease(type)
-        dam = dam + (dam * inc / 100)
-    end
-    return dam
-end
-
 load("/engine/colors.lua")
-load("/data/damage_types.lua")
 
--- This list is copied (at least for now) from data/talents.lua.
-load("/data/talents/misc/misc.lua")
-load("/data/talents/techniques/techniques.lua")
-load("/data/talents/cunning/cunning.lua")
-load("/data/talents/spells/spells.lua")
-load("/data/talents/gifts/gifts.lua")
-load("/data/talents/celestial/celestial.lua")
-load("/data/talents/corruptions/corruptions.lua")
-load("/data/talents/undeads/undeads.lua")
-load("/data/talents/cursed/cursed.lua")
-load("/data/talents/chronomancy/chronomancer.lua")
-load("/data/talents/psionic/psionic.lua")
-load("/data/talents/uber/uber.lua")
+-- Body parts - copied from ToME's load.lua
+ActorInventory:defineInventory("MAINHAND", "In main hand", true, "Most weapons are wielded in the main hand.", nil, {equipdoll_back="ui/equipdoll/mainhand_inv.png"})
+ActorInventory:defineInventory("OFFHAND", "In off hand", true, "You can use shields or a second weapon in your off-hand, if you have the talents for it.", nil, {equipdoll_back="ui/equipdoll/offhand_inv.png"})
+ActorInventory:defineInventory("PSIONIC_FOCUS", "Psionic focus", true, "Object held in your telekinetic grasp. It can be a weapon or some other item to provide a benefit to your psionic powers.", nil, {equipdoll_back="ui/equipdoll/psionic_inv.png", etheral=true})
+ActorInventory:defineInventory("FINGER", "On fingers", true, "Rings are worn on fingers.", nil, {equipdoll_back="ui/equipdoll/ring_inv.png"})
+ActorInventory:defineInventory("NECK", "Around neck", true, "Amulets are worn around the neck.", nil, {equipdoll_back="ui/equipdoll/amulet_inv.png"})
+ActorInventory:defineInventory("LITE", "Light source", true, "A light source allows you to see in the dark places of the world.", nil, {equipdoll_back="ui/equipdoll/light_inv.png"})
+ActorInventory:defineInventory("BODY", "Main armor", true, "Armor protects you from physical attacks. The heavier the armor the more it hinders the use of talents and spells.", nil, {equipdoll_back="ui/equipdoll/body_inv.png"})
+ActorInventory:defineInventory("CLOAK", "Cloak", true, "A cloak can simply keep you warm or grant you wondrous powers should you find a magical one.", nil, {equipdoll_back="ui/equipdoll/cloak_inv.png"})
+ActorInventory:defineInventory("HEAD", "On head", true, "You can wear helmets or crowns on your head.", nil, {equipdoll_back="ui/equipdoll/head_inv.png"})
+ActorInventory:defineInventory("BELT", "Around waist", true, "Belts are worn around your waist.", nil, {equipdoll_back="ui/equipdoll/belt_inv.png"})
+ActorInventory:defineInventory("HANDS", "On hands", true, "Various gloves can be worn on your hands.", nil, {equipdoll_back="ui/equipdoll/hands_inv.png"})
+ActorInventory:defineInventory("FEET", "On feet", true, "Sandals or boots can be worn on your feet.", nil, {equipdoll_back="ui/equipdoll/boots_inv.png"})
+ActorInventory:defineInventory("TOOL", "Tool", true, "This is your readied tool, always available immediately.", nil, {equipdoll_back="ui/equipdoll/tool_inv.png"})
+ActorInventory:defineInventory("QUIVER", "Quiver", true, "Your readied ammo.", nil, {equipdoll_back="ui/equipdoll/ammo_inv.png"})
+ActorInventory:defineInventory("GEM", "Socketed Gems", true, "Socketed gems.", nil, {equipdoll_back="ui/equipdoll/gem_inv.png"})
+ActorInventory:defineInventory("QS_MAINHAND", "Second weapon set: In main hand", false, "Weapon Set 2: Most weapons are wielded in the main hand. Press 'x' to switch weapon sets.", true)
+ActorInventory:defineInventory("QS_OFFHAND", "Second weapon set: In off hand", false, "Weapon Set 2: You can use shields or a second weapon in your off-hand, if you have the talents for it. Press 'x' to switch weapon sets.", true)
+ActorInventory:defineInventory("QS_PSIONIC_FOCUS", "Second weapon set: psionic focus", false, "Weapon Set 2: Object held in your telekinetic grasp. It can be a weapon or some other item to provide a benefit to your psionic powers. Press 'x' to switch weapon sets.", true)
+ActorInventory:defineInventory("QS_QUIVER", "Second weapon set: Quiver", false, "Weapon Set 2: Your readied ammo.", true)
+
+-- Copied from ToME's load.lua
+DamageType:loadDefinition("/data/damage_types.lua")
+ActorTalents:loadDefinition("/data/talents.lua")
+
+-- Actor resources - copied from ToME's load.lua
+ActorResource:defineResource("Air", "air", nil, "air_regen", "Air capacity in your lungs. Entities that need not breath are not affected.")
+ActorResource:defineResource("Stamina", "stamina", ActorTalents.T_STAMINA_POOL, "stamina_regen", "Stamina represents your physical fatigue. Each physical ability used reduces it.")
+ActorResource:defineResource("Mana", "mana", ActorTalents.T_MANA_POOL, "mana_regen", "Mana represents your reserve of magical energies. Each spell cast consumes mana and each sustained spell reduces your maximum mana.")
+ActorResource:defineResource("Equilibrium", "equilibrium", ActorTalents.T_EQUILIBRIUM_POOL, "equilibrium_regen", "Equilibrium represents your standing in the grand balance of nature. The closer it is to 0 the more balanced you are. Being out of equilibrium will negatively affect your ability to use Wild Gifts.", 0, false)
+ActorResource:defineResource("Vim", "vim", ActorTalents.T_VIM_POOL, "vim_regen", "Vim represents the amount of life energy/souls you have stolen. Each corruption talent requires some.")
+ActorResource:defineResource("Positive", "positive", ActorTalents.T_POSITIVE_POOL, "positive_regen", "Positive energy represents your reserve of positive power. It slowly decreases.")
+ActorResource:defineResource("Negative", "negative", ActorTalents.T_NEGATIVE_POOL, "negative_regen", "Negative energy represents your reserve of negative power. It slowly decreases.")
+ActorResource:defineResource("Hate", "hate", ActorTalents.T_HATE_POOL, "hate_regen", "Hate represents the level of frenzy of a cursed soul.")
+ActorResource:defineResource("Paradox", "paradox", ActorTalents.T_PARADOX_POOL, "paradox_regen", "Paradox represents how much damage you've done to the space-time continuum. A high Paradox score makes Chronomancy less reliable and more dangerous to use but also amplifies the effects.", 0, false)
+ActorResource:defineResource("Psi", "psi", ActorTalents.T_PSI_POOL, "psi_regen", "Psi represents the power available to your mind.")
+ActorResource:defineResource("Soul", "soul", ActorTalents.T_SOUL_POOL, "soul_regen", "Soul fragments you have extracted from your foes.", 0, 10)
+
+-- Actor stats - copied from ToME's load.lua
+ActorStats:defineStat("Strength",	"str", 10, 1, 100, "Strength defines your character's ability to apply physical force. It increases your melee damage, damage done with heavy weapons, your chance to resist physical effects, and carrying capacity.")
+ActorStats:defineStat("Dexterity",	"dex", 10, 1, 100, "Dexterity defines your character's ability to be agile and alert. It increases your chance to hit, your ability to avoid attacks, and your damage with light or ranged weapons.")
+ActorStats:defineStat("Magic",		"mag", 10, 1, 100, "Magic defines your character's ability to manipulate the magical energy of the world. It increases your spell power, and the effect of spells and other magic items.")
+ActorStats:defineStat("Willpower",	"wil", 10, 1, 100, "Willpower defines your character's ability to concentrate. It increases your mana, stamina and PSI capacity, and your chance to resist mental attacks.")
+ActorStats:defineStat("Cunning",	"cun", 10, 1, 100, "Cunning defines your character's ability to learn, think, and react. It allows you to learn many worldly abilities, and increases your mental capabilities and chance of critical hits.")
+ActorStats:defineStat("Constitution",	"con", 10, 1, 100, "Constitution defines your character's ability to withstand and resist damage. It increases your maximum life and physical resistance.")
+-- Luck is hidden and starts at half max value (50) which is considered the standard
+ActorStats:defineStat("Luck",		"lck", 50, 1, 100, "Luck defines your character's fortune when dealing with unknown events. It increases your critical strike chance, your chance of random encounters, ...")
 
 local raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback' }
 
@@ -114,138 +144,13 @@ for i, v in ipairs(raw_resources) do
     resources[v] = resources[v]:gsub("negative", "negative energy")
 end
 
-game = {}
-local player = Actor
-
-player.getTalentRange = function(self, t)
-    if not t.range then return 1 end
-    if type(t.range) == "function" then return t.range(self, t) end
-    return t.range
-end
-
-player.getTalentRadius = function(self, t)
-    if not t.radius then return 0 end
-    if type(t.radius) == "function" then return t.radius(self, t) end
-    return t.radius
-end
-
---- Trigger a talent method
-player.callTalent = function(self, tid, name, ...)
-    local t = Actor.talents_def[tid]
-    name = name or "trigger"
-    if t[name] then return t[name](self, t, ...) end
-end
-
-player.rescaleDamage = function(self, dam)
-    if dam <= 0 then return dam end
---	return dam * (1 - math.log10(dam * 2) / 7) --this is the old version, pre-combat-stat-rescale
-    return dam ^ 1.04
-end
-
--- Compute a diminishing returns value based on talent level that scales with a power
--- t = talent def table or a numeric value
--- low = value to match at talent level 1
--- high = value to match at talent level 5
--- power = scaling factor (default 0.5) or "log" for log10
--- add = amount to add the result (default 0)
--- shift = amount to add to the talent level before computation (default 0)
--- raw if true specifies use of raw talent level
-player.combatTalentScale = function(self, t, low, high, power, add, shift, raw)
-    local tl = type(t) == "table" and (raw and self:getTalentLevelRaw(t) or self:getTalentLevel(t)) or t
-    power, add, shift = power or 0.5, add or 0, shift or 0
-    local x_low, x_high = 1, 5 -- Implied talent levels to fit
-    local x_low_adj, x_high_adj
-    if power == "log" then
-        x_low_adj, x_high_adj = math.log10(x_low+shift), math.log10(x_high+shift)
-        tl = math.max(1, tl)
-    else
-        x_low_adj, x_high_adj = (x_low+shift)^power, (x_high+shift)^power
-    end
-    local m = (high - low)/(x_high_adj - x_low_adj)
-    local b = low - m*x_low_adj
-    if power == "log" then -- always >= 0
-        return math.max(0, m * math.log10(tl + shift) + b + add)
---        return math.max(0, m * math.log10(tl + shift) + b + add), m, b
-    else 
-        return math.max(0, m * (tl + shift)^power + b + add)
---        return math.max(0, m * (tl + shift)^power + b + add), m, b
-    end
-end
-
--- Compute a diminishing returns value based on a stat value that scales with a power
--- stat == "str", "con",.... or a numeric value
--- low = value to match when stat = 10
--- high = value to match when stat = 100
--- power = scaling factor (default 0.5) or "log" for log10
--- add = amount to add the result (default 0)
--- shift = amount to add to the stat value before computation (default 0)
-player.combatStatScale = function(self, stat, low, high, power, add, shift)
-	stat = type(stat) == "string" and self:getStat(stat,nil,true) or stat
-	power, add, shift = power or 0.5, add or 0, shift or 0
-	local x_low, x_high = 10, 100 -- Implied stat values to match
-	local x_low_adj, x_high_adj
-	if power == "log" then
-		x_low_adj, x_high_adj = math.log10(x_low+shift), math.log10(x_high+shift)
-		stat = math.max(1, stat)
-	else
-		x_low_adj, x_high_adj = (x_low+shift)^power, (x_high+shift)^power
-	end
-	local m = (high - low)/(x_high_adj - x_low_adj)
-	local b = low -m*x_low_adj
-	if power == "log" then -- always >= 0
-		return math.max(0, m * math.log10(stat + shift) + b + add)
---		return math.max(0, m * math.log10(stat + shift) + b + add), m, b
-	else 
-		return math.max(0, m * (stat + shift)^power + b + add)
---		return math.max(0, m * (stat + shift)^power + b + add), m, b
-	end
-end
-
--- Compute a diminishing returns value based on talent level that cannot go beyond a limit
--- t = talent def table or a numeric value
--- limit = value approached as talent levels increase
--- high = value at talent level 5
--- low = value at talent level 1 (optional)
--- raw if true specifies use of raw talent level
---    returns (limit - add)*TL/(TL + halfpoint) + add == add when TL = 0 and limit when TL = infinity
--- TL = talent level, halfpoint and add are internally computed to match the desired high/low values
--- note that the progression low->high->limit must be monotone, consistently increasing or decreasing
-player.combatTalentLimit = function(self, t, limit, low, high, raw)
-    local x_low, x_high = 1,5 -- Implied talent levels for low and high values respectively
-    local tl = type(t) == "table" and (raw and self:getTalentLevelRaw(t) or self:getTalentLevel(t)) or t
-    if low then
-        local p = limit*(x_high-x_low)
-        local m = x_high*high - x_low*low
-        local halfpoint = (p-m)/(high - low)
-        local add = (limit*(x_high*low-x_low*high) + high*low*(x_low-x_high))/(p-m)
-        return (limit-add)*tl/(tl + halfpoint) + add
---        return (limit-add)*tl/(tl + halfpoint) + add, halfpoint, add
-    else
-        local add = 0
-        local halfpoint = limit*x_high/(high-add)-x_high
-        return (limit-add)*tl/(tl + halfpoint) + add
---        return (limit-add)*tl/(tl + halfpoint) + add, halfpoint, add
-    end
-end
-
---- Gets damage based on talent
-player.combatTalentSpellDamage = function(self, t, base, max, spellpower_override)
-    -- Compute at "max"
-    local mod = max / ((base + 100) * ((math.sqrt(5) - 1) * 0.8 + 1))
-    -- Compute real
-    return self:rescaleDamage((base + (spellpower_override or self:combatSpellpower())) * ((math.sqrt(self:getTalentLevel(t)) - 1) * 0.8 + 1) * mod)
-end
-
---- Gets damage based on talent
-player.combatTalentStatDamage = function(self, t, stat, base, max)
-    -- Compute at "max"
-    local mod = max / ((base + 100) * ((math.sqrt(5) - 1) * 0.8 + 1))
-    -- Compute real
-    local dam = (base + (self:getStat(stat))) * ((math.sqrt(self:getTalentLevel(t)) - 1) * 0.8 + 1) * mod
-    dam =  dam * (1 - math.log10(dam * 2) / 7)
-    dam = dam ^ (1 / 1.04)
-    return self:rescaleDamage(dam)
-end
+local Actor = require 'mod.class.Actor'
+local player = Actor.new{
+    combat_mindcrit = 0, -- TODO: Configurable(?)
+    body = { INVEN = 1000, QS_MAINHAND = 1, QS_OFFHAND = 1, MAINHAND = 1, OFFHAND = 1, FINGER = 2, NECK = 1, LITE = 1, BODY = 1, HEAD = 1, CLOAK = 1, HANDS = 1, BELT = 1, FEET = 1, TOOL = 1, QUIVER = 1, QS_QUIVER = 1 },
+    wards = {},
+}
+game.player = player
 
 player.getStat = function(self, stat)
     return 100 -- TODO: Configurable
@@ -270,7 +175,20 @@ player.getSoul = function() return math.huge end
 player.knowTalent = function() return false end
 player.getInscriptionData = function()
     return {
-        range = "varies"
+        inc_stat = 0,
+
+        -- TODO: Can we use any better values for the following?
+        range = 0,
+        power = 0,
+        dur = 0,
+        heal = 0,
+        effects = 0,
+        speed = 0,
+        heal_factor = 0,
+        turns = 0,
+        die_at = 0,
+        mana = 0,
+        what = { ["physical, mental, or magical"] = true }
     }
 end
 
@@ -304,6 +222,12 @@ end
 
 -- Process each talent, adding text descriptions of the various attributes
 for tid, t in pairs(Actor.talents_def) do
+    player.getTalentLevel = function() return 5 end
+    player.getTalentLevelRaw = function() return 5 end
+    t.info_text = t.info(player, t)
+    player.getTalentLevel = nil
+    player.getTalentLevelRaw = nil
+
     t.mode = t.mode or "activated"
 
     if t.mode ~= "passive" then
@@ -333,12 +257,6 @@ for tid, t in pairs(Actor.talents_def) do
         end
         if #cost > 0 then t.cost = table.concat(cost, ", ") end
     end
-
-    player.getTalentLevel = function() return 5 end
-    player.getTalentLevelRaw = function() return 5 end
-    t.info_text = t.info(player, t)
-    player.getTalentLevel = nil
-    player.getTalentLevelRaw = nil
 end
 
 -- TODO: travel speed, range, requirements, description
