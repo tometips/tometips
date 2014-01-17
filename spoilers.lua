@@ -259,6 +259,13 @@ for tid, t in pairs(Actor.talents_def) do
     end
 end
 
+local talents_types_def_dict = {}
+for k, v in pairs(Actor.talents_types_def) do
+    if type(k) ~= 'number' then
+        talents_types_def_dict[k] = v
+    end
+end
+
 -- TODO: travel speed, range, requirements, description
 --         if self:getTalentRange(t) > 1 then d:add({"color",0x6f,0xff,0x83}, "Range: ", {"color",0xFF,0xFF,0xFF}, ("%0.1f"):format(self:getTalentRange(t)), true)
 --        else d:add({"color",0x6f,0xff,0x83}, "Range: ", {"color",0xFF,0xFF,0xFF}, "melee/personal", true)
@@ -270,11 +277,13 @@ end
 -- TODO: cooldown for Rush and similar
 
 if true then
-    print(json.encode({
+    out = arg[1] and io.open(arg[1], 'w') or io.stdout
+    out:write("tome = ")
+    out:write(json.encode({
         colors = colors,
         -- FIXME: Strip death_message
-        DamageType = DamageType,
-        talents_types_def = Actor.talents_types_def,
+        --DamageType = DamageType,
+        talents_types_def = talents_types_def_dict,
         talents_def = Actor.talents_def
     }))
 end
