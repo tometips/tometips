@@ -199,22 +199,30 @@ end
 
 function getByTalentLevel(actor, f)
     local result = {}
+    local used_level = false
+    local used_raw_level = false
     for i = 1, 5 do
-        actor.getTalentLevel = function() return i end
-        actor.getTalentLevelRaw = function() return i end
+        actor.getTalentLevel = function() used_level = true return i * 1.3 end
+        actor.getTalentLevelRaw = function() used_raw_level = true return i end
         result[#result+1] = tostring(f())
-        if result[#result] == result[#result-1] then result[#result] = nil end
     end
     actor.getTalentLevel = nil
     actor.getTalentLevelRaw = nil
-    return #result > 0 and table.concat(result, ", ") or nil
+    if used_level or used_raw_level then
+        local tip = "Values for talent levels 1-5"
+        if used_level then tip = tip .. ", talent mastery 1.30" end
+        return '<acronym class="talent-level" title="' .. tip .. '">' .. table.concat(result, ", ") .. '</acronym>'
+    else
+        return result[1]
+    end
 end
 
 function getvalByTalentLevel(val, actor, t)
     if type(val) == "function" then
         return getByTalentLevel(actor, function() return val(actor, t) end)
-    elseif type(val) == "table" then
-        return val[rng.range(1, #val)]
+    -- ToME supports random values, but we shouldn't need that.
+    --elseif type(val) == "table" then
+    --    return val[rng.range(1, #val)]
     else
         return val
     end
@@ -231,17 +239,20 @@ for tid, t in pairs(Actor.talents_def) do
     t.mode = t.mode or "activated"
 
     if t.mode ~= "passive" then
-        if t.range == archery_range then
+        if t.range == Actor.talents_def[Actor.T_SHOOT].range then
             t.range = "archery"
         else
-            local success, value = pcall(function() getByTalentLevel(player, function() return player:getTalentRange(t) end) end)
-            if not success then
-                io.stderr:write(string.format("%s: range: %s\n", tid, value))
-            else
-                t.range = value
-            end
+            t.range = getByTalentLevel(player, function() return player:getTalentRange(t) end)
+
+            -- Sample error handling:
+            --local success, value = pcall(function() getByTalentLevel(player, function() return player:getTalentRange(t) end) end)
+            --if not success then
+            --    io.stderr:write(string.format("%s: range: %s\n", tid, value))
+            --else
+            --    t.range = value
+            --end
         end
-        if t.range == 1 then t.range = "melee/personal" end
+        if t.range == 1 or t.range == "1" then t.range = "melee/personal" end
 
         if t.no_energy and type(t.no_energy) == "boolean" and t.no_energy == true then
             t.use_speed = "instant"
