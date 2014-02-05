@@ -152,8 +152,25 @@ local player = Actor.new{
 }
 game.player = player
 
+spoilers = {
+    -- Currently active parameters.  TODO: Configurable
+    active = {
+        mastery = 1.3,
+        stat = 100,
+        spellpower = 100,
+        -- According to chronomancer.lua, 300 is "the optimal balance"
+        paradox = 300,
+    },
+
+    -- Which parameters have been used for the current tooltip
+    used = {
+    }
+}
+
 player.getStat = function(self, stat)
-    return 100 -- TODO: Configurable
+    spoilers.used.stat = spoilers.used.stat or {}
+    spoilers.used.stat[stat] = true
+    return spoilers.active.stat
 end
 
 player.combatSpellpower = function(self, mod, add)
@@ -161,12 +178,15 @@ player.combatSpellpower = function(self, mod, add)
     if add then
         io.stderr:write("Unsupported add to combatSpellpower")
     end
-    return 100 * mod   -- TODO: Configurable
+    spoilers.used.spellpower = true
+    return spoilers.active.spellpower * mod
 end
 
+-- TODO: Where is mindpower?
+
 player.getParadox = function(self)
-    -- According to chronomancer.lua, 300 is "the optimal balance"
-    return 300 -- TODO: Configurable, or at least report it
+    spoilers.used.paradox = true
+    return spoilers.active.paradox
 end
 
 player.isTalentActive = function() return false end  -- TODO: Doesn't handle spiked auras
@@ -191,6 +211,25 @@ player.getInscriptionData = function()
         what = { ["physical, mental, or magical"] = true }
     }
 end
+player.getTalentLevel = function(self, id)
+    if type(id) == "table" then id = id.id end
+    if id == spoilers.active.talent_id then
+        spoilers.used.talent = true
+        spoilers.used.mastery = true
+        return spoilers.active.talent_level * spoilers.active.mastery
+    else
+        return 0
+    end
+end
+player.getTalentLevelRaw = function(self, id)
+    if type(id) == "table" then id = id.id end
+    if id == spoilers.active.talent_id then
+        spoilers.used.talent = true
+        return spoilers.active.talent_level
+    else
+        return 0
+    end
+end
 
 -- Overrides data/talents/psionic/psionic.lua.  TODO: Can we incorporate this at all?
 function getGemLevel()
@@ -199,18 +238,17 @@ end
 
 function getByTalentLevel(actor, f)
     local result = {}
-    local used_level = false
-    local used_raw_level = false
+
+    spoilers.used = {}
     for i = 1, 5 do
-        actor.getTalentLevel = function() used_level = true return i * 1.3 end
-        actor.getTalentLevelRaw = function() used_raw_level = true return i end
+        spoilers.active.talent_level = i
         result[#result+1] = tostring(f())
     end
-    actor.getTalentLevel = nil
-    actor.getTalentLevelRaw = nil
-    if used_level or used_raw_level then
+    spoilers.active.talent_level = nil
+
+    if spoilers.used.talent then
         local tip = "Values for talent levels 1-5"
-        if used_level then tip = tip .. ", talent mastery 1.30" end
+        if spoilers.used.mastery then tip = tip .. ", talent mastery 1.30" end
         return '<acronym class="talent-level" title="' .. tip .. '">' .. table.concat(result, ", ") .. '</acronym>'
     else
         return result[1]
@@ -230,11 +268,11 @@ end
 
 -- Process each talent, adding text descriptions of the various attributes
 for tid, t in pairs(Actor.talents_def) do
-    player.getTalentLevel = function() return 5 end
-    player.getTalentLevelRaw = function() return 5 end
+    spoilers.active.talent_id = tid
+
+    spoilers.active.talent_level = 5
     t.info_text = t.info(player, t)
-    player.getTalentLevel = nil
-    player.getTalentLevelRaw = nil
+    spoilers.active.talent_level = nil
 
     t.mode = t.mode or "activated"
 
@@ -252,6 +290,7 @@ for tid, t in pairs(Actor.talents_def) do
             --    t.range = value
             --end
         end
+        -- Note: Not the same logic as ToME (which checks <= 1), but seems to work
         if t.range == 1 or t.range == "1" then t.range = "melee/personal" end
 
         if t.no_energy and type(t.no_energy) == "boolean" and t.no_energy == true then
@@ -260,6 +299,8 @@ for tid, t in pairs(Actor.talents_def) do
             t.use_speed = "1 turn"
         end
     end
+
+    t.cooldown = getvalByTalentLevel(t.cooldown, player, t)
 
     for i, v in ipairs(raw_resources) do
         cost = {}
@@ -277,25 +318,19 @@ for k, v in pairs(Actor.talents_types_def) do
     end
 end
 
--- TODO: travel speed, range, requirements, description
---         if self:getTalentRange(t) > 1 then d:add({"color",0x6f,0xff,0x83}, "Range: ", {"color",0xFF,0xFF,0xFF}, ("%0.1f"):format(self:getTalentRange(t)), true)
---        else d:add({"color",0x6f,0xff,0x83}, "Range: ", {"color",0xFF,0xFF,0xFF}, "melee/personal", true)
---        end
+-- TODO: travel speed, requirements, description
 --        local speed = self:getTalentProjectileSpeed(t)
 --        if speed then d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, ""..(speed * 100).."% of base", true)
 --        else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)
 --        end
--- TODO: cooldown for Rush and similar
 
-if true then
-    out = arg[1] and io.open(arg[1], 'w') or io.stdout
-    out:write("tome = ")
-    out:write(json.encode({
-        colors = colors,
-        -- FIXME: Strip death_message
-        --DamageType = DamageType,
-        talents_types_def = talents_types_def_dict,
-        talents_def = Actor.talents_def
-    }))
-end
+out = arg[1] and io.open(arg[1], 'w') or io.stdout
+out:write("tome = ")
+out:write(json.encode({
+    colors = colors,
+    -- FIXME: Strip death_message
+    --DamageType = DamageType,
+    talents_types_def = talents_types_def_dict,
+    talents_def = Actor.talents_def
+}))
 

@@ -52,7 +52,7 @@ var talent_by_type_template = Handlebars.compile(
                 "{{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}" +
                 "{{#if cost}}<dt>Cost</dt><dd>{{{cost}}}</dd>{{/if}}" +
                 "{{#if range}}<dt>Range</dt><dd>{{{range}}}</dd>{{/if}}" +
-                "{{#if cooldown}}<dt>Cooldown</dt><dd>{{cooldown}}</dd>{{/if}}" +
+                "{{#if cooldown}}<dt>Cooldown</dt><dd>{{{cooldown}}}</dd>{{/if}}" +
                 "{{#if use_speed}}<dt>Use Speed</dt><dd>{{use_speed}}</dd>{{/if}}" +
                 "{{#if info_text}}<dt>Description</dt><dd>{{info_text}}</dd>{{/if}}" +
                 "</dl></div>" +
