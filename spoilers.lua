@@ -133,6 +133,13 @@ ActorStats:defineStat("Constitution",	"con", 10, 1, 100, "Constitution defines y
 -- Luck is hidden and starts at half max value (50) which is considered the standard
 ActorStats:defineStat("Luck",		"lck", 50, 1, 100, "Luck defines your character's fortune when dealing with unknown events. It increases your critical strike chance, your chance of random encounters, ...")
 
+function table.allSame(self)
+    for i = 2, #self do
+        if self[i] ~= self[i-1] then return false end
+    end
+    return true
+end
+
 local raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback' }
 
 local resources = {}
@@ -164,7 +171,19 @@ spoilers = {
 
     -- Which parameters have been used for the current tooltip
     used = {
-    }
+    },
+
+    usedMessage = function(self)
+        local tip = {}
+        if self.used.talent then tip[#tip+1] = "levels 1-5" end
+        if self.used.mastery then tip[#tip+1] = ("talent mastery %.2f"):format(self.active.mastery) end
+        for k, v in pairs(self.used.stat or {}) do
+            if v then tip[#tip+1] = ("%s %i"):format(Actor.stats_def[k].name, self.active.stat) end
+        end
+        -- TODO: Spellpower, mindpower, paradox, others?
+        return "Values for " .. table.concat(tip, ", ")
+    end,
+
 }
 
 player.getStat = function(self, stat)
@@ -246,12 +265,16 @@ function getByTalentLevel(actor, f)
     end
     spoilers.active.talent_level = nil
 
-    if spoilers.used.talent then
-        local tip = "Values for talent levels 1-5"
-        if spoilers.used.mastery then tip = tip .. ", talent mastery 1.30" end
-        return '<acronym class="talent-level" title="' .. tip .. '">' .. table.concat(result, ", ") .. '</acronym>'
+    if table.allSame(result) then
+        result = result[1]
     else
-        return result[1]
+        result = table.concat(result, ", ")
+    end
+
+    if next(spoilers.used) ~= nil then
+        return '<acronym class="variable" title="' .. spoilers:usedMessage() .. '">' .. result .. '</acronym>'
+    else
+        return result
     end
 end
 
