@@ -61,6 +61,21 @@ var talent_by_type_template = Handlebars.compile(
     "{{/eachProperty}}"
 );
 
+var talent_by_type_nav_template = Handlebars.compile(
+    '<ul class="nav">{{#eachProperty talentsByCategory}}' +
+        '<li><a href="#talents/{{property}}" data-toggle="collapse" data-target="#nav-{{property}}">{{toTitleCase property}}</a>' +
+        '<ul class="nav collapse" id="nav-{{property}}">' +
+        '{{#each value}}' +
+            '<li><a href="#talents/{{type}}">{{toTitleCase name}}</a></li>' +  // "type" happens to be category/name, which is what we want for routing
+        "{{/each}}" +
+        "</ul></li>" +
+    "{{/eachProperty}}</ul>"
+);
+
+function nav_talents(tome, tomex) {
+    return talent_by_type_nav_template(tomex);
+}
+
 function list_talents(tome, tomex) {
     return talent_by_type_template(tomex);
 }
@@ -69,6 +84,7 @@ $(document).ready(function() {
     // We explicitly do NOT use var, for now, to facilitate inspection in Firebug.
     tomex = {};
     process_spoilers(tome, tomex);
+    $("#side-nav").html(nav_talents(tome, tomex));
     $("#content").html(list_talents(tome, tomex));
     $(".sub-accordion").accordion({active: false, collapsible: true, heightStyle: "content" });
     $("#content").accordion({active: false, collapsible: true, heightStyle: "content" });
