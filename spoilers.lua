@@ -165,6 +165,7 @@ spoilers = {
         mastery = 1.3,
         stat = 100,
         spellpower = 100,
+        mindpower = 100,
         -- According to chronomancer.lua, 300 is "the optimal balance"
         paradox = 300,
     },
@@ -180,7 +181,9 @@ spoilers = {
         for k, v in pairs(self.used.stat or {}) do
             if v then tip[#tip+1] = ("%s %i"):format(Actor.stats_def[k].name, self.active.stat) end
         end
-        -- TODO: Spellpower, mindpower, paradox, others?
+        if self.used.spellpower then tip[#tip+1] = ("spellpower %i"):format(self.active.spellpower) end
+        if self.used.mindpower then tip[#tip+1] = ("mindpower %i"):format(self.active.mindpower) end
+        if self.used.paradox then tip[#tip+1] = ("paradox %i"):format(self.active.paradox) end
         return "Values for " .. table.concat(tip, ", ")
     end,
 
@@ -199,6 +202,15 @@ player.combatSpellpower = function(self, mod, add)
     end
     spoilers.used.spellpower = true
     return spoilers.active.spellpower * mod
+end
+
+player.combatMindpower = function(self, mod, add)
+    mod = mod or 1
+    if add then
+        io.stderr:write("Unsupported add to combatMindpower")
+    end
+    spoilers.used.mindpower = true
+    return spoilers.active.mindpower * mod
 end
 
 -- TODO: Where is mindpower?
