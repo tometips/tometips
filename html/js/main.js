@@ -7,8 +7,7 @@ function toTitleCase(s)
 
 Handlebars.registerHelper('eachProperty', function(context, options) {
     var ret = "";
-    for(var prop in context)
-    {
+    for (var prop in context) {
         ret = ret + options.fn({property:prop,value:context[prop]});
     }
     return ret;
@@ -17,6 +16,19 @@ Handlebars.registerHelper('eachProperty', function(context, options) {
 Handlebars.registerHelper('toTitleCase', function(context, options) {
     return toTitleCase(context);
 });
+
+Handlebars.registerHelper('toLowerCase', function(context, options) {
+    return context.toLowerCase();
+});
+
+// See http://stackoverflow.com/a/92819/25507
+function talentImgError(image) {
+    image.onerror = "";
+    image.src = "img/000000-0.png";
+    image.width = 64;
+    image.height = 64;
+    return true;
+}
 
 /**Does additional processing to the raw spoilers (in tome) and stores the
  * results to tomex.
@@ -46,15 +58,27 @@ var talent_by_type_template = Handlebars.compile(
         '<h2 id="talents/{{type}}">{{toTitleCase name}}</h2><div>' +
         '<p>{{description}}</p><div class="sub-accordion">' +
         "{{#each talents}}" +
-            '<h3><img src="img/{{short_name}}.png">{{name}}</h3><div class="talent-details">' +
-            "<dl>" +
-            "{{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}" +
-            "{{#if cost}}<dt>Cost</dt><dd>{{{cost}}}</dd>{{/if}}" +
-            "{{#if range}}<dt>Range</dt><dd>{{{range}}}</dd>{{/if}}" +
-            "{{#if cooldown}}<dt>Cooldown</dt><dd>{{{cooldown}}}</dd>{{/if}}" +
-            "{{#if use_speed}}<dt>Use Speed</dt><dd>{{use_speed}}</dd>{{/if}}" +
-            '{{#if info_text}}<dt class="multiline-dd">Description</dt><dd>{{info_text}}</dd>{{/if}}' +
-            "</dl></div>" +
+            '<div class="panel panel-default">' +
+                '<div class="panel-heading clickable">' +
+                    '<h3 class="panel-title">' +
+                        '<a data-toggle="collapse" data-target="#collapse-{{toLowerCase short_name}}">' +
+                            '<img src="img/talents/{{#if image}}{{image}}{{else}}{{toLowerCase short_name}}.png{{/if}}" onerror="talentImgError(this)">' + '{{name}}' +
+                        '</a>' +
+                    '</h3>' +
+                '</div>' +
+                '<div id="collapse-{{toLowerCase short_name}}" class="talent-details panel-collapse collapse">' +
+                    '<div class="panel-body">' +
+                        "<dl>" +
+                            "{{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}" +
+                            "{{#if cost}}<dt>Cost</dt><dd>{{{cost}}}</dd>{{/if}}" +
+                            "{{#if range}}<dt>Range</dt><dd>{{{range}}}</dd>{{/if}}" +
+                            "{{#if cooldown}}<dt>Cooldown</dt><dd>{{{cooldown}}}</dd>{{/if}}" +
+                            "{{#if use_speed}}<dt>Use Speed</dt><dd>{{use_speed}}</dd>{{/if}}" +
+                            '{{#if info_text}}<dt class="multiline-dd">Description</dt><dd>{{info_text}}</dd>{{/if}}' +
+                        '</dl>' +
+                    '</div>' +
+                '</div>' +
+            '</div>' +
         "{{/each}}</div></div>" +
     "{{/each}}"
 );
@@ -98,8 +122,27 @@ $(function() {
         $("#content").html(list_talents(tome, tomex, bindings.category));
     });
 
+    Finch.route("[talents/:category]/:type", function(bindings) {
+        $("#collapse-" + bindings.type).collapse("show");
+    });
+
     $(".sub-accordion").accordion({active: false, collapsible: true, heightStyle: "content" });
     //$("#content").accordion({active: false, collapsible: true, heightStyle: "content" });
+
+    $("html").on("click", ".clickable", function(e) {
+        if (e.target.nodeName == 'A') {
+            // If the user clicked on the link itself, then simply let
+            // the browser handle it.
+            return true;
+        }
+
+        $(this).find('a').click();
+    });
+
+    $("html").on("error", "img", function() {
+        alert("oh");
+        $(this).hide();
+    });
 
     Finch.listen();
 });

@@ -109,7 +109,11 @@ h3 img {
     padding-right: 8px;
 }
 
-
+.panel-title a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
 
 
 

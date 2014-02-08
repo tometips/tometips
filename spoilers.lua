@@ -342,6 +342,8 @@ for tid, t in pairs(Actor.talents_def) do
         end
         if #cost > 0 then t.cost = table.concat(cost, ", ") end
     end
+
+    if t.image then t.image = t.image:gsub("talents/", "") end
 end
 
 local talents_types_def_dict = {}
