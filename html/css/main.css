@@ -19,7 +19,6 @@ textarea {
 }
 
 body {
-    font-size: 1em;
     line-height: 1.4;
 }
 
@@ -93,16 +92,28 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+#side-nav > ul > li > ul > li > a {
+    padding: 0 0 0 30px;
+}
 
+dt {
+    float: left;
+    width: 100px;
+}
 
+dt.multiline-dd {
+    float: none;
+}
 
+h3 img {
+    padding-right: 8px;
+}
 
-
-
-
-
-
-
+.panel-title a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
 
 
 

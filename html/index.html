@@ -6,15 +6,17 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title></title>
+        <title>Unofficial ToME Spoilers</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
 
         <!-- FIXME: Place favicon.ico and apple-touch-icon.png in the root directory -->
 
         <link rel="stylesheet" href="css/normalize.css">
-        <link rel="stylesheet" href="css/main.css">
         <link rel="stylesheet" href="css/eggplant/jquery-ui-1.10.2.custom.css">
+        <link rel="stylesheet" href="css/bootstrap.css">
+        <link rel="stylesheet" href="css/bootstrap-theme.css">
+        <link rel="stylesheet" href="css/main.css">
         <script src="js/vendor/modernizr-2.6.2.min.js"></script>
     </head>
     <body>
@@ -22,14 +24,23 @@
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
         <![endif]-->
 
-        <div id="content">Loading...</div>
+        <div class="page-header">
+            <h1>Unofficial ToME Spoilers</h1>
+        </div>
+
+        <div id="side-nav" class="col-md-2"></div>
+
+        <div id="content" class="col-md-10">Loading...</div>
 
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.9.1.min.js"><\/script>')</script>
         <script src="js/vendor/jquery-ui-1.10.2.custom.min.js"></script>
         <script src="js/vendor/underscore-1.4.4.min.js"></script>
 		<!-- FIXME: Compile templates -->
+		<!-- FIXME: Remove jQuery UI if not needed -->
         <script src="js/vendor/handlebars-1.0.0.rc3.js"></script>
+        <script src="js/vendor/bootstrap.min.js"></script>
+        <script src="js/vendor/finch.min.js"></script>
         <script src="js/plugins.js"></script>
         <script src="js/spoilers.js"></script>
         <script src="js/main.js"></script>

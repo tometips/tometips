@@ -213,8 +213,6 @@ player.combatMindpower = function(self, mod, add)
     return spoilers.active.mindpower * mod
 end
 
--- TODO: Where is mindpower?
-
 player.getParadox = function(self)
     spoilers.used.paradox = true
     return spoilers.active.paradox
@@ -344,6 +342,8 @@ for tid, t in pairs(Actor.talents_def) do
         end
         if #cost > 0 then t.cost = table.concat(cost, ", ") end
     end
+
+    if t.image then t.image = t.image:gsub("talents/", "") end
 end
 
 local talents_types_def_dict = {}
@@ -358,6 +358,7 @@ end
 --        if speed then d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, ""..(speed * 100).."% of base", true)
 --        else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)
 --        end
+-- TODO: Hide 'hide = "always"'?
 
 out = arg[1] and io.open(arg[1], 'w') or io.stdout
 out:write("tome = ")
