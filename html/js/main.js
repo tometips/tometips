@@ -25,8 +25,6 @@ Handlebars.registerHelper('toLowerCase', function(context, options) {
 function talentImgError(image) {
     image.onerror = "";
     image.src = "img/000000-0.png";
-    image.width = 64;
-    image.height = 64;
     return true;
 }
 
@@ -62,7 +60,7 @@ var talent_by_type_template = Handlebars.compile(
                 '<div class="panel-heading clickable">' +
                     '<h3 class="panel-title">' +
                         '<a data-toggle="collapse" data-target="#collapse-{{toLowerCase short_name}}">' +
-                            '<img src="img/talents/{{#if image}}{{image}}{{else}}{{toLowerCase short_name}}.png{{/if}}" onerror="talentImgError(this)">' + '{{name}}' +
+                            '<img width="64" height="64" src="img/talents/{{#if image}}{{image}}{{else}}{{toLowerCase short_name}}.png{{/if}}" onerror="talentImgError(this)">' + '{{name}}' +
                         '</a>' +
                     '</h3>' +
                 '</div>' +
@@ -74,7 +72,7 @@ var talent_by_type_template = Handlebars.compile(
                             "{{#if range}}<dt>Range</dt><dd>{{{range}}}</dd>{{/if}}" +
                             "{{#if cooldown}}<dt>Cooldown</dt><dd>{{{cooldown}}}</dd>{{/if}}" +
                             "{{#if use_speed}}<dt>Use Speed</dt><dd>{{use_speed}}</dd>{{/if}}" +
-                            '{{#if info_text}}<dt class="multiline-dd">Description</dt><dd>{{info_text}}</dd>{{/if}}' +
+                            '{{#if info_text}}<dt class="multiline-dd">Description</dt><dd>{{{info_text}}}</dd>{{/if}}' +
                         '</dl>' +
                     '</div>' +
                 '</div>' +

@@ -115,7 +115,10 @@ h3 img {
     height: 100%;
 }
 
-
+.variable {
+    color: green;
+    border-bottom: dotted 1px;
+}
 
 
 

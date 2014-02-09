@@ -140,6 +140,25 @@ function table.allSame(self)
     return true
 end
 
+function string.escapeHtml(self)
+    return self:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
+end
+
+-- Based on T-Engine's tstring:diffWith
+function multiDiff(str, on_diff)
+	local res = tstring{}
+	for i = 1, #str[1] do
+        local s = {}
+        for j = 1, #str do s[j] = str[j][i] end
+		if type(str[1][i]) == "string" and not table.allSame(s) then
+			on_diff(s, res)
+		else
+			res:add(str[1][i])
+		end
+	end
+	return res
+end
+
 local raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback' }
 
 local resources = {}
@@ -303,9 +322,27 @@ end
 for tid, t in pairs(Actor.talents_def) do
     spoilers.active.talent_id = tid
 
-    spoilers.active.talent_level = 5
-    t.info_text = t.info(player, t)
+    local info_text = {}
+    spoilers.used = {}
+    for i = 1, 5 do
+        spoilers.active.talent_level = i
+        info_text[i] = t.info(player, t):escapeHtml():toTString():tokenize(" ()[]")
+    end
     spoilers.active.talent_level = nil
+
+    t.info_text = multiDiff(info_text, function(s, res)
+        -- Reduce digits after the decimal.
+        for i = 1, #s do
+            s[i] = s[i]:gsub("(%d)(%d)%.(%d)%d*", function(a, b, c) return a .. (tonumber(c) >= 5 and tostring(tonumber(b) + 1) or b) end)
+        end
+
+        res:add('<acronym class="variable" title="', spoilers:usedMessage(), '">', table.concat(s, ", "), '</acronym>')
+    end):toString()
+
+    -- Hack: Fix text like "increases foo by 1., 2., 3., 4., 5."
+    t.info_text = t.info_text:gsub('%., ', ", ")
+
+    t.info_text = '<p>' .. t.info_text:gsub("\n", "</p><p>") .. '</p>'
 
     t.mode = t.mode or "activated"
 
@@ -359,6 +396,9 @@ end
 --        else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)
 --        end
 -- TODO: Hide 'hide = "always"'?
+
+-- TODO: Special cases:
+-- Golem's armor reconfiguration depends on armor mastery
 
 out = arg[1] and io.open(arg[1], 'w') or io.stdout
 out:write("tome = ")
