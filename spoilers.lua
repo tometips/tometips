@@ -1,3 +1,5 @@
+local re = require("re")
+
 -- T-Engine's C core.  Unimplemented as much as possible.
 local surface_metatable = { __index = {} }
 local font_metatable = { __index = {} }
@@ -362,7 +364,26 @@ for tid, t in pairs(Actor.talents_def) do
     t.info_text = t.info_text:gsub('%., ', ", ")
     t.info_text = t.info_text:gsub(',, ', ", ")
 
+    -- Turn ad hoc lists into <ul>
+    t.info_text = t.info_text:gsub('\n[lL]evel %d+ *[-:][^\n]+', function(s)
+        return '<li>' .. s:sub(2) .. '</li>'
+    end)
+    t.info_text = t.info_text:gsub('\nAt level %d+:[^\n]+', function(s)
+        return '<li>' .. s:sub(2) .. '</li>'
+    end)
+    t.info_text = t.info_text:gsub('\n%-[^\n]+', function(s)
+        return '<li>' .. s:sub(3) .. '</li>'
+    end)
+
+    -- Turn line breaks into <p>
     t.info_text = '<p>' .. t.info_text:gsub("\n", "</p><p>") .. '</p>'
+
+    -- Finish turning ad hoc lists into <ul>
+    t.info_text = t.info_text:gsub('([^>])<li>', function(s)
+        return s .. '</p><ul><li>'
+    end)
+    t.info_text = t.info_text:gsub('</li></p>', '</li></ul>')
+
     -- Ending of info text.
 
     t.mode = t.mode or "activated"
