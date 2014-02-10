@@ -92,6 +92,11 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+#side-nav a {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 #side-nav > ul > li > ul > li > a {
     padding: 0 0 0 30px;
 }
@@ -120,8 +125,9 @@ h3 img {
     border-bottom: dotted 1px;
 }
 
-
-
+.clickable {
+    cursor: pointer;
+}
 
 /* ==========================================================================
    Helper classes

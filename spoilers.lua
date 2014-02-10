@@ -195,7 +195,13 @@ spoilers = {
 
     usedMessage = function(self)
         local tip = {}
-        if self.used.talent then tip[#tip+1] = "levels 1-5" end
+        if self.used.talent then
+            if self.active.alt_talent then
+                tip[#tip+1] = Actor.talents_def[self.active.talent_id].name .. " levels 1-5"
+            else
+                tip[#tip+1] = "levels 1-5"
+            end
+        end
         if self.used.mastery then tip[#tip+1] = ("talent mastery %.2f"):format(self.active.mastery) end
         for k, v in pairs(self.used.stat or {}) do
             if v then tip[#tip+1] = ("%s %i"):format(Actor.stats_def[k].name, self.active.stat) end
@@ -322,6 +328,19 @@ end
 for tid, t in pairs(Actor.talents_def) do
     spoilers.active.talent_id = tid
 
+    -- Special case: Poison effects depend on the Vile Poisons talent.  Traps depend on Trap Mastery.
+    spoilers.active.alt_talent = false
+    if t.type[1] == "cunning/poisons-effects" then
+        spoilers.active.talent_id = Actor.T_VILE_POISONS
+        spoilers.active.alt_talent = true
+    end
+    if t.type[1] == "cunning/traps" then
+        spoilers.active.talent_id = Actor.T_TRAP_MASTERY
+        spoilers.active.alt_talent = true
+    end
+
+    -- Beginning of info text.  This is a bit complicated.
+    -- TODO: Any way to get better tooltips for when one part depends on a stat but the rest doesn't?
     local info_text = {}
     spoilers.used = {}
     for i = 1, 5 do
@@ -333,7 +352,7 @@ for tid, t in pairs(Actor.talents_def) do
     t.info_text = multiDiff(info_text, function(s, res)
         -- Reduce digits after the decimal.
         for i = 1, #s do
-            s[i] = s[i]:gsub("(%d)(%d)%.(%d)%d*", function(a, b, c) return a .. (tonumber(c) >= 5 and tostring(tonumber(b) + 1) or b) end)
+            s[i] = s[i]:gsub("(%d%d+)%.(%d)%d*", function(a, b) return tonumber(b) >= 5 and tostring(tonumber(a) + 1) or a end)
         end
 
         res:add('<acronym class="variable" title="', spoilers:usedMessage(), '">', table.concat(s, ", "), '</acronym>')
@@ -341,8 +360,10 @@ for tid, t in pairs(Actor.talents_def) do
 
     -- Hack: Fix text like "increases foo by 1., 2., 3., 4., 5."
     t.info_text = t.info_text:gsub('%., ', ", ")
+    t.info_text = t.info_text:gsub(',, ', ", ")
 
     t.info_text = '<p>' .. t.info_text:gsub("\n", "</p><p>") .. '</p>'
+    -- Ending of info text.
 
     t.mode = t.mode or "activated"
 
@@ -399,6 +420,7 @@ end
 
 -- TODO: Special cases:
 -- Golem's armor reconfiguration depends on armor mastery
+-- Values that depend only on a stat - Wave of Power's range, poison effects without special effect - can these be improved?
 
 out = arg[1] and io.open(arg[1], 'w') or io.stdout
 out:write("tome = ")
