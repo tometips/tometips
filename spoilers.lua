@@ -441,7 +441,7 @@ end
 
 -- TODO: Special cases:
 -- Golem's armor reconfiguration depends on armor mastery
--- Values that depend only on a stat - Wave of Power's range, poison effects without special effect - can these be improved?
+-- Values that depend only on a stat - Wave of Power's range, prodigies - can these be improved?
 
 out = arg[1] and io.open(arg[1], 'w') or io.stdout
 out:write("tome = ")

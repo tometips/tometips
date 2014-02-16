@@ -92,6 +92,16 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+html, body, #side-nav-container, #content-container
+{
+    height: 100%;
+}
+
+#side-nav-container, #content-container
+{
+    overflow: scroll;
+}
+
 #side-nav a {
     text-overflow: ellipsis;
     white-space: nowrap;
