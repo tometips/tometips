@@ -21,6 +21,12 @@ Handlebars.registerHelper('toLowerCase', function(context, options) {
     return context.toLowerCase();
 });
 
+// ToME-specific function that makes a ToME ID a valid and standard HTML ID
+Handlebars.registerHelper('toHtmlId', function(context, options) {
+    // For now, only replace characters known to cause issues.
+    return context.toLowerCase().replace(':', '_');
+});
+
 // See http://stackoverflow.com/a/92819/25507
 function talentImgError(image) {
     image.onerror = "";
@@ -59,12 +65,12 @@ var talent_by_type_template = Handlebars.compile(
             '<div class="panel panel-default">' +
                 '<div class="panel-heading clickable">' +
                     '<h3 class="panel-title">' +
-                        '<a data-toggle="collapse" data-target="#collapse-{{toLowerCase short_name}}">' +
+                        '<a data-toggle="collapse" data-target="#collapse-{{toHtmlId short_name}}">' +
                             '<img width="64" height="64" src="img/talents/{{#if image}}{{image}}{{else}}{{toLowerCase short_name}}.png{{/if}}" onerror="talentImgError(this)">' + '{{name}}' +
                         '</a>' +
                     '</h3>' +
                 '</div>' +
-                '<div id="collapse-{{toLowerCase short_name}}" class="talent-details panel-collapse collapse">' +
+                '<div id="collapse-{{toHtmlId short_name}}" class="talent-details panel-collapse collapse">' +
                     '<div class="panel-body">' +
                         "<dl>" +
                             "{{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}" +
