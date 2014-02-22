@@ -111,6 +111,15 @@ html, body, #side-nav-container, #content-container
     padding: 0 0 0 30px;
 }
 
+#side-nav > ul > li > a {
+    padding-left: 18px;
+    background: url(../img/fugue/control-270-small.png) left center no-repeat;
+}
+
+#side-nav > ul > li > a.collapsed {
+    background-image: url(../img/fugue/control-000-small.png);
+}
+
 dt {
     float: left;
     width: 100px;
@@ -137,6 +146,16 @@ h3 img {
 
 .clickable {
     cursor: pointer;
+}
+
+#footer {
+    color: #cccccc;
+    float: right;
+    font-style: italic;
+}
+
+#footer a {
+    color: #bbbbbb;
 }
 
 /* ==========================================================================
