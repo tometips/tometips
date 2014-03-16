@@ -60,7 +60,7 @@ var talent_by_type_template = Handlebars.compile(
     // FIXME: type header and description
     "{{#each this}}" +
         '<h2 id="talents/{{type}}">{{toTitleCase name}}</h2><div>' +
-        '<p>{{description}}</p><div class="sub-accordion">' +
+        '<p>{{description}}</p><div>' +
         "{{#each talents}}" +
             '<div class="panel panel-default">' +
                 '<div class="panel-heading clickable">' +
@@ -129,9 +129,6 @@ $(function() {
     Finch.route("[talents/:category]/:type", function(bindings) {
         $("#collapse-" + bindings.type).collapse("show");
     });
-
-    $(".sub-accordion").accordion({active: false, collapsible: true, heightStyle: "content" });
-    //$("#content").accordion({active: false, collapsible: true, heightStyle: "content" });
 
     $("html").on("click", ".clickable", function(e) {
         if (e.target.nodeName == 'A') {
