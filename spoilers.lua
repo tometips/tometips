@@ -142,6 +142,11 @@ function table.allSame(self)
     return true
 end
 
+-- From http://lua-users.org/wiki/StringRecipes
+function string.starts(s, start)
+   return string.sub(s, 1, string.len(start)) == start
+end
+
 function string.escapeHtml(self)
     return self:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
 end
@@ -199,7 +204,7 @@ spoilers = {
         local tip = {}
         if self.used.talent then
             if self.active.alt_talent then
-                tip[#tip+1] = Actor.talents_def[self.active.talent_id].name .. " levels 1-5"
+                tip[#tip+1] = Actor.talents_def[self.active.alt_talent_fake_id or self.active.talent_id].name .. " levels 1-5"
             else
                 tip[#tip+1] = "levels 1-5"
             end
@@ -216,10 +221,24 @@ spoilers = {
 
 }
 
-player.getStat = function(self, stat)
+player.getStat = function(self, stat, scale, raw, no_inc)
     spoilers.used.stat = spoilers.used.stat or {}
     spoilers.used.stat[stat] = true
-    return spoilers.active.stat
+
+    local val = spoilers.active.stat
+    if no_inc then
+        io.stderr:write("Unsupported use of getStat no_inc")
+    end
+
+    -- Based on interface.ActorStats.getStat
+    if scale then
+        if not raw then
+            val = math.floor(val * scale / self.stats_def[stat].max)
+        else
+            val = val * scale / self.stats_def[stat].max
+        end
+    end
+    return val
 end
 
 player.combatSpellpower = function(self, mod, add)
@@ -330,8 +349,9 @@ end
 for tid, t in pairs(Actor.talents_def) do
     spoilers.active.talent_id = tid
 
-    -- Special case: Poison effects depend on the Vile Poisons talent.  Traps depend on Trap Mastery.
+    -- Special cases: Poison effects depend on the Vile Poisons talent.  Traps depend on Trap Mastery.
     spoilers.active.alt_talent = false
+    spoilers.active.alt_talent_fake_id = nil
     if t.type[1] == "cunning/poisons-effects" then
         spoilers.active.talent_id = Actor.T_VILE_POISONS
         spoilers.active.alt_talent = true
@@ -339,6 +359,13 @@ for tid, t in pairs(Actor.talents_def) do
     if t.type[1] == "cunning/traps" then
         spoilers.active.talent_id = Actor.T_TRAP_MASTERY
         spoilers.active.alt_talent = true
+    end
+    -- Special case: Jumpgate's talent is tied to Jumpgate: Teleport.
+    -- TODO: This is arguably a bug, since ToME can't properly report talent increases' effects either.
+    if t.name:starts('Jumpgate') then
+        spoilers.active.talent_id = Actor.T_JUMPGATE_TELEPORT
+        spoilers.active.alt_talent = true
+        spoilers.active.alt_talent_fake_id = Actor.T_JUMPGATE
     end
 
     -- Beginning of info text.  This is a bit complicated.
@@ -383,6 +410,9 @@ for tid, t in pairs(Actor.talents_def) do
         return s .. '</p><ul><li>'
     end)
     t.info_text = t.info_text:gsub('</li></p>', '</li></ul>')
+
+    -- Add HTML character entities
+    t.info_text = t.info_text:gsub('%-%-', '&mdash;')
 
     -- Ending of info text.
 
