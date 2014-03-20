@@ -387,6 +387,13 @@ for tid, t in pairs(Actor.talents_def) do
         res:add('<acronym class="variable" title="', spoilers:usedMessage(), '">', table.concat(s, ", "), '</acronym>')
     end):toString()
 
+	-- Special case: Extract Gems is too hard to format
+	if t.id == Actor.T_EXTRACT_GEMS then
+		spoilers.active.talent_level = 5
+		t.info_text = t.info(player, t):escapeHtml()
+		spoilers.active.talent_level = nil
+	end
+
     -- Hack: Fix text like "increases foo by 1., 2., 3., 4., 5."
     t.info_text = t.info_text:gsub('%., ', ", ")
     t.info_text = t.info_text:gsub(',, ', ", ")
