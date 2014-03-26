@@ -140,8 +140,9 @@ h3 img {
 }
 
 .variable {
-    color: green;
+    color: #5cb85c;
     border-bottom: dotted 1px;
+    font-weight: bold;
 }
 
 .clickable {
