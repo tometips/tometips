@@ -141,7 +141,6 @@ $(function() {
     });
 
     $("html").on("error", "img", function() {
-        alert("oh");
         $(this).hide();
     });
 

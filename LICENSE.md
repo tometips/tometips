@@ -1,8 +1,7 @@
 This project's Lua and original content are licensed under the GPLv3.
 
 Other components (HTML 5 Boilerplate, Twitter Bootstrap, etc.) are used under
-their respective licenses.  Some icons by [Yusuke Kamiyamane](http://p.yusukekamiyamane.com/)
-and are licensed under a Creative Commons Attribution 3.0 License.
+their respective licenses.  Some icons by [Glyphicons](http://glyphicons.com/).
 
 GNU GENERAL PUBLIC LICENSE
 ==========================

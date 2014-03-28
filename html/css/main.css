@@ -111,13 +111,15 @@ html, body, #side-nav-container, #content-container
     padding: 0 0 0 30px;
 }
 
-#side-nav > ul > li > a {
-    padding-left: 18px;
-    background: url(../img/fugue/control-270-small.png) left center no-repeat;
+#side-nav > ul > li > a:before {
+    font-family: "Glyphicons Halflings";
+    font-size: 10px;
+    content: "\e114";
+    padding-right: 5px;
 }
 
-#side-nav > ul > li > a.collapsed {
-    background-image: url(../img/fugue/control-000-small.png);
+#side-nav > ul > li > a.collapsed:before {
+    content: "\e080";
 }
 
 dt {
@@ -150,13 +152,13 @@ h3 img {
 }
 
 #footer {
-    color: #bbb;
+    color: #999;
     float: right;
     font-style: italic;
 }
 
 #footer a {
-    color: #bbbbbb;
+    color: #999;
 }
 
 /* ==========================================================================
