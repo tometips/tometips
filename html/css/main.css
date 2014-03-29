@@ -142,7 +142,7 @@ h3 img {
 }
 
 .variable {
-    color: #5cb85c;
+    color: #00a000;
     border-bottom: dotted 1px;
     font-weight: bold;
 }
@@ -155,6 +155,7 @@ h3 img {
     color: #999;
     float: right;
     font-style: italic;
+    font-size: 13px;
 }
 
 #footer a {
