@@ -420,6 +420,7 @@ for tid, t in pairs(Actor.talents_def) do
 
     -- Add HTML character entities
     t.info_text = t.info_text:gsub('%-%-', '&mdash;')
+    t.info_text = t.info_text:gsub('%.%.%.', '&hellip;')
 
     -- Ending of info text.
 
@@ -460,6 +461,18 @@ for tid, t in pairs(Actor.talents_def) do
     end
 
     if t.image then t.image = t.image:gsub("talents/", "") end
+
+    -- Strip unused elements in order to save space.
+    t.display_entity = nil
+    t.tactical = nil
+    -- More unused elements - although these might be useful someday
+    t.allow_random = nil
+    t.is_mind = nil
+    t.is_nature = nil
+    t.is_spell = nil
+    t.direct_hit = nil
+    t.no_npc_use = nil
+    t.no_silence = nil
 end
 
 local talents_types_def_dict = {}
@@ -469,7 +482,7 @@ for k, v in pairs(Actor.talents_types_def) do
     end
 end
 
--- TODO: travel speed, requirements, description
+-- TODO: travel speed, requirements
 --        local speed = self:getTalentProjectileSpeed(t)
 --        if speed then d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, ""..(speed * 100).."% of base", true)
 --        else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)
@@ -484,9 +497,6 @@ out = arg[1] and io.open(arg[1], 'w') or io.stdout
 out:write("tome = ")
 out:write(json.encode({
     colors = colors,
-    -- FIXME: Strip death_message
-    --DamageType = DamageType,
-    talents_types_def = talents_types_def_dict,
-    talents_def = Actor.talents_def
+    talents_types_def = talents_types_def_dict
 }))
 
