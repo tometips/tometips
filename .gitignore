@@ -2,4 +2,4 @@
 /data
 /mod
 /html/img/talents/*.png
-/html/js/spoilers.js
+/html/data/*.json

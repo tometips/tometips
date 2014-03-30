@@ -34,28 +34,6 @@ function talentImgError(image) {
     return true;
 }
 
-/**Does additional processing to the raw spoilers (in tome) and stores the
- * results to tomex.
- */
-function process_spoilers(tome, tomex) {
-    // FIXME: Polyfill for Object.keys
-    var talent_types = Object.keys(tome.talents_types_def),
-        category;
-    talent_types.sort();
-    tomex.talentsByCategory = {};
-    for (var i = 0; i < talent_types.length; i++) {
-        category = talent_types[i].split("/")[0];
-        tomex.talentsByCategory[category] = tomex.talentsByCategory[category] || []; 
-        for (var j = 0; j < tome.talents_types_def[talent_types[i]].length; j++) {
-            tome.talents_types_def[talent_types[i]][j].sort(function(a, b) {
-                return a.type[1] < b.type[1] ||
-                    (a.type[1] == b.type[1] && a.name < b.name);
-            });
-        }
-        tomex.talentsByCategory[category].push(tome.talents_types_def[talent_types[i]]);
-    }
-}
-
 var talent_by_type_template = Handlebars.compile(
     // FIXME: type header and description
     "{{#each this}}" +
@@ -88,48 +66,99 @@ var talent_by_type_template = Handlebars.compile(
 );
 
 var talent_by_type_nav_template = Handlebars.compile(
-    '<ul class="nav">{{#eachProperty talentsByCategory}}' +
-        '<li><a href="#talents/{{property}}" data-toggle="collapse" data-target="#nav-{{property}}" class="collapsed">{{toTitleCase property}}</a>' +
-        '<ul class="nav collapse" id="nav-{{property}}">' +
-        '{{#each value}}' +
-            '<li><a href="#talents/{{type}}">{{toTitleCase name}}</a></li>' +  // "type" happens to be category/name, which is what we want for routing
-        "{{/each}}" +
+    '<ul class="nav">{{#each talent_categories}}' +
+        '<li><a href="#talents/{{this}}" data-toggle="collapse" data-target="#nav-{{this}}" class="collapsed">{{toTitleCase this}}</a>' +
+        '<ul class="nav collapse" id="nav-{{this}}">' +
+        // Empty for now; will be populated later
         "</ul></li>" +
-    "{{/eachProperty}}</ul>"
+    "{{/each}}</ul>"
 );
 
-function nav_talents(tome, tomex) {
-    return talent_by_type_nav_template(tomex);
+function navTalents(tome) {
+    return talent_by_type_nav_template(tome);
 }
 
-function list_talents(tome, tomex, category) {
-    // FIXME: Error handling for bad category - also check Sher'tul
-    return talent_by_type_template(tomex.talentsByCategory[category]);
+function fillNavTalents(tome, category) {
+    var $el = $("#nav-" + category),
+        talent_types = tome.talents[category];
+    if ($.trim($el.html())) {
+        // Nav already exists; no need to do more.
+        return;
+    }
+
+    for (var i = 0; i < talent_types.length; i++) {
+        $el.append('<li><a href="#talents/' + talent_types[i].type + '">' + toTitleCase(talent_types[i].name + '</a></li>'));
+        // "type" happens to be category/name, which is what we want for routing
+    }
 }
 
-$(function() {
-    // We explicitly do NOT use var, for now, to facilitate inspection in Firebug.
-    tomex = {};
-    process_spoilers(tome, tomex);
+function listTalents(tome, category) {
+    return talent_by_type_template(tome.talents[category]);
+}
 
+function initializeRoutes() {
     // Default route.  We currently just have talents.
     Finch.route("", function() {
         Finch.navigate("talents");
     });
 
     Finch.route("talents", function() {
-        $("#side-nav").html(nav_talents(tome, tomex));
+        $("#side-nav").html(navTalents(tome));
         $("#content").html("Select a talent category to the left.");
     });
 
     Finch.route("[talents]/:category", function(bindings) {
-        $("#content").html(list_talents(tome, tomex, bindings.category));
+        loadDataIfNeeded('talents.' + bindings.category, function() {
+            fillNavTalents(tome, bindings.category);
+            $("#content").html(listTalents(tome, bindings.category));
+        });
     });
 
     Finch.route("[talents/:category]/:type", function(bindings) {
         $("#collapse-" + bindings.type).collapse("show");
     });
 
+    Finch.listen();
+}
+
+function loadData(data_file, success) {
+    $.ajax({
+        url: "data/" + data_file + ".json",
+        dataType: "json"
+    }).success(success);
+    // FIXME: Error handling
+}
+
+/**Loads a section of JSON data into the tome object if needed, then executes
+ * the success function handler.
+ *
+ * For example, if data_file is "talents.chronomancy", then this function
+ * loads talents_chronomancy.json to tome.talents.chronomancy then calls
+ * success(tome.talents.chronomancy).
+ */
+function loadDataIfNeeded(data_file, success) {
+    var parts = data_file.split("."),
+        last_part = parts.pop(),
+        tome_part = tome;
+
+    for (var i = 0; i < parts.length; i++) {
+        if (typeof(tome_part[parts[i]]) === 'undefined') {
+            tome_part[parts[i]] = {};
+        }
+        tome_part = tome_part[parts[i]];
+    }
+
+    if (!tome_part[last_part]) {
+        loadData(data_file, function(data) {
+            tome_part[last_part] = data;
+            success(data);
+        });
+    } else {
+        success(tome_part[last_part]);
+    }
+}
+
+$(function() {
     $("html").on("click", ".clickable", function(e) {
         if (e.target.nodeName == 'A') {
             // If the user clicked on the link itself, then simply let
@@ -144,6 +173,12 @@ $(function() {
         $(this).hide();
     });
 
-    Finch.listen();
+    // We explicitly do NOT use var, for now, to facilitate inspection in Firebug.
+    // (Our route handlers and loading routes also rely on tome being global.)
+    tome = {};
+    loadData('tome', function(data) {
+        tome = data;
+        initializeRoutes();
+    });
 });
 

@@ -465,21 +465,8 @@ for tid, t in pairs(Actor.talents_def) do
     -- Strip unused elements in order to save space.
     t.display_entity = nil
     t.tactical = nil
-    -- More unused elements - although these might be useful someday
     t.allow_random = nil
-    t.is_mind = nil
-    t.is_nature = nil
-    t.is_spell = nil
-    t.direct_hit = nil
     t.no_npc_use = nil
-    t.no_silence = nil
-end
-
-local talents_types_def_dict = {}
-for k, v in pairs(Actor.talents_types_def) do
-    if type(k) ~= 'number' then
-        talents_types_def_dict[k] = v
-    end
 end
 
 -- TODO: travel speed, requirements
@@ -493,10 +480,36 @@ end
 -- Golem's armor reconfiguration depends on armor mastery
 -- Values that depend only on a stat - Wave of Power's range, prodigies - can these be improved?
 
-out = arg[1] and io.open(arg[1], 'w') or io.stdout
-out:write("tome = ")
+-- Reorganize ToME's data for output
+local talents_by_category = {}
+local talent_categories = {}
+for k, v in pairs(Actor.talents_types_def) do
+    if type(k) ~= 'number' then
+        local category = k:split('/')[1]
+        talents_by_category[category] = talents_by_category[category] or {}
+        table.insert(talents_by_category[category], v)
+        talent_categories[category] = true
+    end
+end
+talent_categories = table.keys(talent_categories)
+table.sort(talent_categories)
+
+for k, v in pairs(talents_by_category) do
+    table.sort(v, function(a, b) return a.name:upper() < b.name:upper() end)
+end
+
+-- Output the data
+local output_dir = (arg[1] or '.') .. '/'
+
+local out = io.open(output_dir .. 'tome.json', 'w')
 out:write(json.encode({
-    colors = colors,
-    talents_types_def = talents_types_def_dict
+    talent_categories = talent_categories
 }))
+out:close()
+
+for k, v in pairs(talents_by_category) do
+    local out = io.open(output_dir .. 'talents.'..k..'.json', 'w')
+    out:write(json.encode(v))
+    out:close()
+end
 

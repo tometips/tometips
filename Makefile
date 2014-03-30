@@ -1,6 +1,5 @@
-html/js/spoilers.js: spoilers.lua
-	echo "tome = " > $@
-	lua spoilers.lua $@
+html/data/tome.json: spoilers.lua
+	lua spoilers.lua $(dir $@)
 
 .DELETE_ON_ERROR:
 
