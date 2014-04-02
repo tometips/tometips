@@ -508,7 +508,7 @@ out:write(json.encode({
 out:close()
 
 for k, v in pairs(talents_by_category) do
-    local out = io.open(output_dir .. 'talents.'..k..'.json', 'w')
+    local out = io.open(output_dir .. 'talents.'..k:gsub("[']", "_")..'.json', 'w')
     out:write(json.encode(v))
     out:close()
 end

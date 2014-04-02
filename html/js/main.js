@@ -5,6 +5,13 @@ function toTitleCase(s)
     return s.replace(/\b[a-z]/g, function(match) { return match.toUpperCase(); });
 }
 
+///ToME-specific function that makes a ToME ID a valid and standard HTML ID
+function toHtmlId(s)
+{
+    // For now, only replace characters known to cause issues.
+    return s.toLowerCase().replace(/[':]/, '_');
+}
+
 Handlebars.registerHelper('eachProperty', function(context, options) {
     var ret = "";
     for (var prop in context) {
@@ -23,8 +30,7 @@ Handlebars.registerHelper('toLowerCase', function(context, options) {
 
 // ToME-specific function that makes a ToME ID a valid and standard HTML ID
 Handlebars.registerHelper('toHtmlId', function(context, options) {
-    // For now, only replace characters known to cause issues.
-    return context.toLowerCase().replace(':', '_');
+    return toHtmlId(context);
 });
 
 // See http://stackoverflow.com/a/92819/25507
@@ -67,8 +73,8 @@ var talent_by_type_template = Handlebars.compile(
 
 var talent_by_type_nav_template = Handlebars.compile(
     '<ul class="nav">{{#each talent_categories}}' +
-        '<li><a href="#talents/{{this}}"><span data-toggle="collapse" data-target="#nav-{{this}}" class="dropdown collapsed"></span>{{toTitleCase this}}</a>' +
-        '<ul class="nav collapse" id="nav-{{this}}">' +
+        '<li><a href="#talents/{{toHtmlId this}}"><span data-toggle="collapse" data-target="#nav-{{toHtmlId this}}" class="dropdown collapsed"></span>{{toTitleCase this}}</a>' +
+        '<ul class="nav collapse" id="nav-{{toHtmlId this}}">' +
         // Empty for now; will be populated later
         "</ul></li>" +
     "{{/each}}</ul>"
@@ -87,7 +93,7 @@ function fillNavTalents(tome, category) {
     }
 
     for (var i = 0; i < talent_types.length; i++) {
-        $el.append('<li><a href="#talents/' + talent_types[i].type + '">' + toTitleCase(talent_types[i].name + '</a></li>'));
+        $el.append('<li><a href="#talents/' + toHtmlId(talent_types[i].type) + '">' + toTitleCase(talent_types[i].name + '</a></li>'));
         // "type" happens to be category/name, which is what we want for routing
     }
 }
