@@ -92,6 +92,11 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+html.wait, html.wait *
+{
+    cursor: wait !important;
+}
+
 html, body, #side-nav-container, #content-container
 {
     height: 100%;
@@ -111,14 +116,14 @@ html, body, #side-nav-container, #content-container
     padding: 0 0 0 30px;
 }
 
-#side-nav > ul > li > a:before {
+#side-nav .dropdown:before {
     font-family: "Glyphicons Halflings";
     font-size: 10px;
     content: "\e114";
     padding-right: 5px;
 }
 
-#side-nav > ul > li > a.collapsed:before {
+#side-nav .dropdown.collapsed:before {
     content: "\e080";
 }
 

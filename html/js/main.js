@@ -67,7 +67,7 @@ var talent_by_type_template = Handlebars.compile(
 
 var talent_by_type_nav_template = Handlebars.compile(
     '<ul class="nav">{{#each talent_categories}}' +
-        '<li><a href="#talents/{{this}}" data-toggle="collapse" data-target="#nav-{{this}}" class="collapsed">{{toTitleCase this}}</a>' +
+        '<li><a href="#talents/{{this}}"><span data-toggle="collapse" data-target="#nav-{{this}}" class="dropdown collapsed"></span>{{toTitleCase this}}</a>' +
         '<ul class="nav collapse" id="nav-{{this}}">' +
         // Empty for now; will be populated later
         "</ul></li>" +
@@ -109,6 +109,13 @@ function initializeRoutes() {
 
     Finch.route("[talents]/:category", function(bindings) {
         loadDataIfNeeded('talents.' + bindings.category, function() {
+            var this_nav = "#nav-" + bindings.category;
+            $(this_nav).collapse('show');
+            // Hack: Update "collapsed" class, since Bootstrap doesn't seem to do it for us
+            // (unless, presumably, we use data-parent for full-blown accordion behavior,
+            // and I don't really want to do that).
+            $("[data-target=" + this_nav + "]").removeClass('collapsed');
+
             fillNavTalents(tome, bindings.category);
             $("#content").html(listTalents(tome, bindings.category));
         });
@@ -159,6 +166,11 @@ function loadDataIfNeeded(data_file, success) {
 }
 
 $(function() {
+    // See http://stackoverflow.com/a/10801889/25507
+    $(document).ajaxStart(function() { $("html").addClass("wait"); });
+    $(document).ajaxStop(function() { $("html").removeClass("wait"); });
+
+    // Clicking on a ".clickable" element triggers the <a> within it.
     $("html").on("click", ".clickable", function(e) {
         if (e.target.nodeName == 'A') {
             // If the user clicked on the link itself, then simply let
@@ -169,12 +181,24 @@ $(function() {
         $(this).find('a').click();
     });
 
+    // Hack: Clicking the expand / collapse within an <a> doesn't trigger the <a>.
+    $("#side-nav").on("click", ".dropdown", function(e) {
+        e.preventDefault();
+    });
+
+    $("#side-nav").on("shown.bs.collapse", ".collapse", function(e) {
+       var category = $(this).attr('id').replace('nav-', '');
+       loadDataIfNeeded('talents.' + category, function() {
+            fillNavTalents(tome, category);
+        });
+    });
+
     $("html").on("error", "img", function() {
         $(this).hide();
     });
 
     // We explicitly do NOT use var, for now, to facilitate inspection in Firebug.
-    // (Our route handlers and loading routes also rely on tome being global.)
+    // (Our route handlers and such currently also rely on tome being global.)
     tome = {};
     loadData('tome', function(data) {
         tome = data;
