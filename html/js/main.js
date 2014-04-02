@@ -203,6 +203,13 @@ $(function() {
         $(this).hide();
     });
 
+    // Track Google Analytics as we navigate from one subpage / hash link to another.
+    // Based on http://stackoverflow.com/a/4813223/25507
+    // Really old browsers don't support hashchange.  A plugin is available, but I don't really care right now.
+    $(window).on('hashchange', function() {
+        _gaq.push(['_trackPageview',location.pathname + location.search  + location.hash]);
+    })
+
     // We explicitly do NOT use var, for now, to facilitate inspection in Firebug.
     // (Our route handlers and such currently also rely on tome being global.)
     tome = {};
