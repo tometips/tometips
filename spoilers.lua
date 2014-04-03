@@ -1,4 +1,4 @@
-local re = require("re")
+package.path = package.path..';./thirdparty/?.lua'
 
 -- T-Engine's C core.  Unimplemented as much as possible.
 local surface_metatable = { __index = {} }
@@ -430,7 +430,7 @@ for tid, t in pairs(Actor.talents_def) do
         if t.range == Actor.talents_def[Actor.T_SHOOT].range then
             t.range = "archery"
         else
-            t.range = getByTalentLevel(player, function() return player:getTalentRange(t) end)
+            t.range = getByTalentLevel(player, function() return ("%.1f"):format(player:getTalentRange(t)) end)
 
             -- Sample error handling:
             --local success, value = pcall(function() getByTalentLevel(player, function() return player:getTalentRange(t) end) end)

@@ -1,5 +1,6 @@
 /engine
 /data
 /mod
+/thirdparty
 /html/img/talents/*.png
 /html/data/*.json

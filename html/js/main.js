@@ -1,8 +1,16 @@
 ///Simplistic title-case function that capitalizes the beginning of every word.
 function toTitleCase(s)
 {
-    // FIXME: Handle "of"
-    return s.replace(/\b[a-z]/g, function(match) { return match.toUpperCase(); });
+    var never_capitalize = {
+        // Fix problems like "Berserker's"
+        "s":true,
+        // Prepositions and internal articles
+        "of":true,
+        "the":true
+    };
+    s = s.replace(/\b([a-z])([a-z]+)/g, function(match, p1, p2) { return never_capitalize[match] ? match : (p1.toUpperCase() + p2); });
+    // Force the first word to be capitalized, even if it's "of" or "the"
+    return s[0].toUpperCase() + s.slice(1);
 }
 
 ///ToME-specific function that makes a ToME ID a valid and standard HTML ID
