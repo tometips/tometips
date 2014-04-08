@@ -219,6 +219,14 @@ spoilers = {
         return "Values for " .. table.concat(tip, ", ")
     end,
 
+    blacklist_talent_type = {
+        ["chronomancy/temporal-archery"] = true, -- unavailable in this ToME version
+        ["psionic/possession"] = true,           -- unavailable in this ToME version
+        ["psionic/psi-archery"] = true,          -- unavailable in this ToME version
+        ["sher'tul/fortress"] = true,            -- unavailable in this ToME version
+        ["tutorial"] = true,                     -- Do these even still exist?
+        ["wild-gift/malleable-body"] = true,     -- unavailable in this ToME version (and not even intelligible)
+    },
 }
 
 player.getStat = function(self, stat, scale, raw, no_inc)
@@ -484,11 +492,13 @@ end
 local talents_by_category = {}
 local talent_categories = {}
 for k, v in pairs(Actor.talents_types_def) do
-    if type(k) ~= 'number' then
-        local category = k:split('/')[1]
-        talents_by_category[category] = talents_by_category[category] or {}
-        table.insert(talents_by_category[category], v)
-        talent_categories[category] = true
+    if type(k) ~= 'number' and not spoilers.blacklist_talent_type[k] then
+        if next(v.talents) ~= nil then   -- skip talent categories with no talents
+            local category = k:split('/')[1]
+            talents_by_category[category] = talents_by_category[category] or {}
+            table.insert(talents_by_category[category], v)
+            talent_categories[category] = true
+        end
     end
 end
 talent_categories = table.keys(talent_categories)
