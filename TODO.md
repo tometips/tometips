@@ -14,4 +14,3 @@ Category link doesn't work correctly (only on first load?) - expand an item, the
 Some IDs are duplicated - e.g., Cursed -> Rampage -> Rampage - clicking on side nav causes first talent to expand
 Hide Spells -> Other -> Charms
 Hide talents: Base, Race
-Better makefile ("make clean") - but that means we need a consistent OS environment
