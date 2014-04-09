@@ -167,6 +167,29 @@ h3 img {
     color: #999;
 }
 
+.panel-body {
+    // This is so .source-link's position:absolute will work.
+    position: relative;
+}
+
+.source-link {
+    text-transform: lowercase;
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+}
+
+.source-link, .source-link a {
+    color: #999;
+}
+
+.source-link:before {
+    content: '[ ';
+}
+.source-link:after {
+    content: ' ]';
+}
+
 /* ==========================================================================
    Helper classes
    ========================================================================== */

@@ -166,6 +166,35 @@ function multiDiff(str, on_diff)
 	return res
 end
 
+-- Finds the upvalue of f with the given name, and returns debug.getinfo for it
+-- See http://www.lua.org/pil/23.1.html, http://www.lua.org/pil/23.1.2.html
+function getinfo_upvalue(f, name)
+    local i = 1
+    while true do
+        local n, v = debug.getupvalue(f, i)
+        if not n then return nil end
+        if n == name then return debug.getinfo(v, 'S') end
+        i = i + 1
+    end
+end
+
+-- Support for loading source files and using debug.getinfo to find where
+-- entities are defined.
+local source_lines = {}
+function resolve_source(dbginfo)
+    local filename = dbginfo.source:sub(2)
+
+    if not source_lines[filename] then
+        local f = assert(io.open(filename, 'r'))
+        source_lines[filename] = f:read("*all"):split('\n')
+        f:close()
+    end
+
+    for line = dbginfo.linedefined, 1, -1 do
+        if source_lines[filename][line]:sub(1, 3) == "new" then return { filename, line } end
+    end
+end
+
 local raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback' }
 
 local resources = {}
@@ -179,7 +208,7 @@ end
 
 local Actor = require 'mod.class.Actor'
 local player = Actor.new{
-    combat_mindcrit = 0, -- TODO: Configurable(?)
+    combat_mindcrit = 0, -- Shouldn't be needed; see http://forums.te4.org/viewtopic.php?f=42&t=39888
     body = { INVEN = 1000, QS_MAINHAND = 1, QS_OFFHAND = 1, MAINHAND = 1, OFFHAND = 1, FINGER = 2, NECK = 1, LITE = 1, BODY = 1, HEAD = 1, CLOAK = 1, HANDS = 1, BELT = 1, FEET = 1, TOOL = 1, QUIVER = 1, QS_QUIVER = 1 },
     wards = {},
 }
@@ -475,6 +504,18 @@ for tid, t in pairs(Actor.talents_def) do
     t.tactical = nil
     t.allow_random = nil
     t.no_npc_use = nil
+
+    -- Find the info function, and use that to find where the talent is defined.
+    --
+    -- Inscriptions have their own newInscription function that sets an old_info function.
+    --
+    -- For other talents, engine.interface.ActorTalents:newTalent creates its own
+    -- local info function based on the talent's provided info function, so we need to look
+    -- for upvalues.
+    local d = t.old_info and debug.getinfo(t.old_info) or getinfo_upvalue(t.info, 'info')
+    if d then
+        t.source_code = resolve_source(d)
+    end
 end
 
 -- TODO: travel speed, requirements
@@ -513,7 +554,8 @@ local output_dir = (arg[1] or '.') .. '/'
 
 local out = io.open(output_dir .. 'tome.json', 'w')
 out:write(json.encode({
-    talent_categories = talent_categories
+    tag = 'tome-1.1.5.real',  -- HACK: Hard-coded for now
+    talent_categories = talent_categories,
 }))
 out:close()
 

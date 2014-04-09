@@ -41,6 +41,10 @@ Handlebars.registerHelper('toHtmlId', function(context, options) {
     return toHtmlId(context);
 });
 
+Handlebars.registerHelper('tag', function(context, options) {
+    return tome.tag;
+});
+
 // See http://stackoverflow.com/a/92819/25507
 function talentImgError(image) {
     image.onerror = "";
@@ -71,6 +75,7 @@ var talent_by_type_template = Handlebars.compile(
                             "{{#if cooldown}}<dt>Cooldown</dt><dd>{{{cooldown}}}</dd>{{/if}}" +
                             "{{#if use_speed}}<dt>Use Speed</dt><dd>{{use_speed}}</dd>{{/if}}" +
                             '{{#if info_text}}<dt class="multiline-dd">Description</dt><dd>{{{info_text}}}</dd>{{/if}}' +
+                            '{{#if source_code}}<div class="source-link"><a href="http://git.net-core.org/darkgod/t-engine4/blob/{{tag}}/game/modules/tome/{{source_code.[0]}}#L{{source_code.[1]}}" target="_blank">View source</a></div>{{/if}}' +
                         '</dl>' +
                     '</div>' +
                 '</div>' +

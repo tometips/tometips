@@ -4,7 +4,6 @@ Extract Gems isn't working properly
 Jumpgate doesn't correctly show talent level effects (but it doesn't in ToME either)
 Correct masteries for, e.g., racial talents
 Talents by stat for Wave of Power, prodigies
-"View Source" link
 "Empty Hand" and Hunted! scales by level
 Clean up inscriptions
 Color-code resource usage, to match ToME?
