@@ -1,4 +1,3 @@
-Physical Power doesn't show up in, e.g., Sunder Arms
 Permalink to individual talents
 Extract Gems isn't working properly
 Jumpgate doesn't correctly show talent level effects (but it doesn't in ToME either)

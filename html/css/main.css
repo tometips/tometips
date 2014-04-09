@@ -168,7 +168,7 @@ h3 img {
 }
 
 .panel-body {
-    // This is so .source-link's position:absolute will work.
+    /* This is so .source-link's position:absolute will work. */
     position: relative;
 }
 

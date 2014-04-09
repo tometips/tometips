@@ -181,7 +181,7 @@ end
 -- Support for loading source files and using debug.getinfo to find where
 -- entities are defined.
 local source_lines = {}
-function resolve_source(dbginfo)
+function resolveSource(dbginfo)
     local filename = dbginfo.source:sub(2)
 
     if not source_lines[filename] then
@@ -219,6 +219,7 @@ spoilers = {
     active = {
         mastery = 1.3,
         stat = 100,
+        physicalpower = 100,
         spellpower = 100,
         mindpower = 100,
         -- According to chronomancer.lua, 300 is "the optimal balance"
@@ -242,6 +243,7 @@ spoilers = {
         for k, v in pairs(self.used.stat or {}) do
             if v then tip[#tip+1] = ("%s %i"):format(Actor.stats_def[k].name, self.active.stat) end
         end
+        if self.used.physicalpower then tip[#tip+1] = ("physical power %i"):format(self.active.physicalpower) end
         if self.used.spellpower then tip[#tip+1] = ("spellpower %i"):format(self.active.spellpower) end
         if self.used.mindpower then tip[#tip+1] = ("mindpower %i"):format(self.active.mindpower) end
         if self.used.paradox then tip[#tip+1] = ("paradox %i"):format(self.active.paradox) end
@@ -258,13 +260,17 @@ spoilers = {
     },
 }
 
+function logError(s)
+    io.stderr:write((spoilers.active.talent_id or "unknown") .. ': ' .. s .. '\n')
+end
+
 player.getStat = function(self, stat, scale, raw, no_inc)
     spoilers.used.stat = spoilers.used.stat or {}
     spoilers.used.stat[stat] = true
 
     local val = spoilers.active.stat
     if no_inc then
-        io.stderr:write("Unsupported use of getStat no_inc")
+        logError("Unsupported use of getStat no_inc")
     end
 
     -- Based on interface.ActorStats.getStat
@@ -278,10 +284,19 @@ player.getStat = function(self, stat, scale, raw, no_inc)
     return val
 end
 
+player.combatPhysicalpower = function(self, mod, weapon, add)
+    mod = mod or 1
+    if add then
+        logError("Unsupported add to combatPhysicalpower")
+    end
+    spoilers.used.physicalpower = true
+    return spoilers.active.physicalpower * mod
+end
+
 player.combatSpellpower = function(self, mod, add)
     mod = mod or 1
     if add then
-        io.stderr:write("Unsupported add to combatSpellpower")
+        logError("Unsupported add to combatSpellpower")
     end
     spoilers.used.spellpower = true
     return spoilers.active.spellpower * mod
@@ -290,7 +305,7 @@ end
 player.combatMindpower = function(self, mod, add)
     mod = mod or 1
     if add then
-        io.stderr:write("Unsupported add to combatMindpower")
+        logError("Unsupported add to combatMindpower")
     end
     spoilers.used.mindpower = true
     return spoilers.active.mindpower * mod
@@ -472,7 +487,7 @@ for tid, t in pairs(Actor.talents_def) do
             -- Sample error handling:
             --local success, value = pcall(function() getByTalentLevel(player, function() return player:getTalentRange(t) end) end)
             --if not success then
-            --    io.stderr:write(string.format("%s: range: %s\n", tid, value))
+            --    logError(string.format("%s: range: %s\n", tid, value))
             --else
             --    t.range = value
             --end
@@ -514,7 +529,7 @@ for tid, t in pairs(Actor.talents_def) do
     -- for upvalues.
     local d = t.old_info and debug.getinfo(t.old_info) or getinfo_upvalue(t.info, 'info')
     if d then
-        t.source_code = resolve_source(d)
+        t.source_code = resolveSource(d)
     end
 end
 
@@ -554,7 +569,10 @@ local output_dir = (arg[1] or '.') .. '/'
 
 local out = io.open(output_dir .. 'tome.json', 'w')
 out:write(json.encode({
-    tag = 'tome-1.1.5.real',  -- HACK: Hard-coded for now
+    -- Official ToME tag in git.net-core.org to link to.
+    -- HACK: Hard-coded for now
+    tag = 'tome-1.1.5.real',
+
     talent_categories = talent_categories,
 }))
 out:close()
