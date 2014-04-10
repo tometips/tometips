@@ -10,5 +10,3 @@ Fearscape shows 5 drain vim but not 90 vim
 Try improving pluralization for, e.g., Reload - avoid saying "shot, shots, shots, shots, shots"
 Category link doesn't work correctly (only on first load?) - expand an item, then click a link beneath it, nothing happens
 Some IDs are duplicated - e.g., Cursed -> Rampage -> Rampage - clicking on side nav causes first talent to expand
-Hide Spells -> Other -> Charms
-Hide talents: Base, Race

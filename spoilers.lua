@@ -258,6 +258,13 @@ spoilers = {
         ["tutorial"] = true,                     -- Do these even still exist?
         ["wild-gift/malleable-body"] = true,     -- unavailable in this ToME version (and not even intelligible)
     },
+
+    blacklist_talent = {
+        ["T_SHERTUL_FORTRESS_GETOUT"] = true,
+        ["T_SHERTUL_FORTRESS_BEAM"] = true,
+        ["T_SHERTUL_FORTRESS_ORBIT"] = true,
+        ["T_GLOBAL_CD"] = true,                  -- aka "charms"
+    }
 }
 
 function logError(s)
@@ -538,7 +545,6 @@ end
 --        if speed then d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, ""..(speed * 100).."% of base", true)
 --        else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)
 --        end
--- TODO: Hide 'hide = "always"'?
 
 -- TODO: Special cases:
 -- Golem's armor reconfiguration depends on armor mastery
@@ -548,8 +554,20 @@ end
 local talents_by_category = {}
 local talent_categories = {}
 for k, v in pairs(Actor.talents_types_def) do
+    -- talent_types_def is indexed by both number and name.
+    -- We only want to print by name.
+    -- Also support blacklisting unavailable talent types.
     if type(k) ~= 'number' and not spoilers.blacklist_talent_type[k] then
         if next(v.talents) ~= nil then   -- skip talent categories with no talents
+
+            -- Remove blacklisted and hide = "always" talents.
+            -- This modifies the real in-memory talents table, but we shouldn't need the original version...
+            for i = #v.talents, 1, -1 do
+                if spoilers.blacklist_talent[v.talents[i].id] or (v.talents[i].hide == 'always' and v.talents[i].id ~= 'T_ATTACK') then
+                    table.remove(v.talents, i)
+                end
+            end
+
             local category = k:split('/')[1]
             talents_by_category[category] = talents_by_category[category] or {}
             table.insert(talents_by_category[category], v)
