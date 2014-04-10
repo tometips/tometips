@@ -550,6 +550,14 @@ end
 -- Golem's armor reconfiguration depends on armor mastery
 -- Values that depend only on a stat - Wave of Power's range, prodigies - can these be improved?
 
+-- Helper functions for organizing ToME's data for output
+function shouldSkipTalent(t)
+    -- Remove blacklisted and hide = "always" talents and five of the six copies of inscriptions.
+    return spoilers.blacklist_talent[t.id] or
+        (t.hide == 'always' and t.id ~= 'T_ATTACK') or
+        (t.is_inscription and t.id:match('.+_[2-9]'))
+end
+
 -- Reorganize ToME's data for output
 local talents_by_category = {}
 local talent_categories = {}
@@ -560,10 +568,9 @@ for k, v in pairs(Actor.talents_types_def) do
     if type(k) ~= 'number' and not spoilers.blacklist_talent_type[k] then
         if next(v.talents) ~= nil then   -- skip talent categories with no talents
 
-            -- Remove blacklisted and hide = "always" talents.
             -- This modifies the real in-memory talents table, but we shouldn't need the original version...
             for i = #v.talents, 1, -1 do
-                if spoilers.blacklist_talent[v.talents[i].id] or (v.talents[i].hide == 'always' and v.talents[i].id ~= 'T_ATTACK') then
+                if shouldSkipTalent(v.talents[i]) then
                     table.remove(v.talents, i)
                 end
             end
