@@ -511,13 +511,13 @@ for tid, t in pairs(Actor.talents_def) do
 
     t.cooldown = getvalByTalentLevel(t.cooldown, player, t)
 
+    local cost = {}
     for i, v in ipairs(raw_resources) do
-        cost = {}
         if t[v] then
             cost[#cost+1] = string.format("%s %s", getvalByTalentLevel(t[v], player, t), resources[v])
         end
-        if #cost > 0 then t.cost = table.concat(cost, ", ") end
     end
+    if #cost > 0 then t.cost = table.concat(cost, ", ") end
 
     if t.image then t.image = t.image:gsub("talents/", "") end
 

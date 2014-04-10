@@ -61,12 +61,12 @@ var talent_by_type_template = Handlebars.compile(
             '<div class="panel panel-default">' +
                 '<div class="panel-heading clickable">' +
                     '<h3 class="panel-title">' +
-                        '<a data-toggle="collapse" data-target="#collapse-{{toHtmlId short_name}}">' +
+                        '<a data-toggle="collapse" data-target="#collapse-{{toHtmlId id}}">' +
                             '<img width="64" height="64" src="img/talents/{{#if image}}{{image}}{{else}}{{toLowerCase short_name}}.png{{/if}}" onerror="talentImgError(this)">' + '{{name}}' +
                         '</a>' +
                     '</h3>' +
                 '</div>' +
-                '<div id="collapse-{{toHtmlId short_name}}" class="talent-details panel-collapse collapse">' +
+                '<div id="collapse-{{toHtmlId id}}" class="talent-details panel-collapse collapse">' +
                     '<div class="panel-body">' +
                         "<dl>" +
                             "{{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}" +
