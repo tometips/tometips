@@ -1,3 +1,11 @@
+function scrollToId()
+{
+    var $hash = $(location.hash.replace(/\//g, '\\/'));
+    if ($hash.length) {
+        $("#content-container").scrollTop($("#content-container").scrollTop() + $hash.offset().top);
+    }
+}
+
 ///Simplistic title-case function that capitalizes the beginning of every word.
 function toTitleCase(s)
 {
@@ -127,6 +135,7 @@ function initializeRoutes() {
     });
 
     Finch.route("[talents]/:category", function(bindings) {
+        $("#content-container").scrollTop(0);
         loadDataIfNeeded('talents.' + bindings.category, function() {
             var this_nav = "#nav-" + bindings.category;
             $(this_nav).collapse('show');
@@ -137,6 +146,7 @@ function initializeRoutes() {
 
             fillNavTalents(tome, bindings.category);
             $("#content").html(listTalents(tome, bindings.category));
+            scrollToId();
         });
     });
 

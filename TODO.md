@@ -6,4 +6,3 @@ Talents by stat for Wave of Power, prodigies
 "Empty Hand" and Hunted! scales by level
 Color-code resource usage, to match ToME?
 Try improving pluralization for, e.g., Reload - avoid saying "shot, shots, shots, shots, shots"
-Category link doesn't work correctly (only on first load?) - expand an item, then click a link beneath it, nothing happens
