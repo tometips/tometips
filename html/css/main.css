@@ -102,6 +102,19 @@ html, body, #side-nav-container, #content-container
     height: 100%;
 }
 
+.page-header
+{
+    position: relative;
+}
+
+#header-tools
+{
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    padding-bottom: 10px;
+}
+
 #side-nav-container, #content-container
 {
     overflow: scroll;

@@ -6,6 +6,18 @@ function scrollToId()
     }
 }
 
+function enableExpandCollapseAll()
+{
+    $(".expand-all").addClass('glyphicon-collapse-down')
+        .attr('title', 'Expand All');
+    $(".collapse-all").addClass('glyphicon-collapse-up')
+        .attr('title', 'Collapse All');
+    $(".expand-all, .collapse-all").addClass('glyphicon clickable')
+        .click(function() {
+            $($(this).attr('data-target')).find('.collapse').collapse($(this).hasClass('expand-all') ? 'show' : 'hide');
+        });
+}
+
 ///Simplistic title-case function that capitalizes the beginning of every word.
 function toTitleCase(s)
 {
@@ -225,6 +237,8 @@ $(function() {
     $("html").on("error", "img", function() {
         $(this).hide();
     });
+
+    enableExpandCollapseAll();
 
     // Track Google Analytics as we navigate from one subpage / hash link to another.
     // Based on http://stackoverflow.com/a/4813223/25507
