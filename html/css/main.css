@@ -115,6 +115,20 @@ html, body, #side-nav-container, #content-container
     padding-bottom: 10px;
 }
 
+.sticky
+{
+    position: fixed;
+}
+
+.sticky, .sticky h1
+{
+    margin-top: 0;
+    margin-bottom: 0;
+
+    /* Copied from page theme.  TODO: Cleaner solution available? */
+    background: #272b30;
+}
+
 #side-nav-container, #content-container
 {
     overflow: scroll;

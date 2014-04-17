@@ -18,6 +18,25 @@ function enableExpandCollapseAll()
         });
 }
 
+function makeStickyHeader($header, $container)
+{
+    var $sticky = $header.clone();
+    $sticky.attr('id', $header.attr('id') + '-sticky')
+        .addClass('sticky')
+        .css('width', $header.width())
+        .hide()
+        .insertBefore($header);
+    $container.scroll(function() {
+        if ($container.scrollTop() >= $sticky.outerHeight()) {
+            $sticky.show();
+            $header.css('visibility', 'hidden');
+        } else {
+            $sticky.hide();
+            $header.css('visibility', '');
+        }
+    });
+}
+
 ///Simplistic title-case function that capitalizes the beginning of every word.
 function toTitleCase(s)
 {
@@ -238,6 +257,7 @@ $(function() {
         $(this).hide();
     });
 
+    makeStickyHeader($("#content-header"), $("#content-container"));
     enableExpandCollapseAll();
 
     // Track Google Analytics as we navigate from one subpage / hash link to another.
