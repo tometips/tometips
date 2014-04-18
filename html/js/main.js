@@ -27,13 +27,18 @@ function makeStickyHeader($header, $container)
         .hide()
         .insertBefore($header);
     $container.scroll(function() {
-        if ($container.scrollTop() >= $sticky.outerHeight()) {
+        // Generic approach.  Lets the full header skip up a bit before the sticky header appears.
+        //if ($container.scrollTop() >= $sticky.outerHeight())
+        if ($header.children('h1').offset().top < $sticky.children('h1').offset().top) {
             $sticky.show();
             $header.css('visibility', 'hidden');
         } else {
             $sticky.hide();
             $header.css('visibility', '');
         }
+    });
+    $(window).resize(function() {
+        $sticky.css('width', $header.width());
     });
 }
 
@@ -94,7 +99,7 @@ function talentImgError(image) {
 var talent_by_type_template = Handlebars.compile(
     // FIXME: type header and description
     "{{#each this}}" +
-        '<h2 id="talents/{{type}}">{{toTitleCase name}}</h2><div>' +
+        '<h2><a class="anchor" id="talents/{{type}}"></a>{{toTitleCase name}}</h2><div>' +
         '<p>{{description}}</p><div>' +
         "{{#each talents}}" +
             '<div class="panel panel-default">' +

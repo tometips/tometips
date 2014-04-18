@@ -129,6 +129,15 @@ html, body, #side-nav-container, #content-container
     background: #272b30;
 }
 
+/* Make anchors show below the sticky header.  See http://stackoverflow.com/a/13184714/25507 */
+a.anchor
+{
+    display: block;
+    position: relative;
+    top: -50px;
+    visibility: hidden;
+}
+
 #side-nav-container, #content-container
 {
     overflow: scroll;
