@@ -268,7 +268,7 @@ spoilers = {
             if self.active.alt_talent then
                 tip[#tip+1] = Actor.talents_def[self.active.alt_talent_fake_id or self.active.talent_id].name .. " talent levels 1-5"
             else
-                tip[#tip+1] = "levels 1-5"
+                tip[#tip+1] = "talent levels 1-5"
             end
 
             if self.used.mastery then tip[#tip+1] = ("talent mastery %.2f"):format(self.active.mastery) end
@@ -507,6 +507,10 @@ for tid, t in pairs(Actor.talents_def) do
         spoilers.active.alt_talent = true
         spoilers.active.alt_talent_fake_id = Actor.T_JUMPGATE
     end
+    -- Special case: Armour Training isn't very useful unless you're wearing armor.
+    if tid == 'T_ARMOUR_TRAINING' then
+        player.inven[player.INVEN_BODY][1] = { subtype = "heavy" }
+    end
 
     -- Beginning of info text.  This is a bit complicated.
     local info_text = {}
@@ -532,6 +536,11 @@ for tid, t in pairs(Actor.talents_def) do
 		t.info_text = t.info(player, t):escapeHtml()
 		spoilers.active.talent_level = nil
 	end
+    -- Special case: Finish Armour Training.
+    if tid == 'T_ARMOUR_TRAINING' then
+        player.inven[player.INVEN_BODY][1] = nil
+        t.info_text = t.info_text:gsub(' with your current body armour', ', assuming heavy mail armour')
+    end
 
     -- Hack: Fix text like "increases foo by 1., 2., 3., 4., 5."
     t.info_text = t.info_text:gsub('%., ', ", ")
