@@ -118,6 +118,7 @@ html, body, #side-nav-container, #content-container
 .sticky
 {
     position: fixed;
+    z-index: 1;
 }
 
 .sticky, .sticky h1
@@ -182,10 +183,22 @@ h3 img {
     height: 100%;
 }
 
-.variable {
-    color: #00a000;
+.variable, .stat-variable, .talent-variable {
     border-bottom: dotted 1px;
     font-weight: bold;
+}
+
+/* FIXME: Better color scheme? */
+.variable {
+    color: #009e96;
+}
+
+.stat-variable {
+    color: #006dd3;
+}
+
+.talent-variable {
+    color: #00a000;
 }
 
 .clickable {

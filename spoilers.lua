@@ -135,8 +135,10 @@ ActorStats:defineStat("Constitution",	"con", 10, 1, 100, "Constitution defines y
 -- Luck is hidden and starts at half max value (50) which is considered the standard
 ActorStats:defineStat("Luck",		"lck", 50, 1, 100, "Luck defines your character's fortune when dealing with unknown events. It increases your critical strike chance, your chance of random encounters, ...")
 
-function table.allSame(self)
-    for i = 2, #self do
+function table.allSame(self, from, to)
+    from = from or 1
+    to = to or #self
+    for i = from + 1, to do
         if self[i] ~= self[i-1] then return false end
     end
     return true
@@ -191,7 +193,7 @@ function resolveSource(dbginfo)
     end
 
     for line = dbginfo.linedefined, 1, -1 do
-        if source_lines[filename][line]:sub(1, 3) == "new" then return { filename, line } end
+        if source_lines[filename][line]:sub(1, 3) == "new" or source_lines[filename][line]:sub(1, 4) == "uber" then return { filename, line } end
     end
 end
 
@@ -218,36 +220,120 @@ spoilers = {
     -- Currently active parameters.  TODO: Configurable
     active = {
         mastery = 1.3,
-        stat = 100,
-        physicalpower = 100,
-        spellpower = 100,
-        mindpower = 100,
+        -- To simplify implementation, we use one value for stats (str, dex,
+        -- etc.) and powers (physical, mind, spell).
+        stat_power = 100,
         -- According to chronomancer.lua, 300 is "the optimal balance"
         paradox = 300,
+    },
+
+    -- We iterate over these parameters to display the effects of a talent at
+    -- different stats and talent levels.
+    --
+    -- determineDisabled depends on this particular layout (5 varying stats and
+    -- 5 varying talent levels).
+    all_active = {
+        { stat_power=10,  talent_level=1},
+        { stat_power=25,  talent_level=1},
+        { stat_power=50,  talent_level=1},
+        { stat_power=75,  talent_level=1},
+        { stat_power=100, talent_level=1},
+        { stat_power=100, talent_level=2}, 
+        { stat_power=100, talent_level=3}, 
+        { stat_power=100, talent_level=4}, 
+        { stat_power=100, talent_level=5}, 
+    },
+
+    -- Merged into active whenever we're not processing per-stat /
+    -- per-talent-level values.
+    default_active = {
+        stat = 100,
+        power = 100,
+        talent_level = 0,
     },
 
     -- Which parameters have been used for the current tooltip
     used = {
     },
 
-    usedMessage = function(self)
+    -- Determines the HTML tooltip and CSS class to use for the current
+    -- talent, by looking at spoilers.used and the results of
+    -- determineDisabled.
+    usedMessage = function(self, disable)
+        disable = disable or {}
         local tip = {}
-        if self.used.talent then
+
+        local use_talent = self.used.talent and not disable.talent
+        if use_talent then
             if self.active.alt_talent then
-                tip[#tip+1] = Actor.talents_def[self.active.alt_talent_fake_id or self.active.talent_id].name .. " levels 1-5"
+                tip[#tip+1] = Actor.talents_def[self.active.alt_talent_fake_id or self.active.talent_id].name .. " talent levels 1-5"
             else
                 tip[#tip+1] = "levels 1-5"
             end
+
+            if self.used.mastery then tip[#tip+1] = ("talent mastery %.2f"):format(self.active.mastery) end
         end
-        if self.used.mastery then tip[#tip+1] = ("talent mastery %.2f"):format(self.active.mastery) end
-        for k, v in pairs(self.used.stat or {}) do
-            if v then tip[#tip+1] = ("%s %i"):format(Actor.stats_def[k].name, self.active.stat) end
+
+        local stat_power_text
+        -- As in determineDisabled, if both stats / powers and talents have an
+        -- effect, hide the stats / powers to cut down on space usage.
+        if use_talent then
+            stat_power_text = tostring(self.active.stat_power)
+        else
+            stat_power_text = '10, 25, 50, 75, 100' -- HACK/TODO: Remove duplication with self.all_active
         end
-        if self.used.physicalpower then tip[#tip+1] = ("physical power %i"):format(self.active.physicalpower) end
-        if self.used.spellpower then tip[#tip+1] = ("spellpower %i"):format(self.active.spellpower) end
-        if self.used.mindpower then tip[#tip+1] = ("mindpower %i"):format(self.active.mindpower) end
-        if self.used.paradox then tip[#tip+1] = ("paradox %i"):format(self.active.paradox) end
-        return "Values for " .. table.concat(tip, ", ")
+
+        local use_stat_power = false
+        if not disable.stat_power then
+            for k, v in pairs(self.used.stat or {}) do
+                if v then tip[#tip+1] = ("%s %s"):format(Actor.stats_def[k].name, stat_power_text) use_stat_power = true end
+            end
+            if self.used.physicalpower then tip[#tip+1] = ("physical power %s"):format(stat_power_text) use_stat_power = true end
+            if self.used.spellpower then tip[#tip+1] = ("spellpower %s"):format(stat_power_text) use_stat_power = true end
+            if self.used.mindpower then tip[#tip+1] = ("mindpower %s"):format(stat_power_text) use_stat_power = true end
+        end
+
+        if self.used.paradox then tip[#tip+1] = ("paradox %i"):format(self.active.paradox) use_stat_power = true end
+
+        local css_class
+        if use_stat_power and use_talent then
+            css_class = 'variable'
+        elseif use_stat_power then
+            css_class = 'stat-variable'
+        else
+            css_class = 'talent-variable'
+        end
+
+        return "Values for " .. table.concat(tip, ", "), css_class
+    end,
+
+    -- Looks at the results of getTalentByLevel or multiDiff (a table) to see
+    -- which active parameters were actually used for a particular set of
+    -- results.
+    determineDisabled = function(self, results)
+        assert(#results == 9)
+
+        -- Values 5-10 have varying talents.  If they're all the same,
+        -- then talents have no effect.
+        if table.allSame(results, 5, 9) then
+            return table.concat(results, ', ', 1, 5), { talent = true }
+
+        -- Values 1-5 have varying stats / powers.  If they're all the
+        -- same, then stats / powers have no effect.
+        elseif table.allSame(results, 1, 5) then
+            return table.concat(results, ', ', 5, 9), { stat_power = true }
+
+        -- Both stats / powers and talents have an effect, but hide the
+        -- stats / powers to cut down on space usage.
+        else
+            return table.concat(results, ', ', 5, 9), {}
+        end
+    end,
+
+    formatResults = function(self, results)
+        local new_result, disabled = self:determineDisabled(results)
+        local message, css_class = self:usedMessage(disabled)
+        return '<acronym class="' .. css_class .. '" title="' .. message .. '">' .. new_result .. '</acronym>'
     end,
 
     blacklist_talent_type = {
@@ -275,7 +361,7 @@ player.getStat = function(self, stat, scale, raw, no_inc)
     spoilers.used.stat = spoilers.used.stat or {}
     spoilers.used.stat[stat] = true
 
-    local val = spoilers.active.stat
+    local val = spoilers.active.stat_power
     if no_inc then
         logError("Unsupported use of getStat no_inc")
     end
@@ -297,7 +383,7 @@ player.combatPhysicalpower = function(self, mod, weapon, add)
         logError("Unsupported add to combatPhysicalpower")
     end
     spoilers.used.physicalpower = true
-    return spoilers.active.physicalpower * mod
+    return spoilers.active.stat_power * mod
 end
 
 player.combatSpellpower = function(self, mod, add)
@@ -306,7 +392,7 @@ player.combatSpellpower = function(self, mod, add)
         logError("Unsupported add to combatSpellpower")
     end
     spoilers.used.spellpower = true
-    return spoilers.active.spellpower * mod
+    return spoilers.active.stat_power * mod
 end
 
 player.combatMindpower = function(self, mod, add)
@@ -315,7 +401,7 @@ player.combatMindpower = function(self, mod, add)
         logError("Unsupported add to combatMindpower")
     end
     spoilers.used.mindpower = true
-    return spoilers.active.mindpower * mod
+    return spoilers.active.stat_power * mod
 end
 
 player.getParadox = function(self)
@@ -374,22 +460,17 @@ function getByTalentLevel(actor, f)
     local result = {}
 
     spoilers.used = {}
-    for i = 1, 5 do
-        spoilers.active.talent_level = i
+    for i, v in ipairs(spoilers.all_active) do
+        table.merge(spoilers.active, v)
         result[#result+1] = tostring(f())
     end
-    spoilers.active.talent_level = nil
+    table.merge(spoilers.active, spoilers.default_active)
 
     if table.allSame(result) then
-        result = result[1]
+        assert(next(spoilers.used) == nil)
+        return result[1]
     else
-        result = table.concat(result, ", ")
-    end
-
-    if next(spoilers.used) ~= nil then
-        return '<acronym class="variable" title="' .. spoilers:usedMessage() .. '">' .. result .. '</acronym>'
-    else
-        return result
+        return spoilers:formatResults(result)
     end
 end
 
@@ -428,14 +509,13 @@ for tid, t in pairs(Actor.talents_def) do
     end
 
     -- Beginning of info text.  This is a bit complicated.
-    -- TODO: Any way to get better tooltips for when one part depends on a stat but the rest doesn't?
     local info_text = {}
     spoilers.used = {}
-    for i = 1, 5 do
-        spoilers.active.talent_level = i
+    for i, v in ipairs(spoilers.all_active) do
+        table.merge(spoilers.active, v)
         info_text[i] = t.info(player, t):escapeHtml():toTString():tokenize(" ()[]")
     end
-    spoilers.active.talent_level = nil
+    table.merge(spoilers.active, spoilers.default_active)
 
     t.info_text = multiDiff(info_text, function(s, res)
         -- Reduce digits after the decimal.
@@ -443,7 +523,7 @@ for tid, t in pairs(Actor.talents_def) do
             s[i] = s[i]:gsub("(%d%d+)%.(%d)%d*", function(a, b) return tonumber(b) >= 5 and tostring(tonumber(a) + 1) or a end)
         end
 
-        res:add('<acronym class="variable" title="', spoilers:usedMessage(), '">', table.concat(s, ", "), '</acronym>')
+        res:add(spoilers:formatResults(s))
     end):toString()
 
 	-- Special case: Extract Gems is too hard to format
