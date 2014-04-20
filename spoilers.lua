@@ -288,6 +288,7 @@ spoilers = {
             for k, v in pairs(self.used.stat or {}) do
                 if v then tip[#tip+1] = ("%s %s"):format(Actor.stats_def[k].name, stat_power_text) use_stat_power = true end
             end
+            if self.used.attack then tip[#tip+1] = ("accuracy %s"):format(stat_power_text) use_stat_power = true end
             if self.used.physicalpower then tip[#tip+1] = ("physical power %s"):format(stat_power_text) use_stat_power = true end
             if self.used.spellpower then tip[#tip+1] = ("spellpower %s"):format(stat_power_text) use_stat_power = true end
             if self.used.mindpower then tip[#tip+1] = ("mindpower %s"):format(stat_power_text) use_stat_power = true end
@@ -375,6 +376,11 @@ player.getStat = function(self, stat, scale, raw, no_inc)
         end
     end
     return val
+end
+
+player.combatAttack = function(self, weapon, ammo)
+    spoilers.used.attack = true
+    return spoilers.active.stat_power
 end
 
 player.combatPhysicalpower = function(self, mod, weapon, add)
