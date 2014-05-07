@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-all: t-engine4 html/data/tome.json img
+all: t-engine4 links html/data/tome.json img
 
 html/data/tome.json: spoilers.lua
 	lua spoilers.lua $(dir $@)
@@ -30,7 +30,18 @@ switch-dev:
 switch-release:
 	cd t-engine4 && git checkout $$(git tag | tail -n 1)
 
+# Symlinks
+links: data engine mod thirdparty
+data:
+	ln -s t-engine4/game/modules/tome/data
+engine:
+	ln -s t-engine4/game/engines/default/engine
+mod:
+	ln -s t-engine4/game/modules/tome mod
+thirdparty:
+	ln -s t-engine4/game/thirdparty
+
 .DELETE_ON_ERROR:
 
-.PHONY: clean pretty img switch-dev switch-release
+.PHONY: clean pretty links img switch-dev switch-release
 
