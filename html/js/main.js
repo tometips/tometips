@@ -86,7 +86,7 @@ Handlebars.registerHelper('toHtmlId', function(context, options) {
 });
 
 Handlebars.registerHelper('tag', function(context, options) {
-    return tome.tag;
+    return tome[current_version].tag;
 });
 
 // See http://stackoverflow.com/a/92819/25507
@@ -138,12 +138,12 @@ var talent_by_type_nav_template = Handlebars.compile(
 );
 
 function navTalents(tome) {
-    return talent_by_type_nav_template(tome);
+    return talent_by_type_nav_template(tome[current_version]);
 }
 
 function fillNavTalents(tome, category) {
     var $el = $("#nav-" + category),
-        talent_types = tome.talents[category];
+        talent_types = tome[current_version].talents[category];
     if ($.trim($el.html())) {
         // Nav already exists; no need to do more.
         return;
@@ -156,18 +156,30 @@ function fillNavTalents(tome, category) {
 }
 
 function listTalents(tome, category) {
-    return talent_by_type_template(tome.talents[category]);
+    return talent_by_type_template(tome[current_version].talents[category]);
 }
 
 function initializeRoutes() {
+    // ToME versions.
+    DEFAULT_VERSION = '1.1.5';
+    current_version = DEFAULT_VERSION;
+    Finch.observe('ver', function(new_version) {
+        new_version = new_version || DEFAULT_VERSION;
+        if (new_version != current_version) {
+            current_version = new_version;
+        }
+    });
+
     // Default route.  We currently just have talents.
     Finch.route("", function() {
-        Finch.navigate("talents");
+        Finch.navigate("talents", true);
     });
 
     Finch.route("talents", function() {
-        $("#side-nav").html(navTalents(tome));
-        $("#content").html("Select a talent category to the left.");
+        loadDataIfNeeded('', function() {
+            $("#side-nav").html(navTalents(tome));
+            $("#content").html("Select a talent category to the left.");
+        });
     });
 
     Finch.route("[talents]/:category", function(bindings) {
@@ -195,7 +207,7 @@ function initializeRoutes() {
 
 function loadData(data_file, success) {
     $.ajax({
-        url: "data/" + data_file + ".json",
+        url: "data/" + current_version + "/" + data_file + ".json",
         dataType: "json"
     }).success(success);
     // FIXME: Error handling
@@ -209,9 +221,30 @@ function loadData(data_file, success) {
  * success(tome.talents.chronomancy).
  */
 function loadDataIfNeeded(data_file, success) {
-    var parts = data_file.split("."),
-        last_part = parts.pop(),
-        tome_part = tome;
+    var parts, last_part, tome_part;
+
+    // Special case: No data has been loaded at all.
+    // Load top-level data, then reissue the request.
+    if (!tome[current_version]) {
+        loading_version = current_version;
+        loadData('tome', function(data) {
+            tome[loading_version] = data;
+            loadDataIfNeeded(data_file, success);
+        });
+        return;
+    }
+
+    // Special case: No data file requested.
+    if (!data_file) {
+        success(tome);
+        return;
+    }
+
+    // General case: Walk the object tree to find where the requested file
+    // should go, and load it.
+    parts = data_file.split(".");
+    last_part = parts.pop();
+    tome_part = tome[current_version];
 
     for (var i = 0; i < parts.length; i++) {
         if (typeof(tome_part[parts[i]]) === 'undefined') {
@@ -269,15 +302,13 @@ $(function() {
     // Based on http://stackoverflow.com/a/4813223/25507
     // Really old browsers don't support hashchange.  A plugin is available, but I don't really care right now.
     $(window).on('hashchange', function() {
-        _gaq.push(['_trackPageview',location.pathname + location.search  + location.hash]);
+        _gaq.push(['_trackPageview', location.pathname + location.search + location.hash]);
     })
 
     // We explicitly do NOT use var, for now, to facilitate inspection in Firebug.
     // (Our route handlers and such currently also rely on tome being global.)
     tome = {};
-    loadData('tome', function(data) {
-        tome = data;
-        initializeRoutes();
-    });
+
+    initializeRoutes();
 });
 
