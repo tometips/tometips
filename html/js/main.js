@@ -1,6 +1,22 @@
+function locationHashNoQuery()
+{
+    return location.hash.replace(/\?.*/, '');
+}
+
+function currentQuery()
+{
+    var query = '';
+    query += versions.asQuery();
+    if (query) {
+        return '?' + query;
+    } else {
+        return '';
+    }
+}
+
 function scrollToId()
 {
-    var $hash = $(location.hash.replace(/\//g, '\\/'));
+    var $hash = $(locationHashNoQuery().replace(/\//g, '\\/'));
     if ($hash.length) {
         $("#content-container").scrollTop($("#content-container").scrollTop() + $hash.offset().top);
     }
@@ -86,7 +102,11 @@ Handlebars.registerHelper('toHtmlId', function(context, options) {
 });
 
 Handlebars.registerHelper('tag', function(context, options) {
-    return tome[current_version].tag;
+    return tome[versions.current].tag;
+});
+
+Handlebars.registerHelper('currentQuery', function(context, options) {
+    return currentQuery();
 });
 
 // See http://stackoverflow.com/a/92819/25507
@@ -129,8 +149,8 @@ var talent_by_type_template = Handlebars.compile(
 );
 
 var talent_by_type_nav_template = Handlebars.compile(
-    '<ul class="nav">{{#each talent_categories}}' +
-        '<li><a href="#talents/{{toHtmlId this}}"><span data-toggle="collapse" data-target="#nav-{{toHtmlId this}}" class="dropdown collapsed"></span>{{toTitleCase this}}</a>' +
+    '<ul id="nav-talents" class="nav">{{#each talent_categories}}' +
+        '<li><a href="#talents/{{toHtmlId this}}{{currentQuery}}"><span data-toggle="collapse" data-target="#nav-{{toHtmlId this}}" class="dropdown collapsed"></span>{{toTitleCase this}}</a>' +
         '<ul class="nav collapse" id="nav-{{toHtmlId this}}">' +
         // Empty for now; will be populated later
         "</ul></li>" +
@@ -138,76 +158,146 @@ var talent_by_type_nav_template = Handlebars.compile(
 );
 
 function navTalents(tome) {
-    return talent_by_type_nav_template(tome[current_version]);
+    return talent_by_type_nav_template(tome[versions.current]);
 }
 
 function fillNavTalents(tome, category) {
     var $el = $("#nav-" + category),
-        talent_types = tome[current_version].talents[category];
+        talent_types = tome[versions.current].talents[category];
     if ($.trim($el.html())) {
         // Nav already exists; no need to do more.
         return;
     }
 
     for (var i = 0; i < talent_types.length; i++) {
-        $el.append('<li><a href="#talents/' + toHtmlId(talent_types[i].type) + '">' + toTitleCase(talent_types[i].name + '</a></li>'));
+        $el.append('<li><a href="#talents/' + toHtmlId(talent_types[i].type) + currentQuery() + '">' + toTitleCase(talent_types[i].name + '</a></li>'));
         // "type" happens to be category/name, which is what we want for routing
     }
 }
 
 function listTalents(tome, category) {
-    return talent_by_type_template(tome[current_version].talents[category]);
+    return talent_by_type_template(tome[versions.current].talents[category]);
 }
 
-function initializeRoutes() {
-    // ToME versions.
-    DEFAULT_VERSION = '1.1.5';
-    current_version = DEFAULT_VERSION;
-    Finch.observe('ver', function(new_version) {
-        new_version = new_version || DEFAULT_VERSION;
-        if (new_version != current_version) {
-            current_version = new_version;
+// ToME versions.
+var versions = (function() {
+    var $_dropdown;
+
+    var versions = {
+        DEFAULT: '1.1.5',
+        current: '1.1.5',
+        all: [ '1.1.5', '1.2.0dev' ],
+
+        update: function(query) {
+            query = query || {};
+            versions.current = query.ver || versions.DEFAULT;
+            $_dropdown.val(versions.current);
+        },
+
+        asQuery: function() {
+            if (versions.current == versions.DEFAULT) {
+                return '';
+            } else {
+                return 'ver=' + versions.current;
+            }
+        },
+
+        // Lists available versions in the given <option> element(s).
+        list: function($el) {
+            var html;
+            if (versions.all.length < 2) {
+                $el.hide();
+            } else {
+                html = '';
+                for (var i = 0; i < versions.all.length; i++) {
+                    html += '<option value="' + versions.all[i] + '"';
+                    if (versions.all[i] == versions.DEFAULT) {
+                        html += ' selected';
+                    }
+                    html += '>' + versions.all[i] + '</option>';
+                }
+                $el.show().html(html);
+            }
+        },
+
+        // Listens for version change events in the given <option> element(s).
+        listen: function($el) {
+            $el.change(function() {
+                versions.current = $(this).val();
+                $el.val(versions.current);
+                hasher.setHash(locationHashNoQuery() + currentQuery());
+            });
+        },
+
+        init: function($el) {
+            $_dropdown = $el;
+            versions.list($el);
+            versions.listen($el);
         }
-    });
+    };
+    return versions;
+}());
 
-    // Default route.  We currently just have talents.
-    Finch.route("", function() {
-        Finch.navigate("talents", true);
-    });
+var routes;
 
-    Finch.route("talents", function() {
-        loadDataIfNeeded('', function() {
-            $("#side-nav").html(navTalents(tome));
-            $("#content").html("Select a talent category to the left.");
-        });
-    });
+function initializeRoutes() {
+    routes = {
 
-    Finch.route("[talents]/:category", function(bindings) {
-        $("#content-container").scrollTop(0);
-        loadDataIfNeeded('talents.' + bindings.category, function() {
-            var this_nav = "#nav-" + bindings.category;
-            $(this_nav).collapse('show');
-            // Hack: Update "collapsed" class, since Bootstrap doesn't seem to do it for us
-            // (unless, presumably, we use data-parent for full-blown accordion behavior,
-            // and I don't really want to do that).
-            $("[data-target=" + this_nav + "]").removeClass('collapsed');
+        // Default route.  We currently just have talents.
+        default_route: crossroads.addRoute('', function() {
+            hasher.replaceHash('talents');
+        }),
 
-            fillNavTalents(tome, bindings.category);
-            $("#content").html(listTalents(tome, bindings.category));
-            scrollToId();
-        });
-    });
+        talents: crossroads.addRoute('talents:?query:', function(query) {
+            versions.update(query);
 
-    Finch.route("[talents/:category]/:type", function(bindings) {
-        $("#collapse-" + bindings.type).collapse("show");
-    });
+            if (!$("#nav-talents").length) {
+                loadDataIfNeeded('', function() {
+                    $("#side-nav").html(navTalents(tome));
+                    $("#content").html("Select a talent category to the left.");
+                });
+            }
+        }),
 
-    Finch.listen();
+        talents_category: crossroads.addRoute("talents/{category}:?query:", function(category, query) {
+            routes.talents.matched.dispatch(query);
+
+            $("#content-container").scrollTop(0);
+            loadDataIfNeeded('talents.' + category, function() {
+                var this_nav = "#nav-" + category;
+                $(this_nav).collapse('show');
+                // Hack: Update "collapsed" class, since Bootstrap doesn't seem to do it for us
+                // (unless, presumably, we use data-parent for full-blown accordion behavior,
+                // and I don't really want to do that).
+                $("[data-target=" + this_nav + "]").removeClass('collapsed');
+
+                fillNavTalents(tome, category);
+                $("#content").html(listTalents(tome, category));
+                scrollToId();
+            });
+        }),
+
+        talents_category_type: crossroads.addRoute("talents/{category}/{type}:?query:", function(category, type, query) {
+            routes.talents_category.matched.dispatch(category, query);
+
+            $("#collapse-" + type).collapse("show");
+        })
+
+    }
+
+    function parseHash(new_hash, old_hash) {
+         crossroads.parse(new_hash);
+    }
+
+    hasher.prependHash = '';
+    hasher.initialized.add(parseHash);
+    hasher.changed.add(parseHash);
+    hasher.init();
 }
 
 function loadData(data_file, success) {
     $.ajax({
-        url: "data/" + current_version + "/" + data_file + ".json",
+        url: "data/" + versions.current + "/" + data_file + ".json",
         dataType: "json"
     }).success(success);
     // FIXME: Error handling
@@ -225,10 +315,9 @@ function loadDataIfNeeded(data_file, success) {
 
     // Special case: No data has been loaded at all.
     // Load top-level data, then reissue the request.
-    if (!tome[current_version]) {
-        loading_version = current_version;
+    if (!tome[versions.current]) {
         loadData('tome', function(data) {
-            tome[loading_version] = data;
+            tome[versions.current] = data;
             loadDataIfNeeded(data_file, success);
         });
         return;
@@ -244,7 +333,7 @@ function loadDataIfNeeded(data_file, success) {
     // should go, and load it.
     parts = data_file.split(".");
     last_part = parts.pop();
-    tome_part = tome[current_version];
+    tome_part = tome[versions.current];
 
     for (var i = 0; i < parts.length; i++) {
         if (typeof(tome_part[parts[i]]) === 'undefined') {
@@ -297,6 +386,7 @@ $(function() {
 
     makeStickyHeader($("#content-header"), $("#content-container"));
     enableExpandCollapseAll();
+    versions.init($(".ver-dropdown"));
 
     // Track Google Analytics as we navigate from one subpage / hash link to another.
     // Based on http://stackoverflow.com/a/4813223/25507
