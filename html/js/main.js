@@ -330,6 +330,8 @@ function initializeRoutes() {
                 fillNavTalents(tome, category);
                 $("#content").html(listTalents(tome, category));
                 scrollToId();
+
+                versions.updateFinished();
             });
         }),
 
@@ -340,10 +342,6 @@ function initializeRoutes() {
         })
 
     }
-
-    crossroads.routed.add(function(request, data) {
-        versions.updateFinished();
-    });
 
     function parseHash(new_hash, old_hash) {
          crossroads.parse(new_hash);
