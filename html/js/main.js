@@ -34,10 +34,18 @@ function enableExpandCollapseAll()
         });
 }
 
-function showCollapsed(html_id)
+function showCollapsed(html_id, disable_transitions)
 {
     if (html_id[0] != '#') {
         html_id = '#' + html_id;
+    }
+
+    // Hack: If requested, temporarily disable transitions.  Bootstrap's default
+    // transition is 0.35s, so we do just a bit longer.
+    // Based on http://stackoverflow.com/a/22428493/25507
+    if (disable_transitions) {
+        $(html_id).addClass('disable-transition');
+        setTimeout(function() { $(html_id).removeClass('disable-transition'); }, 400);
     }
 
     $(html_id).collapse('show');
@@ -55,10 +63,10 @@ function getExpandedIds()
     });
 }
 
-function expandIds(id_list)
+function expandIds(id_list, disable_transitions)
 {
     for (var i = 0; i < id_list.length; i++) {
-        showCollapsed(id_list[i]);
+        showCollapsed(id_list[i], disable_transitions);
     }
 }
 
@@ -240,7 +248,7 @@ var versions = (function() {
 
         updateFinished: function() {
             if (prev_expanded) {
-                expandIds(prev_expanded);
+                expandIds(prev_expanded, true);
                 prev_expanded = null;
             }
         },
@@ -254,10 +262,10 @@ var versions = (function() {
         },
 
         // Lists available versions in the given <option> element(s).
-        list: function($el) {
+        list: function($el, $container) {
             var html;
             if (versions.all.length < 2) {
-                $el.hide();
+                ($container || $el).hide();
             } else {
                 html = '';
                 for (var i = 0; i < versions.all.length; i++) {
@@ -267,7 +275,8 @@ var versions = (function() {
                     }
                     html += '>' + versions.all[i] + '</option>';
                 }
-                $el.show().html(html);
+                ($container || $el).removeClass("hidden").show();
+                $el.html(html);
             }
         },
 
@@ -280,9 +289,9 @@ var versions = (function() {
             });
         },
 
-        init: function($el) {
+        init: function($el, $container) {
             $_dropdown = $el;
-            versions.list($el);
+            versions.list($el, $container);
             versions.listen($el);
         }
     };
@@ -437,7 +446,7 @@ $(function() {
 
     makeStickyHeader($("#content-header"), $("#content-container"));
     enableExpandCollapseAll();
-    versions.init($(".ver-dropdown"));
+    versions.init($(".ver-dropdown"), $(".ver-dropdown-container"));
 
     // Track Google Analytics as we navigate from one subpage / hash link to another.
     // Based on http://stackoverflow.com/a/4813223/25507
