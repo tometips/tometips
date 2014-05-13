@@ -92,6 +92,11 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+.disable-transition {
+    transition: none !important;
+    -webkit-transition: none !important;
+}
+
 html.wait, html.wait *
 {
     cursor: wait !important;
@@ -162,6 +167,10 @@ a.anchor
 
 #side-nav .dropdown.collapsed:before {
     content: "\e080";
+}
+
+.ver-dropdown-container {
+    padding-right: 1em;
 }
 
 dt {

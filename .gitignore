@@ -1,6 +1,6 @@
 /t-engine4
 /html/img/talents/*.png
-/html/data/*.json
+/html/data/**/*.json
 /data
 /engine
 /mod

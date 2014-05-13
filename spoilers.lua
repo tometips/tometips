@@ -44,6 +44,22 @@ game = {
     },
 }
 
+-- Load init.lua and get version number.  Based on Module.lua.
+local mod = { config={ settings={} } }
+local mod_def = loadfile('mod/init.lua')
+setfenv(mod_def, mod)
+mod_def()
+
+-- Hack: Hard-code a mapping between versions and tags / branches for now.
+local git_tag = ({
+    ['1.1.5'] = 'tome-1.1.5.real',
+    ['1.2.0'] = 'master',
+})[table.concat(mod.version, '.')]
+if not git_tag then
+    io.stderr:write(('Unable to determine Git tag from module version "%s"\n'):format(table.concat(mod.version, '.')))
+    os.exit(1)
+end
+
 local old_loadfile = loadfile
 loadfile = function(file)
     -- Remove leading '/'
@@ -221,7 +237,7 @@ spoilers = {
     active = {
         mastery = 1.3,
         -- To simplify implementation, we use one value for stats (str, dex,
-        -- etc.) and powers (physical, mind, spell).
+        -- etc.) and powers (physical power, accuracy, mindpower, spellpower).
         stat_power = 100,
         -- According to chronomancer.lua, 300 is "the optimal balance"
         paradox = 300,
@@ -685,13 +701,15 @@ for k, v in pairs(talents_by_category) do
 end
 
 -- Output the data
-local output_dir = (arg[1] or '.') .. '/'
+local output_version = table.concat(mod.version, '.')
+if git_tag == 'master' then output_version = output_version .. 'dev' end
+local output_dir = ("%s/%s/"):format(arg[1] or '.', output_version)
+os.execute('mkdir -p ' .. output_dir)
 
 local out = io.open(output_dir .. 'tome.json', 'w')
 out:write(json.encode({
     -- Official ToME tag in git.net-core.org to link to.
-    -- HACK: Hard-coded for now
-    tag = 'tome-1.1.5.real',
+    tag = git_tag,
 
     talent_categories = talent_categories,
 }))
