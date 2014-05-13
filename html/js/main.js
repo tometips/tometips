@@ -34,6 +34,34 @@ function enableExpandCollapseAll()
         });
 }
 
+function showCollapsed(html_id)
+{
+    if (html_id[0] != '#') {
+        html_id = '#' + html_id;
+    }
+
+    $(html_id).collapse('show');
+    // Hack: Update "collapsed" class, since Bootstrap doesn't seem to do it
+    // for us (unless, presumably, we use data-parent for full-blown accordion
+    // behavior, and I don't really want to do that).
+    $("[data-target=" + html_id + "]").removeClass('collapsed');
+}
+
+/**Gets the HTML IDs of currently expanded collapsed items. */
+function getExpandedIds()
+{
+    return $.map($(".collapse.in"), function(n, i) {
+        return n.id;
+    });
+}
+
+function expandIds(id_list)
+{
+    for (var i = 0; i < id_list.length; i++) {
+        showCollapsed(id_list[i]);
+    }
+}
+
 function makeStickyHeader($header, $container)
 {
     var $sticky = $header.clone();
@@ -181,7 +209,20 @@ function listTalents(tome, category) {
 
 // ToME versions.
 var versions = (function() {
-    var $_dropdown;
+    var $_dropdown,
+        prev_expanded;
+
+    function onChange() {
+        $_dropdown.val(versions.current);
+
+        // Hack: If version changes, then save what IDs are expanded so
+        // we can restore their state after we recreate them for the
+        // new version, and also assume that the side nav needs to be
+        // refreshed.  (This is a hack because it ties the versions
+        // module too closely to our DOM organization.)
+        prev_expanded = getExpandedIds();
+        $("#side-nav").html("");
+    }
 
     var versions = {
         DEFAULT: '1.1.5',
@@ -190,8 +231,18 @@ var versions = (function() {
 
         update: function(query) {
             query = query || {};
-            versions.current = query.ver || versions.DEFAULT;
-            $_dropdown.val(versions.current);
+            query.ver = query.ver || versions.DEFAULT;
+            if (versions.current != query.ver) {
+                versions.current = query.ver;
+                onChange();
+            }
+        },
+
+        updateFinished: function() {
+            if (prev_expanded) {
+                expandIds(prev_expanded);
+                prev_expanded = null;
+            }
         },
 
         asQuery: function() {
@@ -224,7 +275,7 @@ var versions = (function() {
         listen: function($el) {
             $el.change(function() {
                 versions.current = $(this).val();
-                $el.val(versions.current);
+                onChange();
                 hasher.setHash(locationHashNoQuery() + currentQuery());
             });
         },
@@ -265,11 +316,7 @@ function initializeRoutes() {
             $("#content-container").scrollTop(0);
             loadDataIfNeeded('talents.' + category, function() {
                 var this_nav = "#nav-" + category;
-                $(this_nav).collapse('show');
-                // Hack: Update "collapsed" class, since Bootstrap doesn't seem to do it for us
-                // (unless, presumably, we use data-parent for full-blown accordion behavior,
-                // and I don't really want to do that).
-                $("[data-target=" + this_nav + "]").removeClass('collapsed');
+                showCollapsed(this_nav);
 
                 fillNavTalents(tome, category);
                 $("#content").html(listTalents(tome, category));
@@ -284,6 +331,10 @@ function initializeRoutes() {
         })
 
     }
+
+    crossroads.routed.add(function(request, data) {
+        versions.updateFinished();
+    });
 
     function parseHash(new_hash, old_hash) {
          crossroads.parse(new_hash);
