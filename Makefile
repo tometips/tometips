@@ -8,12 +8,19 @@ html/data/tome.json: spoilers.lua
 clean:
 	rm -rf html/data/* html/img/talents/*.png html/img/talents/*/*.png
 
-# Publishes images.
+# Convert and publish images.
 img: t-engine4 switch-dev
 	mkdir -p html/img/talents/{64,48,32}
 	cp --update t-engine4/game/modules/tome/data/gfx/talents/*.png html/img/talents/64/
-	(cd html/img/talents/64 && ls *.png) | xargs -l -i convert -resize 48x48 html/img/talents/64/{} html/img/talents/48/{}
-	(cd html/img/talents/64 && ls *.png) | xargs -l -i convert -resize 32x32 html/img/talents/64/{} html/img/talents/32/{}
+	for size in 32 48; do \
+		for img in html/img/talents/64/*.png; do \
+			newimg=$${img/64/$$size}; \
+			if [ ! -f $$newimg -o $$img -nt $$newimg ]; then \
+				echo Converting $$newimg...; \
+				convert -resize $${size}x$${size} $$img $$newimg; \
+			fi; \
+		done; \
+	done
 
 # Pretty-prints each of the JSON files.
 pretty: html/data/tome.json
