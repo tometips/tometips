@@ -1,5 +1,8 @@
 SHELL := /bin/bash
 
+# GitHub Pages output
+PAGES_OUTPUT = ../tometips.github.io
+
 all: t-engine4 links html/data/tome.json img
 
 html/data/tome.json: spoilers.lua
@@ -8,8 +11,13 @@ html/data/tome.json: spoilers.lua
 clean:
 	rm -rf html/data/* html/img/talents/*.png html/img/talents/*/*.png
 
+publish:
+	test -d $(PAGES_OUTPUT)
+	rm -rf $(PAGES_OUTPUT)/*
+	cp -a html/* $(PAGES_OUTPUT)
+
 # Convert and publish images.
-img: t-engine4 switch-dev
+img: t-engine4
 	mkdir -p html/img/talents/{64,48,32}
 	cp --update t-engine4/game/modules/tome/data/gfx/talents/*.png html/img/talents/64/
 	for size in 32 48; do \
@@ -58,5 +66,5 @@ thirdparty:
 
 .DELETE_ON_ERROR:
 
-.PHONY: clean pretty links img switch-dev switch-release pull
+.PHONY: clean pretty links img switch-dev switch-release pull publish
 

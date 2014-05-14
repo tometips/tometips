@@ -92,6 +92,7 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+/* See http://stackoverflow.com/a/22428493/25507 */
 .disable-transition {
     transition: none !important;
     -webkit-transition: none !important;

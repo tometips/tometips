@@ -704,6 +704,7 @@ end
 local output_version = table.concat(mod.version, '.')
 if git_tag == 'master' then output_version = output_version .. 'dev' end
 local output_dir = ("%s/%s/"):format(arg[1] or '.', output_version)
+print("OUTPUT DIRECTORY: " .. output_dir)
 os.execute('mkdir -p ' .. output_dir)
 
 local out = io.open(output_dir .. 'tome.json', 'w')
