@@ -224,6 +224,7 @@ function listTalents(tome, category) {
 }
 
 function configureImgSize() {
+    options.imgSize = parseInt($.cookie("imgSize") || options.imgSize);
 
     function showImgSizeSelection() {
         $('.option-img-size').removeClass("selected");
@@ -247,6 +248,7 @@ function configureImgSize() {
         options.imgSize = parseInt($(this).attr("data-img-size"));
         showImgSizeSelection();
         changeImgSize(old_size, options.imgSize);
+        $.cookie('imgSize', options.imgSize, { expires: 365, path: '/' });
     });
 }
 
