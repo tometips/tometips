@@ -6,11 +6,14 @@ html/data/tome.json: spoilers.lua
 	lua spoilers.lua $(dir $@)
 
 clean:
-	rm -rf html/data/* html/img/talents/*.png
+	rm -rf html/data/* html/img/talents/*.png html/img/talents/*/*.png
 
 # Publishes images.
-img: t-engine4
-	cp --update t-engine4/game/modules/tome/data/gfx/talents/*.png html/img/talents/
+img: t-engine4 switch-dev
+	mkdir -p html/img/talents/{64,48,32}
+	cp --update t-engine4/game/modules/tome/data/gfx/talents/*.png html/img/talents/64/
+	(cd html/img/talents/64 && ls *.png) | xargs -l -i convert -resize 48x48 html/img/talents/64/{} html/img/talents/48/{}
+	(cd html/img/talents/64 && ls *.png) | xargs -l -i convert -resize 32x32 html/img/talents/64/{} html/img/talents/32/{}
 
 # Pretty-prints each of the JSON files.
 pretty: html/data/tome.json
@@ -30,6 +33,11 @@ switch-dev:
 switch-release:
 	cd t-engine4 && git checkout $$(git tag | tail -n 1)
 
+# git shortcut - git pull
+pull:
+	$(MAKE) switch-dev
+	cd t-engine4 && git pull
+
 # Symlinks
 links: data engine mod thirdparty
 data:
@@ -43,5 +51,5 @@ thirdparty:
 
 .DELETE_ON_ERROR:
 
-.PHONY: clean pretty links img switch-dev switch-release
+.PHONY: clean pretty links img switch-dev switch-release pull
 

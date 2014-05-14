@@ -173,6 +173,16 @@ a.anchor
     padding-right: 1em;
 }
 
+.dropdown-option:before {
+    font-family: "Glyphicons Halflings";
+    content: "\00a0";  /* Unicode non-breaking space - http://stackoverflow.com/a/16552398/25507 */
+    padding-right: 5px;
+}
+
+.dropdown-option.selected:before {
+    content: "\e013";  /* Glyphicons check mark ("ok") */
+}
+
 dt {
     float: left;
     width: 100px;
@@ -183,7 +193,7 @@ dt.multiline-dd {
 }
 
 h3 img {
-    padding-right: 8px;
+    margin-right: 8px;
 }
 
 .panel-title a {

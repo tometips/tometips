@@ -94,6 +94,10 @@ function makeStickyHeader($header, $container)
     });
 }
 
+var options = {
+    imgSize: 48
+};
+
 ///Simplistic title-case function that capitalizes the beginning of every word.
 function toTitleCase(s)
 {
@@ -145,6 +149,10 @@ Handlebars.registerHelper('currentQuery', function(context, options) {
     return currentQuery();
 });
 
+Handlebars.registerHelper('opt', function(opt_name) {
+    return options[opt_name];
+});
+
 // See http://stackoverflow.com/a/92819/25507
 function talentImgError(image) {
     image.onerror = "";
@@ -162,7 +170,7 @@ var talent_by_type_template = Handlebars.compile(
                 '<div class="panel-heading clickable">' +
                     '<h3 class="panel-title">' +
                         '<a data-toggle="collapse" data-target="#collapse-{{toHtmlId id}}">' +
-                            '<img width="64" height="64" src="img/talents/{{#if image}}{{image}}{{else}}{{toLowerCase short_name}}.png{{/if}}" onerror="talentImgError(this)">' + '{{name}}' +
+                            '<img width="{{opt "imgSize"}}" height="{{opt "imgSize"}}" src="img/talents/{{opt "imgSize"}}/{{#if image}}{{image}}{{else}}{{toLowerCase short_name}}.png{{/if}}" onerror="talentImgError(this)">' + '{{name}}' +
                         '</a>' +
                     '</h3>' +
                 '</div>' +
@@ -213,6 +221,33 @@ function fillNavTalents(tome, category) {
 
 function listTalents(tome, category) {
     return talent_by_type_template(tome[versions.current].talents[category]);
+}
+
+function configureImgSize() {
+
+    function showImgSizeSelection() {
+        $('.option-img-size').removeClass("selected");
+        $('.option-img-size[data-img-size="' + options.imgSize + '"]').addClass("selected");
+    }
+
+    function changeImgSize(old_size, new_size) {
+        $("img").each(function(n, e) {
+            if ($(this).attr("width") == old_size) {
+                $(this).attr("width", new_size)
+                    .attr("height", new_size)
+                    .attr("src", $(this).attr("src").replace(old_size.toString(), new_size.toString()));
+            }
+        });
+    }
+
+    showImgSizeSelection();
+
+    $(".option-img-size").click(function(e) {
+        var old_size = options.imgSize;
+        options.imgSize = parseInt($(this).attr("data-img-size"));
+        showImgSizeSelection();
+        changeImgSize(old_size, options.imgSize);
+    });
 }
 
 // ToME versions.
@@ -445,6 +480,7 @@ $(function() {
     makeStickyHeader($("#content-header"), $("#content-container"));
     enableExpandCollapseAll();
     versions.init($(".ver-dropdown"), $(".ver-dropdown-container"));
+    configureImgSize();
 
     // Track Google Analytics as we navigate from one subpage / hash link to another.
     // Based on http://stackoverflow.com/a/4813223/25507

@@ -1,5 +1,5 @@
 /t-engine4
-/html/img/talents/*.png
+/html/img/talents/**/*.png
 /html/data/**/*.json
 /data
 /engine
