@@ -638,6 +638,10 @@ for tid, t in pairs(Actor.talents_def) do
     t.allow_random = nil
     t.no_npc_use = nil
 
+    -- "require" would be nice to have, but it's currently unused and
+    -- incomplete, and JSON4Lua refuses to parse the empty arrays it creates.
+    t.require = nil
+
     -- Find the info function, and use that to find where the talent is defined.
     --
     -- Inscriptions have their own newInscription function that sets an old_info function.

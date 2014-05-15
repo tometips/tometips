@@ -1,11 +1,13 @@
 SHELL := /bin/bash
 
+VERSION := 1.1.5
+
 # GitHub Pages output
 PAGES_OUTPUT = ../tometips.github.io
 
-all: t-engine4 links html/data/tome.json img
+all: t-engine4 links html/data/$(VERSION) img
 
-html/data/tome.json: spoilers.lua
+html/data/$(VERSION): spoilers.lua
 	lua spoilers.lua $(dir $@)
 
 clean:
@@ -31,8 +33,8 @@ img: t-engine4
 	done
 
 # Pretty-prints each of the JSON files.
-pretty: html/data/tome.json
-	for file in html/data/*.json; do python -mjson.tool $$file > $$file.tmp && mv $$file.tmp $$file; done
+pretty: html/data/$(VERSION)
+	for file in $$(find html -name '*.json'); do python -mjson.tool $$file > $$file.tmp && mv $$file.tmp $$file; done
 
 # git shortcuts to automate maintenance of the local source tree
 t-engine4:
