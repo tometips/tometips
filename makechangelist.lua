@@ -38,11 +38,11 @@ end
 -- Otherwise, execute processFunction on whichever element is by itself.
 function processSortedTable(a, b, keyFunction, processFunction)
     local i, j = 1, 1
-    while i <= #a and j <= #b do
+    while i <= #a or j <= #b do
         -- Assume string keys.  Do a case-insensitive comparison to match
         -- spoilers.lua's sort order.
-        local key_a = i < #a and keyFunction(a[i]):upper()
-        local key_b = i < #b and keyFunction(b[j]):upper()
+        local key_a = i <= #a and keyFunction(a[i]):upper()
+        local key_b = j <= #b and keyFunction(b[j]):upper()
 
         if key_a == key_b then
             processFunction(a[i], b[j])
@@ -69,7 +69,18 @@ function recordChange(key, subkey, change_type, from, to)
     if #changes[key] == 0 or changes[key][#changes[key]].name ~= subkey then
         table.insert(changes[key], { name = subkey, values = {} })
     end
-    table.insert(changes[key][#changes[key]].values, { type=change_type, old=from, new=to })
+
+    -- To simplify usage within JavaScript:
+    -- * If an entry is added or removed, then record the new / old entry
+    --   under "value".
+    -- * If an entry is changed, then record the new entry as "value" and the
+    --   old entry as "value2".
+    -- The result is that "value" is always the most relevant item to use.
+    if from and to then
+        table.insert(changes[key][#changes[key]].values, { type=change_type, value=to, value2=from })
+    else
+        table.insert(changes[key][#changes[key]].values, { type=change_type, value=to or from })
+    end
 end
 
 processSortedTable(tome[from_version].talent_categories, tome[to_version].talent_categories,

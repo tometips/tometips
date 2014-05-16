@@ -170,6 +170,13 @@ a.anchor
     content: "\e080";
 }
 
+#side-nav .no-dropdown:before {
+    font-family: "Glyphicons Halflings";
+    font-size: 10px;
+    content: "\00a0";  /* Unicode non-breaking space - http://stackoverflow.com/a/16552398/25507 */
+    padding-right: 5px;
+}
+
 .ver-dropdown-container {
     padding-right: 1em;
 }
@@ -257,6 +264,14 @@ h3 img {
 }
 .source-link:after {
     content: ' ]';
+}
+
+table.old-new {
+    margin-bottom: 0;
+}
+
+table.old-new td {
+    vertical-align: top;
 }
 
 /* ==========================================================================

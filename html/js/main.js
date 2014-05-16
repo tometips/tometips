@@ -153,12 +153,33 @@ Handlebars.registerHelper('opt', function(opt_name) {
     return options[opt_name];
 });
 
+Handlebars.registerHelper('labelForChangeType', function(type) {
+    var css_class = { "changed": "info", "added": "success", "removed": "danger" },
+        text = { "changed": "Changed", "added": "New", "removed": "Removed" };
+    return '<span class="label label-' + css_class[type] + '">' + text[type] + ':</span>';
+});
+
 // See http://stackoverflow.com/a/92819/25507
 function talentImgError(image) {
     image.onerror = "";
     image.src = "img/000000-0.png";
     return true;
 }
+
+var talent_img = Handlebars.registerPartial("talent_img",
+    '<img width="{{opt "imgSize"}}" height="{{opt "imgSize"}}" src="img/talents/{{opt "imgSize"}}/{{#if image}}{{image}}{{else}}{{toLowerCase short_name}}.png{{/if}}" onerror="talentImgError(this)">'
+);
+
+var talent_details = Handlebars.registerPartial("talent",
+    "<dl>" +
+        "{{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}" +
+        "{{#if cost}}<dt>Cost</dt><dd>{{{cost}}}</dd>{{/if}}" +
+        "{{#if range}}<dt>Range</dt><dd>{{{range}}}</dd>{{/if}}" +
+        "{{#if cooldown}}<dt>Cooldown</dt><dd>{{{cooldown}}}</dd>{{/if}}" +
+        "{{#if use_speed}}<dt>Use Speed</dt><dd>{{use_speed}}</dd>{{/if}}" +
+        '{{#if info_text}}<dt class="multiline-dd">Description</dt><dd>{{{info_text}}}</dd>{{/if}}' +
+    '</dl>'
+);
 
 var talent_by_type_template = Handlebars.compile(
     // FIXME: type header and description
@@ -170,20 +191,13 @@ var talent_by_type_template = Handlebars.compile(
                 '<div class="panel-heading clickable">' +
                     '<h3 class="panel-title">' +
                         '<a data-toggle="collapse" data-target="#collapse-{{toHtmlId id}}">' +
-                            '<img width="{{opt "imgSize"}}" height="{{opt "imgSize"}}" src="img/talents/{{opt "imgSize"}}/{{#if image}}{{image}}{{else}}{{toLowerCase short_name}}.png{{/if}}" onerror="talentImgError(this)">' + '{{name}}' +
+                            '{{> talent_img}}{{name}}' +
                         '</a>' +
                     '</h3>' +
                 '</div>' +
                 '<div id="collapse-{{toHtmlId id}}" class="talent-details panel-collapse collapse">' +
                     '<div class="panel-body">' +
-                        "<dl>" +
-                            "{{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}" +
-                            "{{#if cost}}<dt>Cost</dt><dd>{{{cost}}}</dd>{{/if}}" +
-                            "{{#if range}}<dt>Range</dt><dd>{{{range}}}</dd>{{/if}}" +
-                            "{{#if cooldown}}<dt>Cooldown</dt><dd>{{{cooldown}}}</dd>{{/if}}" +
-                            "{{#if use_speed}}<dt>Use Speed</dt><dd>{{use_speed}}</dd>{{/if}}" +
-                            '{{#if info_text}}<dt class="multiline-dd">Description</dt><dd>{{{info_text}}}</dd>{{/if}}' +
-                        '</dl>' +
+                        '{{> talent}}' +
                         '{{#if source_code}}<div class="source-link"><a href="http://git.net-core.org/darkgod/t-engine4/blob/{{tag}}/game/modules/tome/{{source_code.[0]}}#L{{source_code.[1]}}" target="_blank">View source</a></div>{{/if}}' +
                     '</div>' +
                 '</div>' +
@@ -193,12 +207,51 @@ var talent_by_type_template = Handlebars.compile(
 );
 
 var talent_by_type_nav_template = Handlebars.compile(
-    '<ul id="nav-talents" class="nav">{{#each talent_categories}}' +
+    '<ul id="nav-talents" class="nav">' +
+    '{{#if has_changes}}' +
+        '<li><a href="#changes/talents{{currentQuery}}"><span class="no-dropdown"></span>New in {{version}}</a></li>' +
+    '{{/if}}' +
+    '{{#each talent_categories}}' +
         '<li><a href="#talents/{{toHtmlId this}}{{currentQuery}}"><span data-toggle="collapse" data-target="#nav-{{toHtmlId this}}" class="dropdown collapsed"></span>{{toTitleCase this}}</a>' +
         '<ul class="nav collapse" id="nav-{{toHtmlId this}}">' +
         // Empty for now; will be populated later
         "</ul></li>" +
     "{{/each}}</ul>"
+);
+
+var changes_talents_template = Handlebars.compile(
+    "{{#each this}}" +
+        '<h3><a class="anchor" id="changes/talents/{{name}}"></a>{{toTitleCase name}}</h3><div>' +
+        "{{#each values}}" +
+            '<div class="panel panel-default">' +
+                '<div class="panel-heading clickable">' +
+                    '<h3 class="panel-title">' +
+                        '<a data-toggle="collapse" data-target="#collapse-{{type}}-{{toHtmlId value.id}}">' +
+                            '{{> talent_img value}}{{{labelForChangeType type}}} {{value.name}}' +
+                        '</a>' +
+                    '</h3>' +
+                '</div>' +
+                '<div id="collapse-{{type}}-{{toHtmlId value.id}}" class="talent-details panel-collapse collapse">' +
+                        '{{#if value2}}' +
+                            '<table class="table table-bordered old-new">' +
+                                '<colgroup>' +
+                                    '<col width="50%">' +
+                                    '<col width="50%">' +
+                                '</colgroup>' +
+                                '<tr><th>Old</th><th>New</th></tr><tr>' +
+                                    '<td>{{> talent value2}}</td>' +
+                                    '<td>{{> talent value}}</td>' +
+                                '</tr>' +
+                            '</table>' +
+                        '{{else}}' + 
+                            '<div class="panel-body">' +
+                                '{{> talent value}}' +
+                            '</div>' +
+                        '{{/if}}' +
+                '</div>' +
+            '</div>' +
+        "{{/each}}</div></div>" +
+    "{{/each}}"
 );
 
 function navTalents(tome) {
@@ -221,6 +274,10 @@ function fillNavTalents(tome, category) {
 
 function listTalents(tome, category) {
     return talent_by_type_template(tome[versions.current].talents[category]);
+}
+
+function listChangesTalents(tome) {
+    return changes_talents_template(tome[versions.current].changes.talents);
 }
 
 function configureImgSize() {
@@ -272,7 +329,7 @@ var versions = (function() {
     var versions = {
         DEFAULT: '1.1.5',
         current: '1.1.5',
-        all: [ '1.1.5', '1.2.0dev' ],
+        ALL: [ '1.1.5', '1.2.0dev' ],
 
         update: function(query) {
             query = query || {};
@@ -301,16 +358,16 @@ var versions = (function() {
         // Lists available versions in the given <option> element(s).
         list: function($el, $container) {
             var html;
-            if (versions.all.length < 2) {
+            if (versions.ALL.length < 2) {
                 ($container || $el).hide();
             } else {
                 html = '';
-                for (var i = 0; i < versions.all.length; i++) {
-                    html += '<option value="' + versions.all[i] + '"';
-                    if (versions.all[i] == versions.DEFAULT) {
+                for (var i = 0; i < versions.ALL.length; i++) {
+                    html += '<option value="' + versions.ALL[i] + '"';
+                    if (versions.ALL[i] == versions.DEFAULT) {
                         html += ' selected';
                     }
-                    html += '>' + versions.all[i] + '</option>';
+                    html += '>' + versions.ALL[i] + '</option>';
                 }
                 ($container || $el).removeClass("hidden").show();
                 $el.html(html);
@@ -343,6 +400,17 @@ function initializeRoutes() {
         // Default route.  We currently just have talents.
         default_route: crossroads.addRoute('', function() {
             hasher.replaceHash('talents');
+        }),
+
+        changes_talents: crossroads.addRoute('changes/talents:?query:', function(query) {
+            routes.talents.matched.dispatch(query);
+
+            $("#content-container").scrollTop(0);
+            loadDataIfNeeded('changes.talents', function() {
+                $("#content").html(listChangesTalents(tome));
+
+                versions.updateFinished();
+            });
         }),
 
         talents: crossroads.addRoute('talents:?query:', function(query) {
