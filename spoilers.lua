@@ -670,7 +670,14 @@ function shouldSkipTalent(t)
     -- Remove blacklisted and hide = "always" talents and five of the six copies of inscriptions.
     return spoilers.blacklist_talent[t.id] or
         (t.hide == 'always' and t.id ~= 'T_ATTACK') or
-        (t.is_inscription and t.id:match('.+_[2-9]'))
+        (t.is_inscription and t.id:match('.+_[2-9]')) or
+        shouldSkipPsiTalent(t)
+end
+
+-- Implementation for shouldSkipTalent: skip psionic talents that were hidden
+-- and replaced but not actually removed in 1.2.0.
+function shouldSkipPsiTalent(t)
+    return t.hide == true and t.type[1]:starts("psionic/") and t.autolearn_mindslayer
 end
 
 -- Reorganize ToME's data for output
@@ -715,7 +722,11 @@ local out = io.open(output_dir .. 'tome.json', 'w')
 out:write(json.encode({
     -- Official ToME tag in git.net-core.org to link to.
     tag = git_tag,
+
     version = output_version,
+
+    has_changes = output_version ~= '1.1.5', -- HACK: Hard-code for now
+
     talent_categories = talent_categories,
 }))
 out:close()

@@ -152,8 +152,11 @@ end
 changes = { talents = {} }
 
 function talentsMatch(from, to)
-    -- FIXME: Check additional parameters
-    return from.info_text == to.info_text
+    local check_keys = { 'info_text', 'cooldown', 'mode', 'cost', 'range', 'use_speed' }
+    for i = 1, #check_keys do
+        if from[check_keys[i]] ~= to[check_keys[i]] then return false end
+    end
+    return true
 end
 
 function recordChange(key, subkey, change_type, from, to)
@@ -184,18 +187,23 @@ processSortedTable(tome[from_version].talent_categories, tome[to_version].talent
 
             -- Iterate over talent categories ("spells/fire", etc.)
             function(from, to)
+                -- Hack: Reconstruct the full user-visible name from the
+                -- "supercategory" (before the slash) and the user-visible name
+                -- after the slash.
                 local category_type = from and from.type or to.type
+                local category_name = category_type:gsub('/.*', '') .. ' / ' .. (from and from.name or to.name)
+
                 processDiffTable(from and from.talents or {}, to and to.talents or {},
                     function(talent) return talent.name end,
 
                     -- Iterate over individual talents
                     function(from, to)
                         if not from then
-                            recordChange("talents", category_type, "added", from, to)
+                            recordChange("talents", category_name, "added", from, to)
                         elseif not to then
-                            recordChange("talents", category_type, "removed", from, to)
+                            recordChange("talents", category_name, "removed", from, to)
                         elseif not talentsMatch(from, to) then
-                            recordChange("talents", category_type, "changed", from, to)
+                            recordChange("talents", category_name, "changed", from, to)
                         end
                     end)
             end)

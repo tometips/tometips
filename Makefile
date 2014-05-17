@@ -5,7 +5,7 @@ VERSION := 1.1.5
 # GitHub Pages output
 PAGES_OUTPUT = ../tometips.github.io
 
-all: t-engine4 links html/data/$(VERSION) img
+all: t-engine4 links html/data/$(VERSION) img changes
 
 html/data/$(VERSION): spoilers.lua
 	lua spoilers.lua $(dir $@)
@@ -17,6 +17,11 @@ publish:
 	test -d $(PAGES_OUTPUT)
 	rm -rf $(PAGES_OUTPUT)/*
 	cp -a html/* $(PAGES_OUTPUT)
+
+# Changes from one version to the next
+# HACK: Hard-code version numbers for now
+changes:
+	lua makechangelist.lua html/data/ 1.1.5 1.2.0dev
 
 # Convert and publish images.
 img: t-engine4
