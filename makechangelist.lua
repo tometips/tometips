@@ -36,6 +36,8 @@ end
 -- execute processFunction on the matching pair.
 --
 -- Otherwise, execute processFunction on whichever element is by itself.
+--
+-- TODO? processDiffTable probably makes this obsolete.
 function processSortedTable(a, b, keyFunction, processFunction)
     local i, j = 1, 1
     while i <= #a or j <= #b do
@@ -54,6 +56,95 @@ function processSortedTable(a, b, keyFunction, processFunction)
         else
             processFunction(nil, b[j])
             j = j + 1
+        end
+    end
+end
+
+-- General diff algorithm, based on Heckel
+-- (http://dl.acm.org/citation.cfm?doid=359460.359467), via Resig
+-- (http://ejohn.org/projects/javascript-diff-algorithm/).
+function diff(o, n)
+    local os = {}
+    local ns = {}
+  
+    for i = 1, #n do
+        if not ns[n[i]] then
+            ns[n[i]] = { rows = {}, o = nil }
+        end
+        table.insert(ns[n[i]].rows, i)
+    end
+
+    for i = 1, #o do
+        if not os[o[i]] then
+            os[o[i]] = { rows = {}, n = nil }
+        end
+        table.insert(os[o[i]].rows, i)
+    end
+
+    for k, v in pairs(ns) do
+        if #ns[k].rows == 1 and os[k] and #os[k].rows == 1 then
+            n[ns[k].rows[1]] = { text = n[ns[k].rows[1]], row = os[k].rows[1] }
+            o[os[k].rows[1]] = { text = o[os[k].rows[1]], row = ns[k].rows[1] }
+        end
+    end
+
+    for i = 1, #n - 1 do
+        if n[i].text and not n[i+1].text and n[i].row + 1 < #o and not o[n[i].row + 1].text and n[i+1] == o[n[i].row + 1] then
+            n[i+1] = { text = n[i+1], row = n[i].row + 1 }
+            o[n[i].row+1] = { text = o[n[i].row+1], row = i + 1 }
+        end
+    end
+
+    for i = #n - 1, 2, -1 do
+        if n[i].text and not n[i-1].text and n[i].row > 1 and not o[n[i].row - 1].text and n[i-1] == o[n[i].row - 1] then
+            n[i-1] = { text = n[i-1], row = n[i].row - 1 }
+            o[n[i].row-1] = { text = o[n[i].row - 1], row = i - 1 }
+        end
+    end
+
+    return o, n
+end
+
+-- As processSortedTable, but instead of requiring that the inputs be sorted
+-- by key, it uses diff to match table elements.
+--
+-- Also based on Resig (http://ejohn.org/projects/javascript-diff-algorithm/).
+--
+-- NOTE: As currently used, this doesn't pick up on reordering.  Should it?
+function processDiffTable(a, b, keyFunction, processFunction)
+    local a_keys = {}
+    local b_keys = {}
+    for i = 1, #a do
+        table.insert(a_keys, keyFunction(a[i]))
+    end
+    for i = 1, #b do
+        table.insert(b_keys, keyFunction(b[i]))
+    end
+
+    local o, n = diff(a_keys, b_keys)
+
+    if #n == 0 then
+        for i = 1, #o do
+            processFunction(a[i], nil)
+        end
+    else
+        if type(n[1]) == 'string' then
+            for j = 1, #o do
+                if type(o[j]) ~= 'string' then break end
+                processFunction(a[j], nil)
+            end
+        end
+
+        for i = 1, #n do
+            if type(n[i]) == 'string' then
+                processFunction(nil, b[i])
+            else
+                for j = n[i].row + 1, #o do
+                    if type(o[j]) ~= 'string' then break end
+                    processFunction(a[j], nil)
+                end
+                processFunction(a[n[i].row], b[i])
+            end
         end
     end
 end
@@ -94,7 +185,7 @@ processSortedTable(tome[from_version].talent_categories, tome[to_version].talent
             -- Iterate over talent categories ("spells/fire", etc.)
             function(from, to)
                 local category_type = from and from.type or to.type
-                processSortedTable(from and from.talents or {}, to and to.talents or {},
+                processDiffTable(from and from.talents or {}, to and to.talents or {},
                     function(talent) return talent.name end,
 
                     -- Iterate over individual talents

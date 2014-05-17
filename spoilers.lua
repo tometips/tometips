@@ -715,7 +715,7 @@ local out = io.open(output_dir .. 'tome.json', 'w')
 out:write(json.encode({
     -- Official ToME tag in git.net-core.org to link to.
     tag = git_tag,
-
+    version = output_version,
     talent_categories = talent_categories,
 }))
 out:close()
