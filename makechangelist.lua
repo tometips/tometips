@@ -152,7 +152,7 @@ end
 changes = { talents = {} }
 
 function talentsMatch(from, to)
-    local check_keys = { 'info_text', 'cooldown', 'mode', 'cost', 'range', 'use_speed' }
+    local check_keys = { 'info_text', 'cooldown', 'mode', 'cost', 'range', 'use_speed', 'require' }
     for i = 1, #check_keys do
         if from[check_keys[i]] ~= to[check_keys[i]] then return false end
     end

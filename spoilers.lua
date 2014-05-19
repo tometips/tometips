@@ -142,14 +142,14 @@ ActorResource:defineResource("Psi", "psi", ActorTalents.T_PSI_POOL, "psi_regen",
 ActorResource:defineResource("Soul", "soul", ActorTalents.T_SOUL_POOL, "soul_regen", "Soul fragments you have extracted from your foes.", 0, 10)
 
 -- Actor stats - copied from ToME's load.lua
-ActorStats:defineStat("Strength",	"str", 10, 1, 100, "Strength defines your character's ability to apply physical force. It increases your melee damage, damage done with heavy weapons, your chance to resist physical effects, and carrying capacity.")
-ActorStats:defineStat("Dexterity",	"dex", 10, 1, 100, "Dexterity defines your character's ability to be agile and alert. It increases your chance to hit, your ability to avoid attacks, and your damage with light or ranged weapons.")
-ActorStats:defineStat("Magic",		"mag", 10, 1, 100, "Magic defines your character's ability to manipulate the magical energy of the world. It increases your spell power, and the effect of spells and other magic items.")
-ActorStats:defineStat("Willpower",	"wil", 10, 1, 100, "Willpower defines your character's ability to concentrate. It increases your mana, stamina and PSI capacity, and your chance to resist mental attacks.")
-ActorStats:defineStat("Cunning",	"cun", 10, 1, 100, "Cunning defines your character's ability to learn, think, and react. It allows you to learn many worldly abilities, and increases your mental capabilities and chance of critical hits.")
-ActorStats:defineStat("Constitution",	"con", 10, 1, 100, "Constitution defines your character's ability to withstand and resist damage. It increases your maximum life and physical resistance.")
+ActorStats:defineStat("Strength",     "str", 10, 1, 100, "Strength defines your character's ability to apply physical force. It increases your melee damage, damage done with heavy weapons, your chance to resist physical effects, and carrying capacity.")
+ActorStats:defineStat("Dexterity",    "dex", 10, 1, 100, "Dexterity defines your character's ability to be agile and alert. It increases your chance to hit, your ability to avoid attacks, and your damage with light or ranged weapons.")
+ActorStats:defineStat("Magic",        "mag", 10, 1, 100, "Magic defines your character's ability to manipulate the magical energy of the world. It increases your spell power, and the effect of spells and other magic items.")
+ActorStats:defineStat("Willpower",    "wil", 10, 1, 100, "Willpower defines your character's ability to concentrate. It increases your mana, stamina and PSI capacity, and your chance to resist mental attacks.")
+ActorStats:defineStat("Cunning",      "cun", 10, 1, 100, "Cunning defines your character's ability to learn, think, and react. It allows you to learn many worldly abilities, and increases your mental capabilities and chance of critical hits.")
+ActorStats:defineStat("Constitution", "con", 10, 1, 100, "Constitution defines your character's ability to withstand and resist damage. It increases your maximum life and physical resistance.")
 -- Luck is hidden and starts at half max value (50) which is considered the standard
-ActorStats:defineStat("Luck",		"lck", 50, 1, 100, "Luck defines your character's fortune when dealing with unknown events. It increases your critical strike chance, your chance of random encounters, ...")
+ActorStats:defineStat("Luck",         "lck", 50, 1, 100, "Luck defines your character's fortune when dealing with unknown events. It increases your critical strike chance, your chance of random encounters, ...")
 
 function table.allSame(self, from, to)
     from = from or 1
@@ -171,17 +171,17 @@ end
 
 -- Based on T-Engine's tstring:diffWith
 function multiDiff(str, on_diff)
-	local res = tstring{}
-	for i = 1, #str[1] do
+    local res = tstring{}
+    for i = 1, #str[1] do
         local s = {}
         for j = 1, #str do s[j] = str[j][i] end
-		if type(str[1][i]) == "string" and not table.allSame(s) then
-			on_diff(s, res)
-		else
-			res:add(str[1][i])
-		end
-	end
-	return res
+        if type(str[1][i]) == "string" and not table.allSame(s) then
+            on_diff(s, res)
+        else
+            res:add(str[1][i])
+        end
+    end
+    return res
 end
 
 -- Finds the upvalue of f with the given name, and returns debug.getinfo for it
@@ -552,12 +552,12 @@ for tid, t in pairs(Actor.talents_def) do
         res:add(spoilers:formatResults(s))
     end):toString()
 
-	-- Special case: Extract Gems is too hard to format
-	if t.id == Actor.T_EXTRACT_GEMS then
-		spoilers.active.talent_level = 5
-		t.info_text = t.info(player, t):escapeHtml()
-		spoilers.active.talent_level = nil
-	end
+    -- Special case: Extract Gems is too hard to format
+    if t.id == Actor.T_EXTRACT_GEMS then
+        spoilers.active.talent_level = 5
+        t.info_text = t.info(player, t):escapeHtml()
+        spoilers.active.talent_level = nil
+    end
     -- Special case: Finish Armour Training.
     if tid == 'T_ARMOUR_TRAINING' then
         player.inven[player.INVEN_BODY][1] = nil
@@ -632,15 +632,50 @@ for tid, t in pairs(Actor.talents_def) do
 
     if t.image then t.image = t.image:gsub("talents/", "") end
 
+    if t.require then
+        -- Based on ActorTalents.getTalentReqDesc
+        local new_require = {}
+        local tlev = 1
+        local req = t.require
+        spoilers.used = {}
+        if type(req) == "function" then req = req(player, t) end
+        if req.level then
+            local v = util.getval(req.level, tlev)
+            if #new_require > 0 then new_require[#new_require+1] = ', ' end
+            new_require[#new_require+1] = ("Level %d"):format(v)
+        end
+        if req.stat then
+            for s, v in pairs(req.stat) do
+                v = util.getval(v, tlev)
+                if spoilers.used.stat then
+                    local stat = {}
+                    for k, s in pairs(spoilers.used.stat or {}) do
+                        stat[#stat+1] = Actor.stats_def[k].short_name:capitalize()
+                    end
+                    if #new_require > 0 then new_require[#new_require+1] = ', ' end
+                    new_require[#new_require+1] = ("%s %d"):format(table.concat(stat, " or "), v)
+                else
+                    if #new_require > 0 then new_require[#new_require+1] = ', ' end
+                    new_require[#new_require+1] = ("%s %d"):format(player.stats_def[s].short_name:capitalize(), v)
+                end
+            end
+        end
+        if req.special then
+            if #new_require > 0 then new_require[#new_require+1] = '; ' end
+            new_require[#new_require+1] = req.special.desc
+        end
+        if req.talent then
+            -- Currently unimplemented (not because it's hard, but because ToME doesn't use it)
+            assert(false)
+        end
+        t.require = table.concat(new_require)
+    end
+
     -- Strip unused elements in order to save space.
     t.display_entity = nil
     t.tactical = nil
     t.allow_random = nil
     t.no_npc_use = nil
-
-    -- "require" would be nice to have, but it's currently unused and
-    -- incomplete, and JSON4Lua refuses to parse the empty arrays it creates.
-    t.require = nil
 
     -- Find the info function, and use that to find where the talent is defined.
     --

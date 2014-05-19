@@ -172,6 +172,7 @@ var talent_img = Handlebars.registerPartial("talent_img",
 
 var talent_details = Handlebars.registerPartial("talent",
     "<dl>" +
+        "{{#if require}}<dt>Requirements</dt><dd>{{require}}</dd>{{/if}}" +
         "{{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}" +
         "{{#if cost}}<dt>Cost</dt><dd>{{{cost}}}</dd>{{/if}}" +
         "{{#if range}}<dt>Range</dt><dd>{{{range}}}</dd>{{/if}}" +
