@@ -182,8 +182,8 @@ processSortedTable(tome[from_version].talent_categories, tome[to_version].talent
 
     -- Iterate over talent "supercategory" names (spells, techniques, etc.)
     function(from, to)
-        processSortedTable(tome[from_version].talents[from] or {}, tome[to_version].talents[to] or {},
-            function(category_list) return category_list.name end,
+        processDiffTable(tome[from_version].talents[from] or {}, tome[to_version].talents[to] or {},
+            function(category_list) return category_list.type end,
 
             -- Iterate over talent categories ("spells/fire", etc.)
             function(from, to)

@@ -229,6 +229,7 @@ local player = Actor.new{
     combat_mindcrit = 0, -- Shouldn't be needed; see http://forums.te4.org/viewtopic.php?f=42&t=39888
     body = { INVEN = 1000, QS_MAINHAND = 1, QS_OFFHAND = 1, MAINHAND = 1, OFFHAND = 1, FINGER = 2, NECK = 1, LITE = 1, BODY = 1, HEAD = 1, CLOAK = 1, HANDS = 1, BELT = 1, FEET = 1, TOOL = 1, QUIVER = 1, QS_QUIVER = 1 },
     wards = {},
+    preferred_paradox = 0,
 }
 game.player = player
 
@@ -360,6 +361,7 @@ spoilers = {
         ["sher'tul/fortress"] = true,            -- unavailable in this ToME version
         ["tutorial"] = true,                     -- Do these even still exist?
         ["wild-gift/malleable-body"] = true,     -- unavailable in this ToME version (and not even intelligible)
+        ["spell/war-alchemy"] = true,            -- Added in 1.2.0, but it only has the old fire alchemy "Heat" talent
     },
 
     blacklist_talent = {
