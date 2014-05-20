@@ -30,36 +30,6 @@ for i, ver in ipairs({from_version, to_version}) do
     end
 end
 
--- Iterates over two tables, whose members are in order.
---
--- For each element, if a matching pair can be found (determined by keyFunction),
--- execute processFunction on the matching pair.
---
--- Otherwise, execute processFunction on whichever element is by itself.
---
--- TODO? processDiffTable probably makes this obsolete.
-function processSortedTable(a, b, keyFunction, processFunction)
-    local i, j = 1, 1
-    while i <= #a or j <= #b do
-        -- Assume string keys.  Do a case-insensitive comparison to match
-        -- spoilers.lua's sort order.
-        local key_a = i <= #a and keyFunction(a[i]):upper()
-        local key_b = j <= #b and keyFunction(b[j]):upper()
-
-        if key_a == key_b then
-            processFunction(a[i], b[j])
-            i = i + 1
-            j = j + 1
-        elseif key_a and (not key_b or key_a < key_b) then
-            processFunction(a[i], nil)
-            i = i + 1
-        else
-            processFunction(nil, b[j])
-            j = j + 1
-        end
-    end
-end
-
 -- General diff algorithm, based on Heckel
 -- (http://dl.acm.org/citation.cfm?doid=359460.359467), via Resig
 -- (http://ejohn.org/projects/javascript-diff-algorithm/).
@@ -105,8 +75,12 @@ function diff(o, n)
     return o, n
 end
 
--- As processSortedTable, but instead of requiring that the inputs be sorted
--- by key, it uses diff to match table elements.
+-- Iterates over two tables, using the diff algorithm to find matching elements.
+--
+-- For each element, if a matching pair can be found (determined by keyFunction),
+-- execute processFunction on the matching pair.
+--
+-- Otherwise, execute processFunction on whichever element is by itself.
 --
 -- Also based on Resig (http://ejohn.org/projects/javascript-diff-algorithm/).
 --
@@ -159,9 +133,9 @@ function talentsMatch(from, to)
     return true
 end
 
-function recordChange(key, subkey, change_type, from, to)
-    if #changes[key] == 0 or changes[key][#changes[key]].name ~= subkey then
-        table.insert(changes[key], { name = subkey, values = {} })
+function recordChange(changelist, key, change_type, from, to)
+    if #changelist == 0 or changelist[#changelist].name ~= key then
+        table.insert(changelist, { name = key, values = {} })
     end
 
     -- To simplify usage within JavaScript:
@@ -171,13 +145,13 @@ function recordChange(key, subkey, change_type, from, to)
     --   old entry as "value2".
     -- The result is that "value" is always the most relevant item to use.
     if from and to then
-        table.insert(changes[key][#changes[key]].values, { type=change_type, value=to, value2=from })
+        table.insert(changelist[#changelist].values, { type=change_type, value=to, value2=from })
     else
-        table.insert(changes[key][#changes[key]].values, { type=change_type, value=to or from })
+        table.insert(changelist[#changelist].values, { type=change_type, value=to or from })
     end
 end
 
-processSortedTable(tome[from_version].talent_categories, tome[to_version].talent_categories,
+processDiffTable(tome[from_version].talent_categories, tome[to_version].talent_categories,
     function(supercategory_name) return supercategory_name end,
 
     -- Iterate over talent "supercategory" names (spells, techniques, etc.)
@@ -199,11 +173,11 @@ processSortedTable(tome[from_version].talent_categories, tome[to_version].talent
                     -- Iterate over individual talents
                     function(from, to)
                         if not from then
-                            recordChange("talents", category_name, "added", from, to)
+                            recordChange(changes.talents, category_name, "added", from, to)
                         elseif not to then
-                            recordChange("talents", category_name, "removed", from, to)
+                            recordChange(changes.talents, category_name, "removed", from, to)
                         elseif not talentsMatch(from, to) then
-                            recordChange("talents", category_name, "changed", from, to)
+                            recordChange(changes.talents, category_name, "changed", from, to)
                         end
                     end)
             end)
