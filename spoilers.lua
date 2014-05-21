@@ -1,4 +1,5 @@
-package.path = package.path..';./thirdparty/?.lua'
+version = arg[1]
+package.path = package.path..(';%s/?.lua;./%s/thirdparty/?.lua'):format(version, version)
 
 -- T-Engine's C core.  Unimplemented as much as possible.
 local surface_metatable = { __index = {} }
@@ -46,24 +47,19 @@ game = {
 
 -- Load init.lua and get version number.  Based on Module.lua.
 local mod = { config={ settings={} } }
-local mod_def = loadfile('mod/init.lua')
+local mod_def = loadfile(version .. '/mod/init.lua')
 setfenv(mod_def, mod)
 mod_def()
 
--- Hack: Hard-code a mapping between versions and tags / branches for now.
-local git_tag = ({
-    ['1.1.5'] = 'tome-1.1.5.real',
-    ['1.2.0'] = 'master',
-})[table.concat(mod.version, '.')]
+local git_tag = version == 'master' and version or ('tome-%s'):format(version)
 if not git_tag then
-    io.stderr:write(('Unable to determine Git tag from module version "%s"\n'):format(table.concat(mod.version, '.')))
+    io.stderr:write(('Unable to determine Git tag from requested version "%s"\n'):format(version))
     os.exit(1)
 end
 
 local old_loadfile = loadfile
 loadfile = function(file)
-    -- Remove leading '/'
-    return old_loadfile(file:sub(2))
+    return old_loadfile(version .. file)
 end
 
 function loadfile_and_execute(file)
@@ -749,9 +745,7 @@ for k, v in pairs(talents_by_category) do
 end
 
 -- Output the data
-local output_version = table.concat(mod.version, '.')
-if git_tag == 'master' then output_version = output_version .. 'dev' end
-local output_dir = ("%s/%s/"):format(arg[1] or '.', output_version)
+local output_dir = (arg[2] or '.') .. '/'
 print("OUTPUT DIRECTORY: " .. output_dir)
 os.execute('mkdir -p ' .. output_dir)
 
@@ -760,9 +754,9 @@ out:write(json.encode({
     -- Official ToME tag in git.net-core.org to link to.
     tag = git_tag,
 
-    version = output_version,
+    version = version,
 
-    has_changes = output_version ~= '1.1.5', -- HACK: Hard-code for now
+    has_changes = version ~= '1.1.5', -- HACK: Hard-code for now
 
     talent_categories = talent_categories,
 }))

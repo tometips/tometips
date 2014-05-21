@@ -1,14 +1,14 @@
 SHELL := /bin/bash
 
-VERSION := 1.1.5
+VERSIONS := 1.1.5 master
 
 # GitHub Pages output
 PAGES_OUTPUT = ../tometips.github.io
 
-all: t-engine4 links html/data/$(VERSION) img changes
+all: t-engine4 $(patsubst %,html/data/%/tome.json,$(VERSIONS)) img html/data/master/changes.talents.json
 
-html/data/$(VERSION): spoilers.lua
-	lua spoilers.lua $(dir $@)
+html/data/%/tome.json: % spoilers.lua
+	lua spoilers.lua $< $(dir $@)
 
 clean:
 	rm -rf html/data/* html/img/talents/*.png html/img/talents/*/*.png
@@ -20,22 +20,12 @@ publish:
 
 # Changes from one version to the next
 # HACK: Hard-code version numbers for now
-changes:
-	lua makechangelist.lua html/data/ 1.1.5 1.2.0dev
+html/data/master/changes.talents.json: html/data/1.1.5/tome.json html/data/master/tome.json makechangelist.lua
+	lua makechangelist.lua html/data/ 1.1.5 master
 
 # Convert and publish images.
 img: t-engine4
-	mkdir -p html/img/talents/{64,48,32}
-	cp --update t-engine4/game/modules/tome/data/gfx/talents/*.png html/img/talents/64/
-	for size in 32 48; do \
-		for img in html/img/talents/64/*.png; do \
-			newimg=$${img/64/$$size}; \
-			if [ ! -f $$newimg -o $$img -nt $$newimg ]; then \
-				echo Converting $$newimg...; \
-				convert -resize $${size}x$${size} $$img $$newimg; \
-			fi; \
-		done; \
-	done
+	scripts/prepare-img.sh
 
 # Pretty-prints each of the JSON files.
 pretty: html/data/$(VERSION)
@@ -60,18 +50,12 @@ pull:
 	$(MAKE) switch-dev
 	cd t-engine4 && git pull
 
-# Symlinks
-links: data engine mod thirdparty
-data:
-	ln -s t-engine4/game/modules/tome/data
-engine:
-	ln -s t-engine4/game/engines/default/engine
-mod:
-	ln -s t-engine4/game/modules/tome mod
-thirdparty:
-	ln -s t-engine4/game/thirdparty
+# Symlinks and working copies
+master:
+	scripts/link-master-src.sh
 
-.DELETE_ON_ERROR:
+$(filter-out master,$(VERSIONS)):
+	scripts/copy-tag-src.sh
 
-.PHONY: clean pretty links img switch-dev switch-release pull publish
+.PHONY: clean pretty img switch-dev switch-release pull publish
 

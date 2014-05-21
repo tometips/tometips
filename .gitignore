@@ -1,7 +1,5 @@
 /t-engine4
-/html/img/talents/**/*.png
-/html/data/**/*.json
-/data
-/engine
-/mod
-/thirdparty
+/html/img/talents/*/
+/html/data/*/
+/1.*/
+/master/
