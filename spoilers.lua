@@ -448,6 +448,8 @@ player.getInscriptionData = function()
         turns = 0,
         die_at = 0,
         mana = 0,
+        apply = 0,
+        radius = 0,
         what = { ["physical, mental, or magical"] = true }
     }
 end

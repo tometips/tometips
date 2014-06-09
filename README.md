@@ -6,7 +6,7 @@ Auto-generated web-based spoilers for [ToME](http://te4.org/).
 Development instructions:
 
 1. Make sure that you have the prerequisites installed:
- * Lua
+ * Lua - Currently, Lua 5.1.x is required.
  * [make](https://www.gnu.org/software/make/)
  * The Git command-line client
  * [ImageMagick](http://www.imagemagick.org/)
