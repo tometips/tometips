@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 V11 := 1.1.5
-V12 := 1.2.1
+V12 := 1.2.2
 VERSIONS := $(V11) $(V12)
 #VERSIONS := $(V11) $(V12) master
 
