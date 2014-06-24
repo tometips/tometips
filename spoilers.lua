@@ -758,8 +758,6 @@ out:write(json.encode({
 
     version = version,
 
-    has_changes = version ~= '1.1.5', -- HACK: Hard-code for now
-
     talent_categories = talent_categories,
 }))
 out:close()

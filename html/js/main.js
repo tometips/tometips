@@ -1,3 +1,10 @@
+// http://stackoverflow.com/a/2548133/25507
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+}
+
 function locationHashNoQuery()
 {
     return location.hash.replace(/\?.*/, '');
@@ -209,8 +216,11 @@ var talent_by_type_template = Handlebars.compile(
 
 var talent_by_type_nav_template = Handlebars.compile(
     '<ul id="nav-talents" class="nav">' +
-    '{{#if has_changes}}' +
-        '<li><a href="#changes/talents{{currentQuery}}"><span class="no-dropdown"></span>New in {{version_for_changes}}</a></li>' +
+    '{{#if hasMinorChanges}}' +
+        '<li><a href="#recent-changes/talents{{currentQuery}}"><span class="no-dropdown"></span>New in {{version}}</a></li>' +
+    '{{/if}}' +
+    '{{#if hasMajorChanges}}' +
+        '<li><a href="#changes/talents{{currentQuery}}"><span class="no-dropdown"></span>New in {{majorVersion}}</a></li>' +
     '{{/if}}' +
     '{{#each talent_categories}}' +
         '<li><a href="#talents/{{toHtmlId this}}{{currentQuery}}"><span data-toggle="collapse" data-target="#nav-{{toHtmlId this}}" class="dropdown collapsed"></span>{{toTitleCase this}}</a>' +
@@ -252,6 +262,8 @@ var changes_talents_template = Handlebars.compile(
                 '</div>' +
             '</div>' +
         "{{/each}}</div></div>" +
+    "{{else}}" +
+        "<p>No talent changes in this version.</p>" +
     "{{/each}}"
 );
 
@@ -279,6 +291,10 @@ function listTalents(tome, category) {
 
 function listChangesTalents(tome) {
     return changes_talents_template(tome[versions.current].changes.talents);
+}
+
+function listRecentChangesTalents(tome) {
+    return changes_talents_template(tome[versions.current]["recent-changes"].talents);
 }
 
 function configureImgSize() {
@@ -329,18 +345,19 @@ var versions = (function() {
 
     var versions = {
         DEFAULT: '1.2.2',
-        current: '1.2.2',
-        ALL: [ '1.1.5', '1.2.2' ],
+        ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2' ],
         DISPLAY: {}, //{ 'master': '1.2.2dev' },
 
         name: function(ver) {
             return versions.DISPLAY[ver] || ver;
         },
 
-        // Version display for "New in 1.x.y" in particular
-        DISPLAY_FOR_CHANGES: { '1.2.1': '1.2' },
-        name_for_changes: function(ver) {
-            return versions.DISPLAY_FOR_CHANGES[ver] || ver;
+        isMajor: function(ver) {
+            return ver.endsWith('.0');
+        },
+
+        asMajor: function(ver) {
+            return ver.replace(/\.\d+$/, '');
         },
 
         update: function(query) {
@@ -401,6 +418,7 @@ var versions = (function() {
             versions.listen($el);
         }
     };
+    versions.current = versions.DEFAULT;
     return versions;
 }());
 
@@ -425,6 +443,18 @@ function initializeRoutes() {
             $("#content-container").scrollTop(0);
             loadDataIfNeeded('changes.talents', function() {
                 $("#content").html(listChangesTalents(tome));
+
+                versions.updateFinished();
+            });
+        }),
+
+        recent_changes_talents: crossroads.addRoute('recent-changes/talents:?query:', function(query) {
+            // FIXME: Remove duplication with changes_talents route
+            routes.talents.matched.dispatch(query);
+
+            $("#content-container").scrollTop(0);
+            loadDataIfNeeded('recent-changes.talents', function() {
+                $("#content").html(listRecentChangesTalents(tome));
 
                 versions.updateFinished();
             });
@@ -498,7 +528,9 @@ function loadDataIfNeeded(data_file, success) {
     if (!tome[versions.current]) {
         loadData('tome', function(data) {
             data.version = versions.name(data.version);
-            data.version_for_changes = versions.name_for_changes(data.version);
+            data.majorVersion = versions.asMajor(data.version);
+            data.hasMajorChanges = data.majorVersion != versions.asMajor(versions.ALL[0]);
+            data.hasMinorChanges = data.version != versions.ALL[0] && !versions.isMajor(data.version);
             tome[versions.current] = data;
             loadDataIfNeeded(data_file, success);
         });

@@ -1,14 +1,12 @@
 SHELL := /bin/bash
 
-V11 := 1.1.5
-V12 := 1.2.2
-VERSIONS := $(V11) $(V12)
-#VERSIONS := $(V11) $(V12) master
+VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2
+#VERSIONS += master
 
 # GitHub Pages output
 PAGES_OUTPUT = ../tometips.github.io
 
-all: t-engine4 $(patsubst %,html/data/%/tome.json,$(VERSIONS)) img html/data/$(V12)/changes.talents.json
+all: t-engine4 $(patsubst %,html/data/%/tome.json,$(VERSIONS)) img $(patsubst %,html/data/%/changes.talents.json,$(VERSIONS)) $(patsubst %,html/data/%/recent-changes.talents.json,$(VERSIONS))
 
 html/data/%/tome.json: % spoilers.lua
 	lua spoilers.lua $< $(dir $@)
@@ -22,9 +20,9 @@ publish:
 	cp -a html/* $(PAGES_OUTPUT)
 
 # Changes from one version to the next
-# HACK: Hard-code version numbers for now
-html/data/$(V12)/changes.talents.json: html/data/$(V11)/tome.json html/data/$(V12)/tome.json makechangelist.lua
-	lua makechangelist.lua html/data/ $(V11) $(V12)
+changes.mk: Makefile scripts/make-changes-mk.sh
+	scripts/make-changes-mk.sh $(VERSIONS) > $@
+-include changes.mk
 
 # Convert and publish images.
 img: t-engine4

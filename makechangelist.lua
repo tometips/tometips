@@ -1,11 +1,12 @@
 require 'lib.json4lua.json.json'
 
-if #arg ~= 3 then
-    print(("Usage: %s json_dir from_version to_version"):format(arg[0]))
+if #arg < 3 or #arg > 4 then
+    print(("Usage: %s json_dir from_version to_version [prefix]"):format(arg[0]))
     os.exit(2)
 end
-local json_dir, from_version, to_version = unpack(arg)
+local json_dir, from_version, to_version, prefix = unpack(arg)
 json_dir = json_dir .. '/'
+prefix = prefix or ''
 print(("Processing changes from %s to %s..."):format(from_version, to_version))
 
 function loadJson(filename)
@@ -183,7 +184,7 @@ processDiffTable(tome[from_version].talent_categories, tome[to_version].talent_c
             end)
     end)
 
-local out = io.open(json_dir .. to_version .. '/changes.talents.json', 'w')
+local out = io.open(json_dir .. to_version .. '/' .. prefix .. 'changes.talents.json', 'w')
 out:write(json.encode(changes.talents))
 out:close()
 
