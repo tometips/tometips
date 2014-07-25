@@ -20,6 +20,13 @@ EOF
 }
 
 for ver in $*; do
+    # Special case: master
+    if [[ "$ver" == master ]]; then
+        make_entry $prev $ver
+        make_dummy_entry $ver recent-
+        continue
+    fi
+
     if [[ "$ver" == *.0 && -n "$prev" ]]; then
         prev_major=$prev
     fi

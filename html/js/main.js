@@ -345,8 +345,8 @@ var versions = (function() {
 
     var versions = {
         DEFAULT: '1.2.3',
-        ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2', '1.2.3' ],
-        DISPLAY: {}, //{ 'master': '1.2.2dev' },
+        ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2', '1.2.3', 'master' ],
+        DISPLAY: { 'master': 'next' },
 
         name: function(ver) {
             return versions.DISPLAY[ver] || ver;
@@ -527,10 +527,12 @@ function loadDataIfNeeded(data_file, success) {
     // Load top-level data, then reissue the request.
     if (!tome[versions.current]) {
         loadData('tome', function(data) {
+            data.hasMajorChanges = data.majorVersion != versions.asMajor(versions.ALL[0]);
+            data.hasMinorChanges = data.version != versions.ALL[0] && !versions.isMajor(data.version) && data.version != 'master';
+
             data.version = versions.name(data.version);
             data.majorVersion = versions.asMajor(data.version);
-            data.hasMajorChanges = data.majorVersion != versions.asMajor(versions.ALL[0]);
-            data.hasMinorChanges = data.version != versions.ALL[0] && !versions.isMajor(data.version);
+
             tome[versions.current] = data;
             loadDataIfNeeded(data_file, success);
         });

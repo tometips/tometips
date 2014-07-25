@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3
-#VERSIONS += master
+VERSIONS += master
 
 # GitHub Pages output
 PAGES_OUTPUT = ../tometips.github.io

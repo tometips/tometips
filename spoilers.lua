@@ -32,8 +32,14 @@ fs = {
         return {}
     end,
 }
+
+-- rng functions.  Shouldn't be needed - descriptions should be static - but
+-- bugs and exceptions eixt.
 rng = {
-    percent = function(chance) return false end, -- This shouldn't be needed, but data/talents/misc/horrors.lua calls it in its description
+    -- Used to be needed by data/talents/misc/horrors.lua
+    percent = function(chance) return false end,
+    -- Used by chronomancy anomalies in post 1.2.3
+    avg = function(min, max, size) return (min + max) / 2 end,
 }
 
 game = {
@@ -269,6 +275,12 @@ spoilers = {
     used = {
     },
 
+    -- Paradox is a special case.  Unlike most parameter-dependent values, we
+    -- only calculate for a single value of paradox.
+    usedParadoxOnly = function(self)
+        return #table.keys(self.used) == 1 and self.used.paradox
+    end,
+
     -- Determines the HTML tooltip and CSS class to use for the current
     -- talent, by looking at spoilers.used and the results of
     -- determineDisabled.
@@ -318,7 +330,7 @@ spoilers = {
             css_class = 'talent-variable'
         end
 
-        return "Values for " .. table.concat(tip, ", "), css_class
+        return (self:usedParadoxOnly() and "Value for " or "Values for ") .. table.concat(tip, ", "), css_class
     end,
 
     -- Looks at the results of getTalentByLevel or multiDiff (a table) to see
@@ -327,9 +339,13 @@ spoilers = {
     determineDisabled = function(self, results)
         assert(#results == 9)
 
+        -- All values are the same.  It must be paradox.
+        if table.allSame(results) then
+            return results[1], {}
+
         -- Values 5-10 have varying talents.  If they're all the same,
         -- then talents have no effect.
-        if table.allSame(results, 5, 9) then
+        elseif table.allSame(results, 5, 9) then
             return table.concat(results, ', ', 1, 5), { talent = true }
 
         -- Values 1-5 have varying stats / powers.  If they're all the
@@ -488,7 +504,7 @@ function getByTalentLevel(actor, f)
     end
     table.merge(spoilers.active, spoilers.default_active)
 
-    if table.allSame(result) then
+    if table.allSame(result) and not spoilers:usedParadoxOnly() then
         assert(next(spoilers.used) == nil)
         return result[1]
     else
