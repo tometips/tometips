@@ -344,8 +344,8 @@ var versions = (function() {
     }
 
     var versions = {
-        DEFAULT: '1.2.2',
-        ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2' ],
+        DEFAULT: '1.2.3',
+        ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2', '1.2.3' ],
         DISPLAY: {}, //{ 'master': '1.2.2dev' },
 
         name: function(ver) {
