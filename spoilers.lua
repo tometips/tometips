@@ -33,13 +33,14 @@ fs = {
     end,
 }
 
--- rng functions.  Shouldn't be needed - descriptions should be static - but
--- bugs and exceptions eixt.
+-- rng functions.  Shouldn't be needed (descriptions should be static), but
+-- bugs and exceptions exist.
+function warn_on_bad_function(function_name)
+    io.stderr:write(string.format("%s called %s\n", spoilers.active.talent_id or "unknown", function_name))
+end
 rng = {
-    -- Used to be needed by data/talents/misc/horrors.lua
-    percent = function(chance) return false end,
-    -- Used by chronomancy anomalies in post 1.2.3
-    avg = function(min, max, size) return (min + max) / 2 end,
+    percent = function(chance) warn_on_bad_function('rng.percent') return false end,
+    avg = function(min, max, size) warn_on_bad_function('rng.avg') return (min + max) / 2 end,
 }
 
 game = {
