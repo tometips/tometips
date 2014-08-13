@@ -45,6 +45,7 @@ rng = {
 
 game = {
     level = {
+        data = {},
         entities = {},
     },
     party = {
@@ -630,10 +631,35 @@ for tid, t in pairs(Actor.talents_def) do
         -- Note: Not the same logic as ToME (which checks <= 1), but seems to work
         if t.range == 1 or t.range == "1" then t.range = "melee/personal" end
 
-        if t.no_energy and type(t.no_energy) == "boolean" and t.no_energy == true then
-            t.use_speed = "instant"
+        -- Simple speed logic from 1.2.3 and earlier
+        if not player.getTalentSpeed then
+            if t.no_energy and type(t.no_energy) == "boolean" and t.no_energy == true then
+                t.use_speed = "Instant"
+            else
+                t.use_speed = "1 turn"
+            end
         else
-            t.use_speed = "1 turn"
+            -- "Usage Speed" logic from Actor:getTalentFullDescription
+            local uspeed = "Full Turn"
+            local no_energy = util.getval(t.no_energy, player, t)
+            local display_speed = util.getval(t.display_speed, player, t)
+            if display_speed then
+                uspeed = display_speed
+            elseif no_energy and type(no_energy) == "boolean" and no_energy == true then
+                uspeed = "Instant"
+            else
+                local speed = player:getTalentSpeed(t)
+                local speed_type = player:getTalentSpeedType(t)
+                if type(speed_type) == "string" then
+                    speed_type = speed_type:capitalize()
+                else
+                    speed_type = 'Special'
+                end
+                -- Actual speed value is fairly meaningless for spoilers
+                --uspeed = ("%s (#LIGHT_GREEN#%d%%#LAST# of a turn)"):format(speed_type, speed * 100)
+                uspeed = speed_type
+            end
+            t.use_speed = uspeed
         end
     end
 
