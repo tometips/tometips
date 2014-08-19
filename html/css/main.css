@@ -191,13 +191,18 @@ a.anchor
     content: "\e013";  /* Glyphicons check mark ("ok") */
 }
 
-dt {
+.dl-table dt {
     float: left;
     width: 120px;
 }
 
-dt.multiline-dd {
+.dl-table dt.multiline-dd {
     float: none;
+}
+
+.news dd {
+    margin-top: 0.25em;
+    margin-bottom: 1.5em;
 }
 
 h3 img {

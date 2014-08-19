@@ -1,5 +1,3 @@
-Add use speed. (Search getTalentFullDescription, "Full Turn")
-
 Distortion no longer displays stuff like "decreasing physical resistance by 0%" for 1.2.0.
 Permalink to individual talents
 Extract Gems isn't working properly

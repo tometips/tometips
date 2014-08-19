@@ -178,7 +178,7 @@ var talent_img = Handlebars.registerPartial("talent_img",
 );
 
 var talent_details = Handlebars.registerPartial("talent",
-    "<dl>" +
+    "<dl class='dl-table'>" +
         "{{#if require}}<dt>Requirements</dt><dd>{{require}}</dd>{{/if}}" +
         "{{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}" +
         "{{#if cost}}<dt>Cost</dt><dd>{{{cost}}}</dd>{{/if}}" +
@@ -466,7 +466,7 @@ function initializeRoutes() {
             if (!$("#nav-talents").length) {
                 loadDataIfNeeded('', function() {
                     $("#side-nav").html(navTalents(tome));
-                    $("#content").html("Select a talent category to the left.");
+                    $("#content").html($("#news").html());
                 });
             }
         }),
