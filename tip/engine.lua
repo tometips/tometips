@@ -86,6 +86,7 @@ local ActorStats = require "engine.interface.ActorStats"
 local ActorResource = require "engine.interface.ActorResource"
 local ActorTalents = require 'engine.interface.ActorTalents'
 local ActorInventory = require "engine.interface.ActorInventory"
+local Birther = require 'engine.Birther'
 
 -- FIXME: Figure out where these should go and what they should do
 resolvers = {
@@ -99,8 +100,19 @@ resolvers = {
     sustains_at_birth = function() end,
     tactic = function() end,
     talents = function() end,
-    tmasteries = function() end
+    tmasteries = function() end,
+    generic = function() end,
+    genericlast = function() end,
+
+    -- For race and class descriptors - may be useful to process these
+    -- to show starting inventory
+    inscription = function() end,
+    inventory = function() end,
+    equipbirth = function() end,
+    inventorybirth = function() end,
 }
+
+config.settings.tome = {}
 
 function setDefaultProjector()
 end
@@ -154,6 +166,9 @@ ActorStats:defineStat("Cunning",      "cun", 10, 1, 100, "Cunning defines your c
 ActorStats:defineStat("Constitution", "con", 10, 1, 100, "Constitution defines your character's ability to withstand and resist damage. It increases your maximum life and physical resistance.")
 -- Luck is hidden and starts at half max value (50) which is considered the standard
 ActorStats:defineStat("Luck",         "lck", 50, 1, 100, "Luck defines your character's fortune when dealing with unknown events. It increases your critical strike chance, your chance of random encounters, ...")
+
+-- Birther descriptor - copied from ToME's load.lua
+Birther:loadDefinition("/data/birth/descriptors.lua")
 
 tip.raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback' }
 
