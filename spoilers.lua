@@ -35,12 +35,9 @@ fs = {
 
 -- rng functions.  Shouldn't be needed (descriptions should be static), but
 -- bugs and exceptions exist.
-function warn_on_bad_function(function_name)
-    io.stderr:write(string.format("%s called %s\n", spoilers.active.talent_id or "unknown", function_name))
-end
 rng = {
-    percent = function(chance) warn_on_bad_function('rng.percent') return false end,
-    avg = function(min, max, size) warn_on_bad_function('rng.avg') return (min + max) / 2 end,
+    percent = function(chance) tip.util.logError('bad function rng.percent called') return false end,
+    avg = function(min, max, size) tip.util.logError('bad function rng.avg called') return (min + max) / 2 end,
 }
 
 game = {
@@ -154,68 +151,6 @@ ActorStats:defineStat("Cunning",      "cun", 10, 1, 100, "Cunning defines your c
 ActorStats:defineStat("Constitution", "con", 10, 1, 100, "Constitution defines your character's ability to withstand and resist damage. It increases your maximum life and physical resistance.")
 -- Luck is hidden and starts at half max value (50) which is considered the standard
 ActorStats:defineStat("Luck",         "lck", 50, 1, 100, "Luck defines your character's fortune when dealing with unknown events. It increases your critical strike chance, your chance of random encounters, ...")
-
-function table.allSame(self, from, to)
-    from = from or 1
-    to = to or #self
-    for i = from + 1, to do
-        if self[i] ~= self[i-1] then return false end
-    end
-    return true
-end
-
--- From http://lua-users.org/wiki/StringRecipes
-function string.starts(s, start)
-   return string.sub(s, 1, string.len(start)) == start
-end
-
-function string.escapeHtml(self)
-    return self:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
-end
-
--- Based on T-Engine's tstring:diffWith
-function multiDiff(str, on_diff)
-    local res = tstring{}
-    for i = 1, #str[1] do
-        local s = {}
-        for j = 1, #str do s[j] = str[j][i] end
-        if type(str[1][i]) == "string" and not table.allSame(s) then
-            on_diff(s, res)
-        else
-            res:add(str[1][i])
-        end
-    end
-    return res
-end
-
--- Finds the upvalue of f with the given name, and returns debug.getinfo for it
--- See http://www.lua.org/pil/23.1.html, http://www.lua.org/pil/23.1.2.html
-function getinfo_upvalue(f, name)
-    local i = 1
-    while true do
-        local n, v = debug.getupvalue(f, i)
-        if not n then return nil end
-        if n == name then return debug.getinfo(v, 'S') end
-        i = i + 1
-    end
-end
-
--- Support for loading source files and using debug.getinfo to find where
--- entities are defined.
-local source_lines = {}
-function resolveSource(dbginfo)
-    local filename = dbginfo.source:sub(2)
-
-    if not source_lines[filename] then
-        local f = assert(io.open(filename, 'r'))
-        source_lines[filename] = f:read("*all"):split('\n')
-        f:close()
-    end
-
-    for line = dbginfo.linedefined, 1, -1 do
-        if source_lines[filename][line]:sub(1, 3) == "new" or source_lines[filename][line]:sub(1, 4) == "uber" then return { filename, line } end
-    end
-end
 
 local raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback' }
 
@@ -386,17 +321,13 @@ spoilers = {
     }
 }
 
-function logError(s)
-    io.stderr:write((spoilers.active.talent_id or "unknown") .. ': ' .. s .. '\n')
-end
-
 player.getStat = function(self, stat, scale, raw, no_inc)
     spoilers.used.stat = spoilers.used.stat or {}
     spoilers.used.stat[stat] = true
 
     local val = spoilers.active.stat_power
     if no_inc then
-        logError("Unsupported use of getStat no_inc")
+        tip.util.logError("Unsupported use of getStat no_inc")
     end
 
     -- Based on interface.ActorStats.getStat
@@ -418,7 +349,7 @@ end
 player.combatPhysicalpower = function(self, mod, weapon, add)
     mod = mod or 1
     if add then
-        logError("Unsupported add to combatPhysicalpower")
+        tip.util.logError("Unsupported add to combatPhysicalpower")
     end
     spoilers.used.physicalpower = true
     return spoilers.active.stat_power * mod
@@ -427,7 +358,7 @@ end
 player.combatSpellpower = function(self, mod, add)
     mod = mod or 1
     if add then
-        logError("Unsupported add to combatSpellpower")
+        tip.util.logError("Unsupported add to combatSpellpower")
     end
     spoilers.used.spellpower = true
     return spoilers.active.stat_power * mod
@@ -436,7 +367,7 @@ end
 player.combatMindpower = function(self, mod, add)
     mod = mod or 1
     if add then
-        logError("Unsupported add to combatMindpower")
+        tip.util.logError("Unsupported add to combatMindpower")
     end
     spoilers.used.mindpower = true
     return spoilers.active.stat_power * mod
@@ -495,6 +426,8 @@ end
 function getGemLevel()
     return 0
 end
+
+require 'tip.utils'
 
 function getByTalentLevel(actor, f)
     local result = {}
@@ -561,7 +494,7 @@ for tid, t in pairs(Actor.talents_def) do
     end
     table.merge(spoilers.active, spoilers.default_active)
 
-    t.info_text = multiDiff(info_text, function(s, res)
+    t.info_text = tip.util.multiDiff(info_text, function(s, res)
         -- Reduce digits after the decimal.
         for i = 1, #s do
             s[i] = s[i]:gsub("(%d%d+)%.(%d)%d*", function(a, b) return tonumber(b) >= 5 and tostring(tonumber(a) + 1) or a end)
@@ -623,7 +556,7 @@ for tid, t in pairs(Actor.talents_def) do
             -- Sample error handling:
             --local success, value = pcall(function() getByTalentLevel(player, function() return player:getTalentRange(t) end) end)
             --if not success then
-            --    logError(string.format("%s: range: %s\n", tid, value))
+            --    tip.util.logError(string.format("%s: range: %s\n", tid, value))
             --else
             --    t.range = value
             --end
@@ -727,9 +660,9 @@ for tid, t in pairs(Actor.talents_def) do
     -- For other talents, engine.interface.ActorTalents:newTalent creates its own
     -- local info function based on the talent's provided info function, so we need to look
     -- for upvalues.
-    local d = t.old_info and debug.getinfo(t.old_info) or getinfo_upvalue(t.info, 'info')
+    local d = t.old_info and debug.getinfo(t.old_info) or tip.util.getinfo_upvalue(t.info, 'info')
     if d then
-        t.source_code = resolveSource(d)
+        t.source_code = tip.util.resolveSource(d)
     end
 end
 
