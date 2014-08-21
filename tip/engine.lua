@@ -2,6 +2,13 @@ tip = tip or {}
 tip.version = arg[1]
 package.path = package.path..(';%s/?.lua;./%s/thirdparty/?.lua'):format(tip.version, tip.version)
 
+tip.outputDir = function()
+    local output_dir = (arg[2] or '.') .. '/'
+    print("OUTPUT DIRECTORY: " .. output_dir)
+    os.execute('mkdir -p ' .. output_dir)
+    return output_dir
+end
+
 require 'tip.utils'
 
 -- T-Engine's C core.  Unimplemented as much as possible.
