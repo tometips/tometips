@@ -8,8 +8,8 @@ PAGES_OUTPUT = ../tometips.github.io
 
 all: t-engine4 $(patsubst %,html/data/%/tome.json,$(VERSIONS)) img $(patsubst %,html/data/%/changes.talents.json,$(VERSIONS)) $(patsubst %,html/data/%/recent-changes.talents.json,$(VERSIONS))
 
-html/data/%/tome.json: % talentspoilers.lua
-	lua talentspoilers.lua $< $(dir $@)
+html/data/%/tome.json: % talent_spoilers.lua
+	lua talent_spoilers.lua $< $(dir $@)
 
 clean:
 	rm -rf html/data/* html/img/talents/*.png html/img/talents/*/*.png

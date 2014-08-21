@@ -6,7 +6,7 @@ make_entry() {
     local prefix=$3
 cat <<EOF
 html/data/$ver/${prefix}changes.talents.json: html/data/$prev/tome.json html/data/$ver/tome.json
-	lua makechangelist.lua html/data/ $prev $ver $prefix
+	lua make_change_list.lua html/data/ $prev $ver $prefix
 EOF
 }
 
