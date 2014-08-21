@@ -335,6 +335,7 @@ function initializeRoutes() {
             if (!$("#nav-talents").length) {
                 loadDataIfNeeded('', function() {
                     $("#side-nav").html(navTalents(tome));
+                    load_nav_data_handler = loadNavTalents;
                     $("#content").html($("#news").html());
                 });
             }
@@ -360,6 +361,18 @@ function initializeRoutes() {
             routes.talents_category.matched.dispatch(category, query);
 
             $("#collapse-" + type).collapse("show");
+        }),
+
+        classes: crossroads.addRoute('classes:?query:', function(query) {
+            versions.update(query);
+
+            if (!$("#nav-classes").length) {
+                loadDataIfNeeded('classes', function() {
+                    $("#side-nav").html(navClasses(tome));
+                    load_nav_data_handler = false;
+                    $("#content").html($("#news").html());
+                });
+            }
         })
     }
 
@@ -380,6 +393,11 @@ function loadData(data_file, success) {
     }).success(success);
     // FIXME: Error handling
 }
+
+/**Handler for expanding nav items. Takes a jQuery element that's being
+ * expanded and does any on-demand loading of the data for that nav item.
+ */
+load_nav_data_handler = false;
 
 /**Loads a section of JSON data into the tome object if needed, then executes
  * the success function handler.
@@ -458,10 +476,9 @@ $(function() {
     });
 
     $("#side-nav").on("shown.bs.collapse", ".collapse", function(e) {
-       var category = $(this).attr('id').replace('nav-', '');
-       loadDataIfNeeded('talents.' + category, function() {
-            fillNavTalents(tome, category);
-        });
+        if (load_nav_data_handler) {
+            load_nav_data_handler($(this));
+        }
     });
 
     $("html").on("error", "img", function() {

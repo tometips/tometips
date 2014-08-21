@@ -103,6 +103,13 @@ function navTalents(tome) {
     return talent_by_type_nav_template(tome[versions.current]);
 }
 
+function loadNavTalents($el) {
+   var category = $el.attr('id').replace('nav-', '');
+   loadDataIfNeeded('talents.' + category, function() {
+        fillNavTalents(tome, category);
+   });
+}
+
 function fillNavTalents(tome, category) {
     var $el = $("#nav-" + category),
         talent_types = tome[versions.current].talents[category];

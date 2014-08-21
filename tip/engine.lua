@@ -87,7 +87,6 @@ load = loadfile_and_execute
 require 'engine.dialogs.Chat'
 
 require 'engine.utils'
-require 'lib.json4lua.json.json'
 local DamageType = require "engine.DamageType"
 local ActorStats = require "engine.interface.ActorStats"
 local ActorResource = require "engine.interface.ActorResource"
