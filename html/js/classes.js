@@ -17,7 +17,14 @@ var class_nav_template = Handlebars.compile(
 );
 
 var class_template = Handlebars.compile(
-    '<h2><a class="anchor" id="classes/{{toHtmlId short_name}}"></a>{{toTitleCase name}}</h2><div>' +
+    '<h2><a class="anchor" id="classes/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h2><div>' +
+        '{{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}' +
+        '{{{desc}}}' +
+        '{{#each subclass_list}}' +
+            '<h3><a class="anchor" id="classes/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h3>' +
+            '{{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}' +
+            '{{{desc}}}' +
+        '{{/each}}' +
     '</div>'
 );
 

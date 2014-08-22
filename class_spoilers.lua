@@ -6,6 +6,11 @@ local Birther = require 'engine.Birther'
 
 local world = Birther.birth_descriptor_def.world["Maj'Eyal"]
 
+function birtherDescToHtml(desc)
+    desc = '<p>' .. desc:gsub("\n", "</p><p>") .. '</p>'
+    return desc
+end
+
 classes = {}
 class_list = {}
 for i, cls in ipairs(Birther.birth_descriptor_def.class) do
@@ -15,7 +20,7 @@ for i, cls in ipairs(Birther.birth_descriptor_def.class) do
             name = cls.name,
             display_name = cls.display_name,
             short_name = cls.short_name,
-            desc = cls.desc,
+            desc = birtherDescToHtml(cls.desc),
             locked_desc = cls.locked_desc,
             subclass_list = {},
         }
@@ -34,7 +39,7 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
         name = sub.name,
         display_name = sub.display_name,
         short_name = sub.short_name,
-        desc = sub.desc,
+        desc = birtherDescToHtml(sub.desc),
         locked_desc = sub.locked_desc,
     }
 end
