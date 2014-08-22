@@ -6,30 +6,37 @@ local Birther = require 'engine.Birther'
 
 local world = Birther.birth_descriptor_def.world["Maj'Eyal"]
 
-class = {}
+classes = {}
+class_list = {}
 for i, cls in ipairs(Birther.birth_descriptor_def.class) do
     if world.descriptor_choices.class[cls.name] then
-        table.insert(class, {
+        class_list[#class_list+1] = cls.short_name
+        classes[cls.short_name] = {
             name = cls.name,
             display_name = cls.display_name,
             short_name = cls.short_name,
             desc = cls.desc,
             locked_desc = cls.locked_desc,
-            subclass = {},
-        })
+            subclass_list = {},
+        }
 
         for j, sub in ipairs(Birther.birth_descriptor_def.subclass) do
             if cls.descriptor_choices.subclass[sub.name] then
-                table.insert(class[#class].subclass, {
-                    name = sub.name,
-                    display_name = sub.display_name,
-                    short_name = sub.short_name,
-                    desc = sub.desc,
-                    locked_desc = sub.locked_desc,
-                })
+                table.insert(classes[cls.short_name].subclass_list, sub.short_name)
             end
         end
     end
+end
+
+subclasses = {}
+for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
+    subclasses[sub.short_name] = {
+        name = sub.name,
+        display_name = sub.display_name,
+        short_name = sub.short_name,
+        desc = sub.desc,
+        locked_desc = sub.locked_desc,
+    }
 end
 
 -- Output the data
@@ -37,7 +44,9 @@ local output_dir = tip.outputDir()
 
 local out = io.open(output_dir .. 'classes.json', 'w')
 out:write(json.encode({
-    class = class
+    classes = classes,
+    class_list = class_list,
+    subclasses = subclasses,
 }))
 out:close()
 

@@ -127,6 +127,17 @@ function toHtmlId(s)
     return s.toLowerCase().replace(/[':]/, '_');
 }
 
+/**Given an object, return a new object that indexes the object's properties by
+ * HTML ID.
+ *
+ * For example, if classes = { 'WARRIOR': { 'short_name': 'WARRIOR', ... }, ...},
+ * then indexByHtmlId(classes, 'short_name') will return
+ * { 'warrior': { 'short_name': 'WARRIOR', ... }, ...}
+ */
+function indexByHtmlId(obj, property) {
+    return _.object(_.map(obj, function(elem) { return [ toHtmlId(elem[property]), elem ]; }));
+}
+
 Handlebars.registerHelper('eachProperty', function(context, options) {
     var ret = "";
     for (var prop in context) {
@@ -359,8 +370,6 @@ function initializeRoutes() {
 
         talents_category_type: crossroads.addRoute("talents/{category}/{type}:?query:", function(category, type, query) {
             routes.talents_category.matched.dispatch(category, query);
-
-            $("#collapse-" + type).collapse("show");
         }),
 
         classes: crossroads.addRoute('classes:?query:', function(query) {
@@ -373,8 +382,30 @@ function initializeRoutes() {
                     $("#content").html($("#news").html());
                 });
             }
-        })
-    }
+        }),
+    
+        classes_class: crossroads.addRoute("classes/{cls}:?query:", function(cls, query) {
+            versions.update(query);
+
+            loadDataIfNeeded('classes', function() {
+                routes.classes.matched.dispatch(query);
+
+                $("#content-container").scrollTop(0);
+
+                var this_nav = "#nav-" + cls;
+                showCollapsed(this_nav);
+
+                $("#content").html(listClasses(tome, cls));
+                scrollToId();
+
+                versions.updateFinished();
+            });
+        }),
+
+        classes_class_subclass: crossroads.addRoute("classes/{cls}/{subclass}:?query:", function(cls, subclass, query) {
+            routes.classes_class.matched.dispatch(cls, query);
+        }),
+}
 
     function parseHash(new_hash, old_hash) {
          crossroads.parse(new_hash);
@@ -418,6 +449,8 @@ function loadDataIfNeeded(data_file, success) {
 
             data.version = versions.name(data.version);
             data.majorVersion = versions.asMajor(data.version);
+
+            data.fixups = {};
 
             tome[versions.current] = data;
             loadDataIfNeeded(data_file, success);
