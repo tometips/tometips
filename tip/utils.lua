@@ -67,3 +67,45 @@ function tip.util.logError(s)
     io.stderr:write((spoilers.active.talent_id or "unknown") .. ': ' .. s .. '\n')
 end
 
+function tip.util.tstringToHtml(tstr)
+    local html = { '<p>' }, in_color, in_font
+
+    local function closeColorIfNeeded()
+        if in_color then html[#html+1] = '</span></span>' in_color = false end
+    end
+    local function closeFontIfNeeded()
+        if in_font then html[#html+1] = '</span></span>' in_font = false end
+    end
+
+    for i, v in ipairs(tstr) do
+        if v == true then
+            closeColorIfNeeded()
+            closeFontIfNeeded()
+            html[#html+1] = '</p></p>'
+        elseif v[1] == "color" then
+            closeColorIfNeeded()
+            in_color = true
+            if #v == 4 then
+                html[#html+1] = ('<span style="color: #%02x%02x%02x"><span style="tstr-color-%02x%02x%02x">'):format(v[2], v[3], v[4], v[2], v[3], v[4])
+            else
+                local c = colors[v[2]]
+                html[#html+1] = ('<span style="color: #%02x%02x%02x"><span style="tstr-color-%s">'):format(c.r, c.g, c.b, v[2])
+            end
+        elseif v[1] == "font" then
+            closeFontIfNeeded()
+            if v[2] ~= 'normal' then
+                in_font = true
+                html[#html+1] = ('<span style="font-weight: %s"><span style="tstr-font-%s">'):format(v[2], v[2])
+            end
+        else
+            html[#html+1] = v
+        end
+    end
+
+    closeColorIfNeeded()
+    closeFontIfNeeded()
+    html[#html+1] = '</p>'
+
+    return table.concat(html, '')
+end
+

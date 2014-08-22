@@ -18,8 +18,10 @@ var class_nav_template = Handlebars.compile(
 
 var class_template = Handlebars.compile(
     '<h2><a class="anchor" id="classes/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h2><div>' +
-        '{{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}' +
-        '{{{desc}}}' +
+        '{{#unless single_subclass}}' +
+            '{{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}' +
+            '{{{desc}}}' +
+        '{{/unless}}' +
         '{{#each subclass_list}}' +
             '<h3><a class="anchor" id="classes/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h3>' +
             '{{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}' +
@@ -42,6 +44,7 @@ function fixupClasses(tome) {
     // to the actual subclass definition.
     _.each(c.classes, function(elem) {
         elem.subclass_list = _.map(elem.subclass_list, function(sub) { return c.subclasses[sub]; });
+        elem.single_subclass = elem.subclass_list.length == 1
     });
 
     c.classes_by_id = indexByHtmlId(c.classes, 'short_name');

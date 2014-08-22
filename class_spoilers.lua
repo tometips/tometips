@@ -7,12 +7,13 @@ local Birther = require 'engine.Birther'
 local world = Birther.birth_descriptor_def.world["Maj'Eyal"]
 
 function birtherDescToHtml(desc)
-    desc = '<p>' .. desc:gsub("\n", "</p><p>") .. '</p>'
-    return desc
+    return tip.util.tstringToHtml(string.toTString(desc))
 end
 
-classes = {}
-class_list = {}
+local blacklist_subclasses = { Psion = true }
+
+local classes = {}
+local class_list = {}
 for i, cls in ipairs(Birther.birth_descriptor_def.class) do
     if world.descriptor_choices.class[cls.name] then
         class_list[#class_list+1] = cls.short_name
@@ -26,14 +27,14 @@ for i, cls in ipairs(Birther.birth_descriptor_def.class) do
         }
 
         for j, sub in ipairs(Birther.birth_descriptor_def.subclass) do
-            if cls.descriptor_choices.subclass[sub.name] then
+            if cls.descriptor_choices.subclass[sub.name] and not blacklist_subclasses[sub.name] then
                 table.insert(classes[cls.short_name].subclass_list, sub.short_name)
             end
         end
     end
 end
 
-subclasses = {}
+local subclasses = {}
 for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
     subclasses[sub.short_name] = {
         name = sub.name,
