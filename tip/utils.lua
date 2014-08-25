@@ -98,7 +98,7 @@ function tip.util.tstringToHtml(tstr)
                 html[#html+1] = ('<span style="font-weight: %s"><span style="tstr-font-%s">'):format(v[2], v[2])
             end
         else
-            html[#html+1] = v
+            html[#html+1] = string.escapeHtml(v)
         end
     end
 

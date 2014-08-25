@@ -17,7 +17,9 @@ var class_nav_template = Handlebars.compile(
 );
 
 var class_template = Handlebars.compile(
-    '<h2><a class="anchor" id="classes/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h2><div>' +
+    // No anchor. Since there's only one h2, we don't want to jump to putting the anchor at the top of the screen.
+    //'<h2><a class="anchor" id="classes/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h2><div>' +
+    '<h2>{{toTitleCase display_name}}</h2><div>' +
         '{{#unless single_subclass}}' +
             '{{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}' +
             '{{{desc}}}' +

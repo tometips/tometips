@@ -42,6 +42,10 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
         short_name = sub.short_name,
         desc = birtherDescToHtml(sub.desc),
         locked_desc = sub.locked_desc,
+        stats = sub.stats,
+        talents_types = sub.talents_types,
+        talents = sub.talents,
+        copy_add = sub.copy_add,
     }
 end
 
