@@ -1,0 +1,14 @@
+<ul id="nav-talents" class="nav">
+    {{#if hasMinorChanges}}
+        <li><a href="#recent-changes/talents{{currentQuery}}"><span class="no-dropdown"></span>New in {{version}}</a></li>
+    {{/if}}
+    {{#if hasMajorChanges}}
+        <li><a href="#changes/talents{{currentQuery}}"><span class="no-dropdown"></span>New in {{majorVersion}}</a></li>
+    {{/if}}
+    {{#each talent_categories}}
+        <li><a href="#talents/{{toHtmlId this}}{{currentQuery}}"><span data-toggle="collapse" data-target="#nav-{{toHtmlId this}}" class="dropdown collapsed"></span>{{toTitleCase this}}</a>
+            <ul class="nav collapse" id="nav-{{toHtmlId this}}">
+                {{! Empty for now; will be populated later }}
+            </ul></li>
+    {{/each}}
+</ul>

@@ -6,7 +6,7 @@ VERSIONS += master
 # GitHub Pages output
 PAGES_OUTPUT = ../tometips.github.io
 
-all: t-engine4 img \
+all: t-engine4 img html/js/templates.js html/js/partials.js \
 	$(patsubst %,html/data/%/tome.json,$(VERSIONS)) \
 	$(patsubst %,html/data/%/classes.json,$(VERSIONS)) \
 	$(patsubst %,html/data/%/changes.talents.json,$(VERSIONS)) \
@@ -18,8 +18,14 @@ html/data/%/tome.json: % talent_spoilers.lua
 html/data/%/classes.json: % class_spoilers.lua
 	lua class_spoilers.lua $< $(dir $@)
 
+html/js/partials.js: html/js/partials/*.handlebars
+	handlebars --min --partial html/js/partials > $@
+
+html/js/templates.js: html/js/templates/*.handlebars
+	handlebars --min html/js/templates > $@
+
 clean:
-	rm -rf html/data/* html/img/talents/*.png html/img/talents/*/*.png
+	rm -rf html/data/* html/img/talents/*.png html/img/talents/*/*.png html/js/templates.js html/js/partials.js
 
 publish:
 	test -d $(PAGES_OUTPUT)

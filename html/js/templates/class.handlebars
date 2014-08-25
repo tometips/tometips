@@ -1,0 +1,14 @@
+{{! No anchor. Since there's only one h2, we don't want to jump to putting the anchor at the top of the screen. }}
+{{!-- <h2><a class="anchor" id="classes/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h2><div> --}}
+<h2>{{toTitleCase display_name}}</h2>
+<div>
+    {{#unless single_subclass}}
+        {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
+        {{{desc}}}
+    {{/unless}}
+    {{#each subclass_list}}
+        <h3><a class="anchor" id="classes/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h3>
+        {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
+        {{{desc}}}
+    {{/each}}
+</div>

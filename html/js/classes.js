@@ -1,37 +1,3 @@
-var class_nav_template = Handlebars.compile(
-    '<ul id="nav-classes" class="nav">' +
-    /*'{{#if hasMinorChanges}}' +
-        '<li><a href="#recent-changes/talents{{currentQuery}}"><span class="no-dropdown"></span>New in {{version}}</a></li>' +
-    '{{/if}}' +
-    '{{#if hasMajorChanges}}' +
-        '<li><a href="#changes/talents{{currentQuery}}"><span class="no-dropdown"></span>New in {{majorVersion}}</a></li>' +
-    '{{/if}}' +*/
-    '{{#each class_list}}' +
-        '<li><a href="#classes/{{toHtmlId short_name}}{{currentQuery}}"><span data-toggle="collapse" data-target="#nav-{{toHtmlId short_name}}" class="dropdown collapsed"></span>{{toTitleCase display_name}}</a>' +
-        '<ul class="nav collapse" id="nav-{{toHtmlId short_name}}">' +
-            '{{#each subclass_list}}' +
-                '<li><a href="#classes/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}{{currentQuery}}">{{toTitleCase display_name}}</a></li>' +
-            '{{/each}}' +
-        "</ul></li>" +
-    "{{/each}}</ul>"
-);
-
-var class_template = Handlebars.compile(
-    // No anchor. Since there's only one h2, we don't want to jump to putting the anchor at the top of the screen.
-    //'<h2><a class="anchor" id="classes/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h2><div>' +
-    '<h2>{{toTitleCase display_name}}</h2><div>' +
-        '{{#unless single_subclass}}' +
-            '{{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}' +
-            '{{{desc}}}' +
-        '{{/unless}}' +
-        '{{#each subclass_list}}' +
-            '<h3><a class="anchor" id="classes/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h3>' +
-            '{{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}' +
-            '{{{desc}}}' +
-        '{{/each}}' +
-    '</div>'
-);
-
 function fixupClasses(tome) {
     var c = tome[versions.current].classes;
 
@@ -56,11 +22,10 @@ function fixupClasses(tome) {
 
 function navClasses(tome) {
     fixupClasses(tome);
-    return class_nav_template(tome[versions.current].classes);
+    return Handlebars.templates.class_nav(tome[versions.current].classes);
 }
 
 function listClasses(tome, cls) {
     fixupClasses(tome);
-    return class_template(tome[versions.current].classes.classes_by_id[cls]);
+    return Handlebars.templates.class(tome[versions.current].classes.classes_by_id[cls]);
 }
-

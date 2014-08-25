@@ -1,0 +1,36 @@
+{{#each this}}
+<h3><a class="anchor" id="changes/talents/{{name}}"></a>{{toTitleCase name}}</h3>
+<div>
+    {{#each values}}
+        <div class="panel panel-default">
+            <div class="panel-heading clickable">
+                <h3 class="panel-title">
+                    <a data-toggle="collapse" data-target="#collapse-{{type}}-{{toHtmlId value.id}}">
+                        {{> talent_img value}}{{{labelForChangeType type}}} {{value.name}}
+                    </a>
+                </h3>
+            </div>
+            <div id="collapse-{{type}}-{{toHtmlId value.id}}" class="talent-details panel-collapse collapse">
+                {{#if value2}}
+                    <table class="table table-bordered old-new">
+                        <colgroup>
+                            <col width="50%">
+                            <col width="50%">
+                        </colgroup>
+                        <tr><th>Old</th><th>New</th></tr><tr>
+                            <td>{{> talent_details value2}}</td>
+                            <td>{{> talent_details value}}</td>
+                        </tr>
+                    </table>
+                {{else}}
+                    <div class="panel-body">
+                        {{> talent_details value}}
+                    </div>
+                {{/if}}
+            </div>
+        </div>
+    {{/each}}
+</div>
+{{else}}
+<p>No talent changes in this version.</p>
+{{/each}}
