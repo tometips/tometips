@@ -302,7 +302,8 @@ var versions = (function() {
     return versions;
 }());
 
-var routes;
+var routes,
+    base_title = document.title;
 
 function initializeRoutes() {
     routes = {
@@ -322,6 +323,7 @@ function initializeRoutes() {
 
             $("#content-container").scrollTop(0);
             loadDataIfNeeded('changes.talents', function() {
+                document.title += ' - New in ' + tome[versions.current].majorVersion;
                 $("#content").html(listChangesTalents(tome));
 
                 versions.updateFinished();
@@ -334,6 +336,7 @@ function initializeRoutes() {
 
             $("#content-container").scrollTop(0);
             loadDataIfNeeded('recent-changes.talents', function() {
+                document.title += ' - New in ' + tome[versions.current].version;
                 $("#content").html(listRecentChangesTalents(tome));
 
                 versions.updateFinished();
@@ -342,6 +345,7 @@ function initializeRoutes() {
 
         talents: crossroads.addRoute('talents:?query:', function(query) {
             versions.update(query);
+            document.title = base_title + ' - Talents';
 
             if (!$("#nav-talents").length) {
                 loadDataIfNeeded('', function() {
@@ -354,6 +358,7 @@ function initializeRoutes() {
 
         talents_category: crossroads.addRoute("talents/{category}:?query:", function(category, query) {
             routes.talents.matched.dispatch(query);
+            document.title += ' - ' + toTitleCase(category);
 
             $("#content-container").scrollTop(0);
             loadDataIfNeeded('talents.' + category, function() {
@@ -374,6 +379,7 @@ function initializeRoutes() {
 
         classes: crossroads.addRoute('classes:?query:', function(query) {
             versions.update(query);
+            document.title += ' - Classes';
 
             if (!$("#nav-classes").length) {
                 loadDataIfNeeded('classes', function() {
@@ -383,12 +389,13 @@ function initializeRoutes() {
                 });
             }
         }),
-    
+
         classes_class: crossroads.addRoute("classes/{cls}:?query:", function(cls, query) {
             versions.update(query);
 
             loadDataIfNeeded('classes', function() {
                 routes.classes.matched.dispatch(query);
+                document.title += ' - ' + tome[versions.current].classes.classes_by_id[cls].display_name;
 
                 $("#content-container").scrollTop(0);
 
@@ -404,8 +411,8 @@ function initializeRoutes() {
 
         classes_class_subclass: crossroads.addRoute("classes/{cls}/{subclass}:?query:", function(cls, subclass, query) {
             routes.classes_class.matched.dispatch(cls, query);
-        }),
-}
+        })
+    }
 
     function parseHash(new_hash, old_hash) {
          crossroads.parse(new_hash);
