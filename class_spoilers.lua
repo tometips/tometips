@@ -36,6 +36,19 @@ end
 
 local subclasses = {}
 for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
+    -- Add additional information to facilitate HTML display
+    if type(sub.talents_types) == 'table' then
+        for k, v in pairs(sub.talents_types) do
+            -- This if is necessary to handle unimplemented or nonexistent talents (!?)
+            if Actor.talents_types_def[k] then
+                -- Make masteries 1-based
+                v[2] = v[2] + 1.0
+                -- Add talent type name
+                v[3] = k:split('/')[1] .. ' / ' .. Actor.talents_types_def[k].name
+            end
+        end
+    end
+
     subclasses[sub.short_name] = {
         name = sub.name,
         display_name = sub.display_name,

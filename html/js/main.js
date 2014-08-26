@@ -138,10 +138,13 @@ function indexByHtmlId(obj, property) {
     return _.object(_.map(obj, function(elem) { return [ toHtmlId(elem[property]), elem ]; }));
 }
 
+///Iterates over properties, sorted. Based on http://stackoverflow.com/a/9058854/25507.
 Handlebars.registerHelper('eachProperty', function(context, options) {
-    var ret = "";
-    for (var prop in context) {
-        ret = ret + options.fn({property:prop,value:context[prop]});
+    var ret = "",
+        keys = _.keys(context);
+    keys.sort();
+    for (var i = 0; i < keys.length; i++) {
+        ret = ret + options.fn({key: keys[i], value: context[keys[i]]});
     }
     return ret;
 });
@@ -154,9 +157,18 @@ Handlebars.registerHelper('toLowerCase', function(context, options) {
     return context.toLowerCase();
 });
 
+Handlebars.registerHelper('toDecimal', function(context, places, options) {
+   return context.toFixed(places || 2);
+});
+
 // ToME-specific function that makes a ToME ID a valid and standard HTML ID
 Handlebars.registerHelper('toHtmlId', function(context, options) {
     return toHtmlId(context);
+});
+
+// ToME-specific function that tries to make a name or ID into a te4.org wiki page name
+Handlebars.registerHelper('toWikiPage', function(context, options) {
+   return toTitleCase(context).replace(' ', '_');
 });
 
 Handlebars.registerHelper('tag', function(context, options) {

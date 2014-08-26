@@ -253,21 +253,24 @@ h3 img {
     position: relative;
 }
 
-.source-link {
+.source-link, .wiki-link {
     text-transform: lowercase;
+}
+
+.source-link {
     position: absolute;
     right: 15px;
     bottom: 15px;
 }
 
-.source-link, .source-link a {
+.source-link, .source-link a, .wiki-link, .wiki-link a {
     color: #999;
 }
 
-.source-link:before {
+.source-link:before, .wiki-link:before {
     content: '[ ';
 }
-.source-link:after {
+.source-link:after, .wiki-link:after {
     content: ' ]';
 }
 
