@@ -36,7 +36,9 @@ end
 
 local subclasses = {}
 for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
-    -- Add additional information to facilitate HTML display
+    -- Process talent types for HTML, and split them into class and generic
+    local talents_types_class = {}
+    local talents_types_generic = {}
     if type(sub.talents_types) == 'table' then
         for k, v in pairs(sub.talents_types) do
             -- This if is necessary to handle unimplemented or nonexistent talents (!?)
@@ -45,6 +47,12 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
                 v[2] = v[2] + 1.0
                 -- Add talent type name
                 v[3] = k:split('/')[1] .. ' / ' .. Actor.talents_types_def[k].name
+
+                if Actor.talents_types_def[k].generic then
+                    talents_types_generic[k] = v
+                else
+                    talents_types_class[k] = v
+                end
             end
         end
     end
@@ -56,7 +64,8 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
         desc = birtherDescToHtml(sub.desc),
         locked_desc = sub.locked_desc,
         stats = sub.stats,
-        talents_types = sub.talents_types,
+        talents_types_class = talents_types_class,
+        talents_types_generic = talents_types_generic,
         talents = sub.talents,
         copy_add = sub.copy_add,
     }

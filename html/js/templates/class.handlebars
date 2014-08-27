@@ -8,20 +8,14 @@
     {{/unless}}
     {{#each subclass_list}}
         <h3><a class="anchor" id="classes/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h3>
-        {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
-        {{{desc}}}
-        <h4>Available Talents</h4>
-        <ul>
-        {{! FIXME: Separate generic and class talents }}
-        {{#eachProperty talents_types}}
-            {{#if value.[2]}}
-                <li>
-                    <a href="#talents/{{toHtmlId key}}{{currentQuery}}">{{toTitleCase value.[2]}}</a>
-                    (×{{toDecimal value.[1] 1}}{{#unless value.[0]}}, locked{{/unless}})
-                </li>
-            {{/if}}
-        {{/eachProperty}}
-        </ul>
+        <div class="well">
+            {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
+            {{{desc}}}
+        </div>
+        <div class="container-fluid">
+            {{$ 'class_talents' talents_types=talents_types_class title='Class Talents' css_class='class-talents' }}
+            {{$ 'class_talents' talents_types=talents_types_generic title='Generic Talents' css_class='generic-talents' }}
+        </div>
         <div class="wiki-link">
             <a href="http://te4.org/wiki/{{toWikiPage name}}">View Wiki</a>
         </div>

@@ -141,12 +141,44 @@ function indexByHtmlId(obj, property) {
 ///Iterates over properties, sorted. Based on http://stackoverflow.com/a/9058854/25507.
 Handlebars.registerHelper('eachProperty', function(context, options) {
     var ret = "",
-        keys = _.keys(context);
+        keys = _.keys(context || {});
     keys.sort();
     for (var i = 0; i < keys.length; i++) {
         ret = ret + options.fn({key: keys[i], value: context[keys[i]]});
     }
     return ret;
+});
+
+/**Renders a partial, with additional arguments. Based on http://stackoverflow.com/a/14618035/25507
+ *
+ * Usage: Arguments are merged with the context for rendering only
+ * (non destructive). Use `:token` syntax to replace parts of the
+ * template path. Tokens are replace in order.
+ *
+ * USAGE: {{$ 'path.to.partial' context=newContext foo='bar' }}
+ * USAGE: {{$ 'path.:1.:2' replaceOne replaceTwo foo='bar' }}
+ */
+Handlebars.registerHelper('$', function (partial) {
+    var values, opts, done, value, context;
+    if (!partial) {
+        console.error('No partial name given.');
+    }
+    values = Array.prototype.slice.call(arguments, 1);
+    opts = values.pop().hash;
+    while (!done) {
+        value = values.pop();
+        if (value) {
+            partial = partial.replace(/:[^\.]+/, value);
+        } else {
+            done = true;
+        }
+    }
+    partial = Handlebars.partials[partial];
+    if (!partial) {
+        return '';
+    }
+    context = _.extend({}, opts.context || this, _.omit(opts, 'context', 'fn', 'inverse'));
+    return new Handlebars.SafeString(partial(context));
 });
 
 Handlebars.registerHelper('toTitleCase', function(context, options) {
