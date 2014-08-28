@@ -347,6 +347,7 @@ var versions = (function() {
 }());
 
 var routes,
+    load_nav_data_handler,
     base_title = document.title;
 
 function initializeRoutes() {
@@ -421,6 +422,11 @@ function initializeRoutes() {
             routes.talents_category.matched.dispatch(category, query);
         }),
 
+        talents_category_type_id: crossroads.addRoute("talents/{category}/{type}/{talent_id}:?query:", function(category, type, talent_id, query) {
+            // TODO: scrollToId not yet working for talent_id links, and talent_id links aren't yet published
+            routes.talents_category.matched.dispatch(category, query);
+        }),
+
         classes: crossroads.addRoute('classes:?query:', function(query) {
             versions.update(query);
             document.title += ' - Classes';
@@ -448,6 +454,8 @@ function initializeRoutes() {
 
                 $("#content").html(listClasses(tome, cls));
                 scrollToId();
+
+                fillClassTalents(tome, cls);
 
                 versions.updateFinished();
             });
@@ -587,4 +595,3 @@ $(function() {
 
     initializeRoutes();
 });
-

@@ -1,0 +1,8 @@
+<ul>
+{{#each talents}}
+    {{!-- id links not yet working properly and may not even be the best UI
+    <li><a href="#talents/{{../type}}/{{toHtmlId id}}{{currentQuery}}" title="{{name}}">{{> talent_img_small }}</a></li>
+    --}}
+    <li><a href="#talents/{{../type}}{{currentQuery}}" title="{{name}}">{{> talent_img_small }}</a></li>
+{{/each}}
+</ul>

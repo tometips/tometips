@@ -287,6 +287,25 @@ table.old-new td {
     padding-bottom: 1em;
 }
 
+.class-talents-container {
+    padding: 0;
+}
+
+.class-talents-detail {
+    height: 37px;
+    padding-bottom: 5px;
+}
+
+.class-talents-detail ul {
+    padding: 0;
+}
+
+.class-talents-detail li {
+    display: inline;
+    list-style-type: none;
+    padding-right: 5px;
+}
+
 /* ==========================================================================
    Helper classes
    ========================================================================== */
