@@ -7,6 +7,10 @@ local Birther = require 'engine.Birther'
 local world = Birther.birth_descriptor_def.world["Maj'Eyal"]
 
 function birtherDescToHtml(desc)
+    -- Replace the "Stat modifiers:" and "Life per level:" block,
+    -- since we'll display those more neatly in HTML.
+    desc = desc:gsub("\n#GOLD#Stat.*", "")
+
     return tip.util.tstringToHtml(string.toTString(desc))
 end
 

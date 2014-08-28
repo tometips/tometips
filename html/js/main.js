@@ -221,6 +221,18 @@ Handlebars.registerHelper('labelForChangeType', function(type) {
     return '<span class="label label-' + css_class[type] + '">' + text[type] + ':</span>';
 });
 
+Handlebars.registerHelper('stat', function(desc, value) {
+    var value_html;
+    if (!value) {
+        value_html = '<span class="stat-neutral">+0</span>';
+    } else if (value > 0) {
+        value_html = '<span class="stat-bonus">+' + value + '</span>';
+    } else {
+        value_html = '<span class="stat-penalty">' + value + '</span>';
+    }
+    return new Handlebars.SafeString("<dt>" + desc + ":</dt><dd>" + value_html + "</dd>");
+});
+
 function configureImgSize() {
     options.imgSize = parseInt($.cookie("imgSize") || options.imgSize);
 

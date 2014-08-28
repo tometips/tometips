@@ -12,7 +12,21 @@
             {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
             {{{desc}}}
         </div>
-        <div class="class-talents-container container-fluid">
+        <div class="class-detail-container container-fluid">
+            <div class="col-md-4">
+                <h4>Stats</h4>
+                <dl class="dl-horizontal stats">
+                    {{stat "Strength" stats.str}}
+                    {{stat "Dexterity" stats.dex}}
+                    {{stat "Constitution" stats.con}}
+                    {{stat "Magic" stats.mag}}
+                    {{stat "Willpower" stats.wil}}
+                    {{stat "Cunning" stats.cun}}
+                    {{stat "Life per level" copy_add.life_rating}}
+                </dl>
+            </div>
+        </div>
+        <div class="class-detail-container container-fluid">
             {{$ 'class_talents' talents_types=talents_types_class title='Class Talents' css_class='class-talents' }}
             {{$ 'class_talents' talents_types=talents_types_generic title='Generic Talents' css_class='generic-talents' }}
         </div>

@@ -287,13 +287,17 @@ table.old-new td {
     padding-bottom: 1em;
 }
 
-.class-talents-container {
+.class-detail-container {
     padding: 0;
 }
 
 .class-talents-detail {
     height: 37px;
     padding-bottom: 5px;
+}
+
+.class-detail-container .talent-mastery {
+    font-weight: bold;
 }
 
 .class-talents-detail ul {
@@ -304,6 +308,40 @@ table.old-new td {
     display: inline;
     list-style-type: none;
     padding-right: 5px;
+}
+
+.class-talents-detail.locked img {
+    opacity: 0.8;
+    filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
+}
+
+.class-talents-detail.locked img:hover {
+    opacity: 1.0;
+    filter: grayscale(0%);
+    -moz-filter: grayscale(0%);
+    -webkit-filter: grayscale(0%);
+}
+
+.stats {
+    margin-left: -40px;
+}
+
+.stats dt {
+    font-weight: normal;
+}
+
+.stat-bonus, .stat-penalty {
+    font-weight: bold;
+}
+
+.stat-bonus {
+    color: #00a000;
+}
+
+.stat-penalty {
+    color: #a00000;
 }
 
 /* ==========================================================================

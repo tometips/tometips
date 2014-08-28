@@ -81,7 +81,7 @@ function tip.util.tstringToHtml(tstr)
         if v == true then
             closeColorIfNeeded()
             closeFontIfNeeded()
-            html[#html+1] = '</p></p>'
+            html[#html+1] = '</p><p>'
         elseif v[1] == "color" then
             closeColorIfNeeded()
             in_color = true
