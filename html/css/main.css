@@ -254,9 +254,6 @@ h3 img {
 
 .source-link, .wiki-link {
     text-transform: lowercase;
-}
-
-.source-link {
     position: absolute;
     right: 15px;
     bottom: 15px;
@@ -279,6 +276,10 @@ table.old-new {
 
 table.old-new td {
     vertical-align: top;
+}
+
+.class-desc {
+    position: relative;
 }
 
 .flavor {

@@ -8,7 +8,7 @@
     {{/unless}}
     {{#each subclass_list}}
         <h3><a class="anchor" id="classes/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h3>
-        <div class="well">
+        <div class="class-desc well">
             <div class="class-images">
                 {{#each images}}
                     <img src="img/{{file}}" width="{{#if width}}{{width}}{{else}}64{{/if}}" height="{{#if height}}{{height}}{{else}}64{{/if}}"/>
@@ -16,6 +16,9 @@
             </div>
             {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
             {{{desc}}}
+            <div class="wiki-link">
+                <a href="http://te4.org/wiki/{{toWikiPage name}}">View Wiki</a>
+            </div>
         </div>
         <div class="class-detail-container container-fluid">
             <div class="col-md-4">
@@ -34,9 +37,6 @@
         <div class="class-detail-container container-fluid">
             {{$ 'class_talents' talents_types=talents_types_class title='Class Talents' css_class='class-talents' }}
             {{$ 'class_talents' talents_types=talents_types_generic title='Generic Talents' css_class='generic-talents' }}
-        </div>
-        <div class="wiki-link">
-            <a href="http://te4.org/wiki/{{toWikiPage name}}">View Wiki</a>
         </div>
     {{/each}}
 </div>
