@@ -220,7 +220,6 @@ h3 img {
     font-weight: bold;
 }
 
-/* FIXME: Better color scheme? */
 .variable {
     color: #009e96;
 }
@@ -285,6 +284,11 @@ table.old-new td {
 .flavor {
     font-style: italic;
     padding-bottom: 1em;
+}
+
+.class-images {
+    float: left;
+    padding-right: 10px;
 }
 
 .class-detail-container {

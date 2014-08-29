@@ -6,6 +6,41 @@ local Birther = require 'engine.Birther'
 
 local world = Birther.birth_descriptor_def.world["Maj'Eyal"]
 
+local blacklist_subclasses = { Psion = true }
+
+function img(file, w, h)
+    return { file = 'npc/' .. file .. '.png', width = w, height = h }
+end
+
+local subclass_images = {
+    ALCHEMIST = { 'humanoid_human_master_alchemist', 'alchemist_golem' },
+    ADVENTURER = { 'hostile_humanoid_adventurers_party' },
+    ANORITHIL = { 'patrol_sunwall_anorithil_patrol' },
+    ARCANE_BLADE = { 'humanoid_human_arcane_blade' },
+    ARCHER = { 'humanoid_thalore_thalore_hunter', 'humanoid_halfling_halfling_slinger' },
+    ARCHMAGE = { { 'humanoid_shalore_elven_tempest-resized', 64, 80 }, { 'humanoid_human_pyromancer-cropped', 64, 80 } },
+    BERSERKER = { 'humanoid_dwarf_norgan' },
+    BRAWLER = { 'humanoid_human_slave_combatant' },
+    BULWARK = { 'humanoid_human_last_hope_guard' },
+    CORRUPTOR = { 'humanoid_shalore_elven_corruptor', 'humanoid_shalore_elven_blood_mage' },
+    CURSED = { 'humanoid_human_ben_cruthdar__the_cursed' },
+    DOOMED = { 'shadow-caster' },
+    MARAUDER = { { 'humanoid_human_rej_arkatis-cropped', 64, 78 } },
+    MINDSLAYER = { { 'humanoid_yeek_yeek_mindslayer-cropped', 64, 85 } },
+    NECROMANCER = { 'humanoid_human_necromancer', 'undead_lich_lich-cropped' },
+    OOZEMANCER = { 'vermin_oozes_bloated_ooze', 'humanoid_dwarf_dwarven_summoner' },
+    PARADOX_MAGE = { 'humanoid_elf_high_chronomancer_zemekkys' },
+    REAVER = { 'humanoid_human_reaver' },
+    ROGUE = { 'humanoid_human_rogue' },
+    SHADOWBLADE = { 'humanoid_human_shadowblade' },
+    SKIRMISHER = { 'humanoid_human_high_slinger' },
+    SOLIPSIST = { 'humanoid_yeek_yeek_psionic' },
+    SUMMONER = { 'humanoid_thalore_ziguranth_summoner', 'summoner_ritch' },
+    SUN_PALADIN = { 'humanoid_human_sun_paladin_guren' },
+    TEMPORAL_WARDEN = { 'humanoid_elf_star_crusader', 'humanoid_elf_elven_archer' },
+    WYRMIC = { 'humanoid_human_fire_wyrmic', 'humanoid_human_multihued_wyrmic' },
+}
+
 function birtherDescToHtml(desc)
     -- Replace the "Stat modifiers:" and "Life per level:" block,
     -- since we'll display those more neatly in HTML.
@@ -13,8 +48,6 @@ function birtherDescToHtml(desc)
 
     return tip.util.tstringToHtml(string.toTString(desc))
 end
-
-local blacklist_subclasses = { Psion = true }
 
 local classes = {}
 local class_list = {}
@@ -72,6 +105,7 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
         talents_types_generic = talents_types_generic,
         talents = sub.talents,
         copy_add = sub.copy_add,
+        images = table.mapv(function(v) return type(v) == 'table' and img(unpack(v)) or img(v) end, subclass_images[sub.short_name] or {}),
     }
 end
 

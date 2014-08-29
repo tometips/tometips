@@ -9,6 +9,11 @@
     {{#each subclass_list}}
         <h3><a class="anchor" id="classes/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h3>
         <div class="well">
+            <div class="class-images">
+                {{#each images}}
+                    <img src="img/{{file}}" width="{{#if width}}{{width}}{{else}}64{{/if}}" height="{{#if height}}{{height}}{{else}}64{{/if}}"/>
+                {{/each}}
+            </div>
             {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
             {{{desc}}}
         </div>
