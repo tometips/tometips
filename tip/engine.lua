@@ -196,3 +196,16 @@ local player = Actor.new{
 }
 game.player = player
 
+-- table.mapv was added in newer versions of T-Engine's utils.lua.
+-- Copy its implementation and add it to older versions if needed.
+if not table.mapv then
+    -- Make a new table with each k, v = k, f(v) in the original.
+    function table.mapv(f, source)
+        local result = {}
+        for k, v in pairs(source) do
+            result[k] = f(v)
+        end
+        return result
+    end
+end
+

@@ -326,6 +326,11 @@ table.old-new td {
 
 .class-talents-detail.locked img {
     opacity: 0.8;
+
+    /* filter:url syntax is the only variant supported by Firefox pre 34 */
+    filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'saturate\' values=\'0\'/></filter></svg>#grayscale");
+
+    /* Newer, simpler syntax */
     filter: grayscale(100%);
     -moz-filter: grayscale(100%);
     -webkit-filter: grayscale(100%);
@@ -333,6 +338,11 @@ table.old-new td {
 
 .class-talents-detail.locked img:hover {
     opacity: 1.0;
+
+    /* filter:url syntax is the only variant supported by Firefox pre 34 */
+    filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'saturate\' values=\'1\'/></filter></svg>#grayscale");
+
+    /* Newer, simpler syntax */
     filter: grayscale(0%);
     -moz-filter: grayscale(0%);
     -webkit-filter: grayscale(0%);
