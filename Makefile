@@ -29,8 +29,7 @@ clean:
 
 publish:
 	test -d $(PAGES_OUTPUT)
-	rm -rf $(PAGES_OUTPUT)/*
-	cp -a html/* $(PAGES_OUTPUT)
+	rsync --recursive --times --exclude=*.template --delete --verbose html/* $(PAGES_OUTPUT)
 
 # Changes from one version to the next
 changes.mk: Makefile scripts/make-changes-mk.sh
