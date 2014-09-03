@@ -1,0 +1,42 @@
+{{! No anchor. Since there's only one h2, we don't want to jump to putting the anchor at the top of the screen. }}
+{{!-- <h2><a class="anchor" id="classes/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h2><div> --}}
+<h2>{{toTitleCase display_name}}</h2>
+<div>
+    {{#unless single_subclass}}
+        {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
+        {{{desc}}}
+    {{/unless}}
+    {{#each subclass_list}}
+        <h3><a class="anchor" id="classes/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h3>
+        <div class="class-desc well">
+            <div class="class-images">
+                {{#each images}}
+                    <img src="img/{{file}}" width="{{#if width}}{{width}}{{else}}64{{/if}}" height="{{#if height}}{{height}}{{else}}64{{/if}}"/>
+                {{/each}}
+            </div>
+            {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
+            {{{desc}}}
+            <div class="wiki-link">
+                <a href="http://te4.org/wiki/{{toWikiPage name}}">View Wiki</a>
+            </div>
+        </div>
+        <div class="class-detail-container container-fluid">
+            <div class="col-md-4">
+                <h4>Stats</h4>
+                <dl class="dl-horizontal stats">
+                    {{stat "Strength" stats.str}}
+                    {{stat "Dexterity" stats.dex}}
+                    {{stat "Constitution" stats.con}}
+                    {{stat "Magic" stats.mag}}
+                    {{stat "Willpower" stats.wil}}
+                    {{stat "Cunning" stats.cun}}
+                    {{stat "Life per level" copy_add.life_rating}}
+                </dl>
+            </div>
+        </div>
+        <div class="class-detail-container container-fluid">
+            {{$ 'class_talents' talents_types=talents_types_class title='Class Talents' css_class='class-talents' }}
+            {{$ 'class_talents' talents_types=talents_types_generic title='Generic Talents' css_class='generic-talents' }}
+        </div>
+    {{/each}}
+</div>

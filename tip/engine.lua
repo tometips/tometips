@@ -87,7 +87,6 @@ load = loadfile_and_execute
 require 'engine.dialogs.Chat'
 
 require 'engine.utils'
-require 'lib.json4lua.json.json'
 local DamageType = require "engine.DamageType"
 local ActorStats = require "engine.interface.ActorStats"
 local ActorResource = require "engine.interface.ActorResource"
@@ -196,4 +195,17 @@ local player = Actor.new{
     preferred_paradox = 0,
 }
 game.player = player
+
+-- table.mapv was added in newer versions of T-Engine's utils.lua.
+-- Copy its implementation and add it to older versions if needed.
+if not table.mapv then
+    -- Make a new table with each k, v = k, f(v) in the original.
+    function table.mapv(f, source)
+        local result = {}
+        for k, v in pairs(source) do
+            result[k] = f(v)
+        end
+        return result
+    end
+end
 

@@ -1,7 +1,7 @@
 require 'tip.engine'
+require 'lib.json4lua.json.json'
 
 local Actor = require 'mod.class.Actor'
-local Birther = require 'engine.Birther'
 
 spoilers = {
     -- Currently active parameters.  TODO: Configurable

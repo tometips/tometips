@@ -113,6 +113,15 @@ html, body, #side-nav-container, #content-container
     position: relative;
 }
 
+.page-header h1
+{
+    /* Left-float the header, and remove the margins that won't collapse
+     * because we're left-floating, so that it sits to the left of our navbar.
+     */
+    float: left;
+    margin: 0 20px 0 0;
+}
+
 #header-tools
 {
     position: absolute;
@@ -220,7 +229,6 @@ h3 img {
     font-weight: bold;
 }
 
-/* FIXME: Better color scheme? */
 .variable {
     color: #009e96;
 }
@@ -253,21 +261,21 @@ h3 img {
     position: relative;
 }
 
-.source-link {
+.source-link, .wiki-link {
     text-transform: lowercase;
     position: absolute;
     right: 15px;
     bottom: 15px;
 }
 
-.source-link, .source-link a {
+.source-link, .source-link a, .wiki-link, .wiki-link a {
     color: #999;
 }
 
-.source-link:before {
+.source-link:before, .wiki-link:before {
     content: '[ ';
 }
-.source-link:after {
+.source-link:after, .wiki-link:after {
     content: ' ]';
 }
 
@@ -277,6 +285,87 @@ table.old-new {
 
 table.old-new td {
     vertical-align: top;
+}
+
+.class-desc {
+    position: relative;
+}
+
+.flavor {
+    font-style: italic;
+    padding-bottom: 1em;
+}
+
+.class-images {
+    float: left;
+    padding-right: 10px;
+}
+
+.class-detail-container {
+    padding: 0;
+}
+
+.class-talents-detail {
+    height: 37px;
+    padding-bottom: 5px;
+}
+
+.class-detail-container .talent-mastery {
+    font-weight: bold;
+}
+
+.class-talents-detail ul {
+    padding: 0;
+}
+
+.class-talents-detail li {
+    display: inline;
+    list-style-type: none;
+    padding-right: 5px;
+}
+
+.class-talents-detail.locked img {
+    opacity: 0.8;
+
+    /* filter:url syntax is the only variant supported by Firefox pre 34 */
+    filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'saturate\' values=\'0\'/></filter></svg>#grayscale");
+
+    /* Newer, simpler syntax */
+    filter: grayscale(100%);
+    -moz-filter: grayscale(100%);
+    -webkit-filter: grayscale(100%);
+}
+
+.class-talents-detail.locked img:hover {
+    opacity: 1.0;
+
+    /* filter:url syntax is the only variant supported by Firefox pre 34 */
+    filter: url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'saturate\' values=\'1\'/></filter></svg>#grayscale");
+
+    /* Newer, simpler syntax */
+    filter: grayscale(0%);
+    -moz-filter: grayscale(0%);
+    -webkit-filter: grayscale(0%);
+}
+
+.stats {
+    margin-left: -40px;
+}
+
+.stats dt {
+    font-weight: normal;
+}
+
+.stat-bonus, .stat-penalty {
+    font-weight: bold;
+}
+
+.stat-bonus {
+    color: #00a000;
+}
+
+.stat-penalty {
+    color: #a00000;
 }
 
 /* ==========================================================================

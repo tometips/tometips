@@ -2,5 +2,8 @@
 /t-engine4
 /html/img/talents/*/
 /html/data/*/
+/html/js/partials.js
+/html/js/templates.js
+/html/.idea/
 /1.*/
 /master/
