@@ -5,6 +5,11 @@ if (typeof String.prototype.endsWith !== 'function') {
     };
 }
 
+function escapeHtml(s)
+{
+    return s.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+}
+
 function locationHashNoQuery()
 {
     return location.hash.replace(/\?.*/, '');
@@ -18,6 +23,22 @@ function currentQuery()
         return '?' + query;
     } else {
         return '';
+    }
+}
+
+function updateNav()
+{
+    // Update nav links to use the current version query.
+    $("a[data-base-href]").each(function () {
+        $(this).attr('href', $(this).attr('data-base-href') + currentQuery());
+    });
+}
+
+function setActiveNav(active_nav_route)
+{
+    $(".nav li").removeClass("active");
+    if (active_nav_route) {
+        $(".nav a[data-base-href='" + active_nav_route + "']").parent().addClass("active");
     }
 }
 
@@ -277,6 +298,8 @@ var versions = (function() {
         // module too closely to our DOM organization.)
         prev_expanded = getExpandedIds();
         $("#side-nav").html("");
+
+        updateNav();
     }
 
     var versions = {
@@ -352,6 +375,7 @@ var versions = (function() {
             $_dropdown = $el;
             versions.list($el, $container);
             versions.listen($el);
+            updateNav();
         }
     };
     versions.current = versions.DEFAULT;
@@ -369,6 +393,7 @@ function initializeRoutes() {
         default_route: crossroads.addRoute(':?query:', function(query) {
             versions.update(query);
             document.title = base_title;
+            setActiveNav();
 
             $("#content").html($("#news").html());
             $("#side-nav").html('');
@@ -407,6 +432,7 @@ function initializeRoutes() {
         talents: crossroads.addRoute('talents:?query:', function(query) {
             versions.update(query);
             document.title = base_title + ' - Talents';
+            setActiveNav("#talents");
 
             if (!$("#nav-talents").length) {
                 loadDataIfNeeded('', function() {
@@ -446,6 +472,7 @@ function initializeRoutes() {
         classes: crossroads.addRoute('classes:?query:', function(query) {
             versions.update(query);
             document.title += ' - Classes';
+            setActiveNav("#classes");
 
             if (!$("#nav-classes").length) {
                 loadDataIfNeeded('classes', function() {
@@ -562,10 +589,28 @@ function loadDataIfNeeded(data_file, success) {
     }
 }
 
+window.onerror = function(msg, url, line) {
+    $("html").removeClass("wait");
+
+    if ($("#content").html() === 'Loading...') {
+        $("#content").html('');
+    }
+
+    $("#content").prepend(
+        '<div class="alert alert-danger">' +
+            'Internal error: ' + escapeHtml(msg || '') +
+            ' on ' + url + ' line ' + line +
+            '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'  +
+        '</div>'
+    );
+}
+
 $(function() {
     // See http://stackoverflow.com/a/10801889/25507
     $(document).ajaxStart(function() { $("html").addClass("wait"); });
     $(document).ajaxStop(function() { $("html").removeClass("wait"); });
+
+    $("#side-nav-container .page-header").height($("#content-header").height());
 
     // Clicking on a ".clickable" element triggers the <a> within it.
     $("html").on("click", ".clickable", function(e) {

@@ -113,6 +113,15 @@ html, body, #side-nav-container, #content-container
     position: relative;
 }
 
+.page-header h1
+{
+    /* Left-float the header, and remove the margins that won't collapse
+     * because we're left-floating, so that it sits to the left of our navbar.
+     */
+    float: left;
+    margin: 0 20px 0 0;
+}
+
 #header-tools
 {
     position: absolute;
