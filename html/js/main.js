@@ -366,8 +366,12 @@ function initializeRoutes() {
     routes = {
 
         // Default route.  We currently just have talents.
-        default_route: crossroads.addRoute('', function() {
-            hasher.replaceHash('talents');
+        default_route: crossroads.addRoute(':?query:', function(query) {
+            versions.update(query);
+            document.title = base_title;
+
+            $("#content").html($("#news").html());
+            $("#side-nav").html('');
         }),
 
         // Updates for previous versions of the site.
