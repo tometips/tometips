@@ -224,6 +224,15 @@ h3 img {
     height: 100%;
 }
 
+.tooltip-inner {
+    text-align: left;
+}
+
+/* Manually copied from abbr[title]'s style */
+.html-tooltip {
+    border-bottom: dotted 1px #7a8288;
+}
+
 .variable, .stat-variable, .talent-variable {
     border-bottom: dotted 1px;
     font-weight: bold;

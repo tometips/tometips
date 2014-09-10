@@ -456,6 +456,11 @@ function initializeRoutes() {
                 $("#content").html(listTalents(tome, category));
                 scrollToId();
 
+                $(".html-tooltip").tooltip({ html: true });
+                $(".variable, .talent-variable, .stat-variable")
+                    .attr('data-toggle', 'tooltip')
+                    .tooltip({ html: true });
+
                 versions.updateFinished();
             });
         }),

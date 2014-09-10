@@ -98,7 +98,7 @@ spoilers = {
             css_class = 'talent-variable'
         end
 
-        return (self:usedParadoxOnly() and "Value for " or "Values for ") .. table.concat(msg, ", "), css_class
+        return (self:usedParadoxOnly() and "Value for\r" or "Values for\r") .. table.concat(msg, ",\r"), css_class
     end,
 
     -- Looks at the results of getTalentByLevel or multiDiff (a table) to see
@@ -276,7 +276,7 @@ function getByTalentLevel(actor, f)
         assert(next(spoilers.used) == nil)
         return result[1]
     else
-        return spoilers:formatResults(result)
+        return spoilers:formatResults(result):gsub('\r', '<br>')
     end
 end
 
@@ -289,6 +289,44 @@ function getvalByTalentLevel(val, actor, t)
     else
         return val
     end
+end
+
+function getTalentReqDesc(player, t, tlev)
+    -- Based on ActorTalents.getTalentReqDesc
+    local new_require = {}
+    local req = t.require
+    spoilers.used = {}
+    if type(req) == "function" then req = req(player, t) end
+    if req.level then
+        local v = util.getval(req.level, tlev)
+        if #new_require > 0 then new_require[#new_require+1] = ', ' end
+        new_require[#new_require+1] = ("Level %d"):format(v)
+    end
+    if req.stat then
+        for s, v in pairs(req.stat) do
+            v = util.getval(v, tlev)
+            if spoilers.used.stat then
+                local stat = {}
+                for k, s in pairs(spoilers.used.stat or {}) do
+                    stat[#stat+1] = Actor.stats_def[k].short_name:capitalize()
+                end
+                if #new_require > 0 then new_require[#new_require+1] = ', ' end
+                new_require[#new_require+1] = ("%s %d"):format(table.concat(stat, " or "), v)
+            else
+                if #new_require > 0 then new_require[#new_require+1] = ', ' end
+                new_require[#new_require+1] = ("%s %d"):format(player.stats_def[s].short_name:capitalize(), v)
+            end
+        end
+    end
+    if req.special then
+        if #new_require > 0 then new_require[#new_require+1] = '; ' end
+        new_require[#new_require+1] = req.special.desc
+    end
+    if req.talent then
+        -- Currently unimplemented (not because it's hard, but because ToME doesn't use it)
+        assert(false)
+    end
+    return table.concat(new_require)
 end
 
 -- Process each talent, adding text descriptions of the various attributes
@@ -366,6 +404,9 @@ for tid, t in pairs(Actor.talents_def) do
     -- Turn line breaks into <p>
     t.info_text = '<p>' .. t.info_text:gsub("\n", "</p><p>") .. '</p>'
 
+    -- Turn line breaks that we've added into normal line breaks
+    t.info_text = t.info_text:gsub("\r", "<br>")
+
     -- Finish turning ad hoc lists into <ul>
     t.info_text = t.info_text:gsub('([^>])<li>', function(s)
         return s .. '</p><ul><li>'
@@ -442,42 +483,12 @@ for tid, t in pairs(Actor.talents_def) do
     if t.image then t.image = t.image:gsub("talents/", "") end
 
     if t.require then
-        -- Based on ActorTalents.getTalentReqDesc
         local new_require = {}
-        local tlev = 1
-        local req = t.require
-        spoilers.used = {}
-        if type(req) == "function" then req = req(player, t) end
-        if req.level then
-            local v = util.getval(req.level, tlev)
-            if #new_require > 0 then new_require[#new_require+1] = ', ' end
-            new_require[#new_require+1] = ("Level %d"):format(v)
+        for tlev = 1, t.points do
+            new_require[#new_require+1] = getTalentReqDesc(player, t, tlev)
         end
-        if req.stat then
-            for s, v in pairs(req.stat) do
-                v = util.getval(v, tlev)
-                if spoilers.used.stat then
-                    local stat = {}
-                    for k, s in pairs(spoilers.used.stat or {}) do
-                        stat[#stat+1] = Actor.stats_def[k].short_name:capitalize()
-                    end
-                    if #new_require > 0 then new_require[#new_require+1] = ', ' end
-                    new_require[#new_require+1] = ("%s %d"):format(table.concat(stat, " or "), v)
-                else
-                    if #new_require > 0 then new_require[#new_require+1] = ', ' end
-                    new_require[#new_require+1] = ("%s %d"):format(player.stats_def[s].short_name:capitalize(), v)
-                end
-            end
-        end
-        if req.special then
-            if #new_require > 0 then new_require[#new_require+1] = '; ' end
-            new_require[#new_require+1] = req.special.desc
-        end
-        if req.talent then
-            -- Currently unimplemented (not because it's hard, but because ToME doesn't use it)
-            assert(false)
-        end
-        t.require = table.concat(new_require)
+        t.require = new_require
+        t.multi_require = t.points > 1
     end
 
     -- Strip unused elements in order to save space.
@@ -499,7 +510,7 @@ for tid, t in pairs(Actor.talents_def) do
     end
 end
 
--- TODO: travel speed, requirements
+-- TODO: travel speed
 --        local speed = self:getTalentProjectileSpeed(t)
 --        if speed then d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, ""..(speed * 100).."% of base", true)
 --        else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)

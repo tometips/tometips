@@ -1,5 +1,20 @@
 <dl class='dl-table'>
-    {{#if require}}<dt>Requirements</dt><dd>{{require}}</dd>{{/if}}
+    {{#if require}}
+        <dt>Requirements</dt>
+        <dd>
+            {{#if multi_require}}
+                <span class="html-tooltip" data-toggle="tooltip" data-placement="right" title="
+                Requirements at 1-{{points}} talent points:
+                <ol>
+                {{#each require}}
+                    <li>{{this}}</li>
+                {{/each}}
+                </ol>">{{require.[0]}}</span>
+            {{else}}
+                {{require.[0]}}
+            {{/if}}
+        </dd>
+    {{/if}}
     {{#if mode}}<dt>Use Mode</dt><dd>{{mode}}</dd>{{/if}}
     {{#if cost}}<dt>Cost</dt><dd>{{{cost}}}</dd>{{/if}}
     {{#if range}}<dt>Range</dt><dd>{{{range}}}</dd>{{/if}}
