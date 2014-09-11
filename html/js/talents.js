@@ -76,6 +76,8 @@ function fillTalentAvailability(tome, category) {
             }
         });
 
+        markupHintLinks();
+
         // HACK: Because we've changed page length, we probably just
         // invalidated scrollToId, so redo that. Is a better approach possible?
         scrollToId();

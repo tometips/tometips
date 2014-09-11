@@ -270,6 +270,15 @@ h3 img {
     position: relative;
 }
 
+/* A link that's merely a hint, so we want to de-emphasize a bit. */
+a.hint-link, a.hint-link:hover {
+    color: #c8c8c8;
+}
+
+a.hint-link .glyphicon {
+    font-size: 75%;
+}
+
 .source-link, .wiki-link {
     text-transform: lowercase;
     position: absolute;

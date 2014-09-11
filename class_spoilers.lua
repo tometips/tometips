@@ -12,6 +12,11 @@ function img(file, w, h)
     return { file = 'npc/' .. file .. '.png', width = w, height = h }
 end
 
+-- Manually configured images for each subclass. ToME itself instead uses
+-- (I think) its paper dolls and particle system, but that would be too hard
+-- to reproduce.
+--
+-- A few of these images aren't a great match; oh well.
 local subclass_images = {
     ALCHEMIST = { 'humanoid_human_master_alchemist', 'alchemist_golem' },
     ADVENTURER = { 'hostile_humanoid_adventurers_party' },
@@ -76,23 +81,34 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
     -- Process talent types for HTML, and split them into class and generic
     local talents_types_class = {}
     local talents_types_generic = {}
-    if type(sub.talents_types) == 'table' then
-        for k, v in pairs(sub.talents_types) do
-            -- This if is necessary to handle unimplemented or nonexistent talents (!?)
-            if Actor.talents_types_def[k] then
-                -- Make masteries 1-based
-                v[2] = v[2] + 1.0
-                -- Add talent type name
-                v[3] = k:split('/')[1] .. ' / ' .. Actor.talents_types_def[k].name
 
-                if Actor.talents_types_def[k].generic then
-                    talents_types_generic[k] = v
-                else
-                    talents_types_class[k] = v
+    local check_talents_types = function(talents_types, unlockable)
+        if type(talents_types) == 'table' then
+            for k, v in pairs(talents_types) do
+                -- This "if" is necessary to handle unimplemented or nonexistent talents (!?)
+                if Actor.talents_types_def[k] then
+                    -- Our output is the same as the array used by ToME, with
+                    -- the following modifications:
+                    --
+                    -- Make masteries 1-based
+                    v[2] = v[2] + 1.0
+                    -- Add talent type name
+                    v[3] = k:split('/')[1] .. ' / ' .. Actor.talents_types_def[k].name
+                    -- Add whether or not it's unlockable
+                    v[4] = unlockable
+
+                    if Actor.talents_types_def[k].generic then
+                        talents_types_generic[k] = v
+                    else
+                        talents_types_class[k] = v
+                    end
                 end
             end
         end
     end
+
+    check_talents_types(sub.talents_types)
+    check_talents_types(sub.unlockable_talents_types, true)
 
     subclasses[sub.short_name] = {
         name = sub.name,

@@ -1,4 +1,4 @@
 {{! For a talent type, shows the classes that can learn it. }}
 {{! Note the duplicated format with class_talents.handlebars. }}
 <a href="#classes/{{toHtmlId subclass.class_short_name}}/{{toHtmlId subclass.short_name}}{{currentQuery}}">{{toTitleCase subclass.name}}</a>
-(<span class="talent-mastery">×{{toDecimal value.[1] 1}}</span>{{#unless value.[0]}}, locked{{/unless}})
+{{> talent_mastery value}}

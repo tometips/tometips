@@ -159,6 +159,13 @@ function indexByHtmlId(obj, property) {
     return _.object(_.map(obj, function(elem) { return [ toHtmlId(elem[property]), elem ]; }));
 }
 
+/**Marks up inline links to the ToME wiki */
+function markupHintLinks() {
+    // TODO: Try FontAwesome instead. I think it might look nicer than glyphicon here.
+    $('.hint-link[target!=_blank]').append(' <span class="glyphicon glyphicon-new-window"></span>')
+        .attr('target', '_blank');
+}
+
 ///Iterates over properties, sorted. Based on http://stackoverflow.com/a/9058854/25507.
 Handlebars.registerHelper('eachProperty', function(context, options) {
     var ret = "",

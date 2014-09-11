@@ -1,5 +1,4 @@
 Collapse All doesn't work on first load
-What about locked talents?
 
 Distortion no longer displays stuff like "decreasing physical resistance by 0%" for 1.2.0.
 Permalink to individual talents

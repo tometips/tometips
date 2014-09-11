@@ -58,10 +58,13 @@ function fillClassTalents(tome, cls) {
                     talent_html = Handlebars.partials['class_talents_detail'](talent_details);
                 $('.class-talents-detail[data-talent-type="' + toHtmlId(this_type) + '"]').html(talent_html);
             });
+
+            markupHintLinks();
         });
     });
 }
 
+/**loadDataIfNeeded for classes */
 function loadClassesIfNeeded(success) {
     loadDataIfNeeded('classes', function(data) {
         fixupClasses(tome);
