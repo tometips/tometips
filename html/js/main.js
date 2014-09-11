@@ -461,6 +461,8 @@ function initializeRoutes() {
                     .attr('data-toggle', 'tooltip')
                     .tooltip({ html: true });
 
+                fillTalentAvailability(tome, category);
+
                 versions.updateFinished();
             });
         }),
@@ -480,7 +482,7 @@ function initializeRoutes() {
             setActiveNav("#classes");
 
             if (!$("#nav-classes").length) {
-                loadDataIfNeeded('classes', function() {
+                loadClassesIfNeeded(function() {
                     $("#side-nav").html(navClasses(tome));
                     load_nav_data_handler = false;
                     $("#content").html($("#news").html());
@@ -491,7 +493,7 @@ function initializeRoutes() {
         classes_class: crossroads.addRoute("classes/{cls}:?query:", function(cls, query) {
             versions.update(query);
 
-            loadDataIfNeeded('classes', function() {
+            loadClassesIfNeeded(function() {
                 routes.classes.matched.dispatch(query);
                 document.title += ' - ' + tome[versions.current].classes.classes_by_id[cls].display_name;
 
@@ -512,7 +514,7 @@ function initializeRoutes() {
         classes_class_subclass: crossroads.addRoute("classes/{cls}/{subclass}:?query:", function(cls, subclass, query) {
             routes.classes_class.matched.dispatch(cls, query);
         })
-    }
+    };
 
     function parseHash(new_hash, old_hash) {
          crossroads.parse(new_hash);

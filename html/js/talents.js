@@ -41,3 +41,43 @@ function listChangesTalents(tome) {
 function listRecentChangesTalents(tome) {
     return Handlebars.templates.changes_talents(tome[versions.current]["recent-changes"].talents);
 }
+
+/**Adds "Availability:" paragraphs to already rendered talent listings,
+ * showing which classes can learn each talent. */
+function fillTalentAvailability(tome, category) {
+    var show;
+
+    // The set of talent types we're interested in showing
+    show = _.object(_.map(tome[versions.current].talents[category], function(t) {
+        return [t.type, []];
+    }));
+
+    loadClassesIfNeeded(function() {
+        var subclasses = tome[versions.current].classes.subclasses,
+            sorted_subclasses = _.sortBy(subclasses, 'name');
+        _.each(sorted_subclasses, function(sub) {
+            _.each([ sub.talents_types_class, sub.talents_types_generic ], function(sub_talents_types) {
+                _.each(sub_talents_types, function(value, key) {
+                    var desc;
+                    if (show[key]) {
+                        if (sub.class_short_name) {
+                            // No associated class = inaccessible subclass
+                            // (like Tutorial Adventurer)
+                            show[key].push(Handlebars.partials.talent_classes({ subclass: sub, value: value }));
+                        }
+                    }
+                });
+            });
+        });
+
+        _.each(show, function(value, key) {
+            if (value.length) {
+                $("#talents\\/" + key.replace('/', '\\/') + "-avail").html('Availability: ' + value.join(', '));
+            }
+        });
+
+        // HACK: Because we've changed page length, we probably just
+        // invalidated scrollToId, so redo that. Is a better approach possible?
+        scrollToId();
+    });
+}

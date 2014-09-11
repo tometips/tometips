@@ -8,7 +8,14 @@ function fixupClasses(tome) {
     // Replace IDs in class_list with references to the actual class definition.
     c.class_list = _.map(c.class_list, function(cls) { return c.classes[cls]; });
 
-    // Replace subclass IDs in each class's subclass_list with references
+    // Store a reference from each subclass back to the class ID.
+    _.each(c.classes, function(elem) {
+        _.each(elem.subclass_list, function (sub) {
+            c.subclasses[sub].class_short_name = elem.short_name;
+        });
+    });
+
+        // Replace subclass IDs in each class's subclass_list with references
     // to the actual subclass definition.
     _.each(c.classes, function(elem) {
         elem.subclass_list = _.map(elem.subclass_list, function(sub) { return c.subclasses[sub]; });
@@ -21,12 +28,10 @@ function fixupClasses(tome) {
 }
 
 function navClasses(tome) {
-    fixupClasses(tome);
     return Handlebars.templates.class_nav(tome[versions.current].classes);
 }
 
 function listClasses(tome, cls) {
-    fixupClasses(tome);
     return Handlebars.templates.class(tome[versions.current].classes.classes_by_id[cls]);
 }
 
@@ -54,5 +59,12 @@ function fillClassTalents(tome, cls) {
                 $('.class-talents-detail[data-talent-type="' + toHtmlId(this_type) + '"]').html(talent_html);
             });
         });
+    });
+}
+
+function loadClassesIfNeeded(success) {
+    loadDataIfNeeded('classes', function(data) {
+        fixupClasses(tome);
+        success(data);
     });
 }
