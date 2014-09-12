@@ -463,6 +463,11 @@ function initializeRoutes() {
                 $("#content").html(listTalents(tome, category));
                 scrollToId();
 
+                // Manually initialize .collapse; if we don't, then the first
+                // click on Hide All will actually expand all.
+                // See https://github.com/twbs/bootstrap/issues/5859
+                $(".talent-details.collapse").collapse({toggle: false});
+                
                 $(".html-tooltip").tooltip({ html: true });
                 $(".variable, .talent-variable, .stat-variable")
                     .attr('data-toggle', 'tooltip')
