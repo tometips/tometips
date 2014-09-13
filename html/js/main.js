@@ -52,11 +52,11 @@ function scrollToId()
 
 function enableExpandCollapseAll()
 {
-    $(".expand-all").addClass('glyphicon-collapse-down')
+    $(".expand-all").addClass('fa fa-toggle-down')
         .attr('title', 'Expand All');
-    $(".collapse-all").addClass('glyphicon-collapse-up')
+    $(".collapse-all").addClass('fa fa-toggle-up')
         .attr('title', 'Collapse All');
-    $(".expand-all, .collapse-all").addClass('glyphicon clickable')
+    $(".expand-all, .collapse-all").addClass('clickable')
         .click(function() {
             $($(this).attr('data-target')).find('.collapse').collapse($(this).hasClass('expand-all') ? 'show' : 'hide');
         });
@@ -162,7 +162,7 @@ function indexByHtmlId(obj, property) {
 /**Marks up inline links to the ToME wiki */
 function markupHintLinks() {
     // TODO: Try FontAwesome instead. I think it might look nicer than glyphicon here.
-    $('.hint-link[target!=_blank]').append(' <span class="glyphicon glyphicon-new-window"></span>')
+    $('.hint-link[target!=_blank]').append(' <span class="fa fa-external-link"></span>')
         .attr('target', '_blank');
 }
 

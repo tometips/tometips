@@ -169,21 +169,25 @@ a.anchor
 }
 
 #side-nav .dropdown:before {
-    font-family: "Glyphicons Halflings";
+    font-family: "FontAwesome";
     font-size: 10px;
-    content: "\e114";
+    content: "\f078";
     padding-right: 5px;
+    width: 1.28571429em;    /* copied from fa-fw class */
+    display: inline-block;
 }
 
 #side-nav .dropdown.collapsed:before {
-    content: "\e080";
+    content: "\f054";
 }
 
 #side-nav .no-dropdown:before {
-    font-family: "Glyphicons Halflings";
+    font-family: "FontAwesome";
     font-size: 10px;
-    content: "\00a0";  /* Unicode non-breaking space - http://stackoverflow.com/a/16552398/25507 */
+    content: "\00a0";       /* Unicode non-breaking space - http://stackoverflow.com/a/16552398/25507 */
     padding-right: 5px;
+    width: 1.28571429em;    /* copied from fa-fw class */
+    display: inline-block;
 }
 
 .ver-dropdown-container {
@@ -191,13 +195,15 @@ a.anchor
 }
 
 .dropdown-option:before {
-    font-family: "Glyphicons Halflings";
-    content: "\00a0";  /* Unicode non-breaking space - http://stackoverflow.com/a/16552398/25507 */
+    font-family: "FontAwesome";
+    content: "\00a0";       /* Unicode non-breaking space - http://stackoverflow.com/a/16552398/25507 */
     padding-right: 5px;
+    width: 1.28571429em;    /* copied from fa-fw class */
+    display: inline-block;
 }
 
 .dropdown-option.selected:before {
-    content: "\e013";  /* Glyphicons check mark ("ok") */
+    content: "\f00c";  /* FontAwesome check mark ("ok") */
 }
 
 .dl-table dt {
@@ -275,7 +281,7 @@ a.hint-link, a.hint-link:hover {
     color: #c8c8c8;
 }
 
-a.hint-link .glyphicon {
+a.hint-link .fa {
     font-size: 75%;
 }
 
