@@ -166,6 +166,13 @@ function markupHintLinks() {
         .attr('target', '_blank');
 }
 
+function enableTalentTooltips() {
+    $(".html-tooltip").tooltip({ html: true });
+    $(".variable, .talent-variable, .stat-variable")
+        .attr('data-toggle', 'tooltip')
+        .tooltip({ html: true });
+}
+
 ///Iterates over properties, sorted. Based on http://stackoverflow.com/a/9058854/25507.
 Handlebars.registerHelper('eachProperty', function(context, options) {
     var ret = "",
@@ -419,6 +426,8 @@ function initializeRoutes() {
                 document.title += ' - New in ' + tome[versions.current].majorVersion;
                 $("#content").html(listChangesTalents(tome));
 
+                enableTalentTooltips();
+
                 versions.updateFinished();
             });
         }),
@@ -431,6 +440,8 @@ function initializeRoutes() {
             loadDataIfNeeded('recent-changes.talents', function() {
                 document.title += ' - New in ' + tome[versions.current].version;
                 $("#content").html(listRecentChangesTalents(tome));
+
+                enableTalentTooltips();
 
                 versions.updateFinished();
             });
@@ -467,11 +478,8 @@ function initializeRoutes() {
                 // click on Hide All will actually expand all.
                 // See https://github.com/twbs/bootstrap/issues/5859
                 $(".talent-details.collapse").collapse({toggle: false});
-                
-                $(".html-tooltip").tooltip({ html: true });
-                $(".variable, .talent-variable, .stat-variable")
-                    .attr('data-toggle', 'tooltip')
-                    .tooltip({ html: true });
+
+                enableTalentTooltips();
 
                 fillTalentAvailability(tome, category);
 
@@ -565,8 +573,10 @@ function loadDataIfNeeded(data_file, success) {
     // Load top-level data, then reissue the request.
     if (!tome[versions.current]) {
         loadData('tome', function(data) {
-            data.hasMajorChanges = data.majorVersion != versions.asMajor(versions.ALL[0]);
-            data.hasMinorChanges = data.version != versions.ALL[0] && !versions.isMajor(data.version) && data.version != 'master';
+            data.hasMajorChanges = versions.asMajor(data.version) != versions.asMajor(versions.ALL[0]);
+            data.hasMinorChanges = data.version != versions.ALL[0] &&
+                !versions.isMajor(data.version) &&
+                data.version != 'master';
 
             data.version = versions.name(data.version);
             data.majorVersion = versions.asMajor(data.version);

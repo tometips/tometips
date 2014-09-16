@@ -126,10 +126,25 @@ end
 
 changes = { talents = {} }
 
+local talent_keys = { 'info_text', 'cooldown', 'mode', 'cost', 'range', 'use_speed', 'require' }
+
+-- 1.2.4 changes how use speed is displayed (from "1 turn" to "Weapon", "Spell", etc.)
+local ignore_talent_keys = {}
+if from_version == '1.2.3' and (to_version == '1.2.4' or to_version == 'master') then
+    ignore_talent_keys.use_speed = true
+end
+
 function talentsMatch(from, to)
-    local check_keys = { 'info_text', 'cooldown', 'mode', 'cost', 'range', 'use_speed', 'require' }
-    for i = 1, #check_keys do
-        if from[check_keys[i]] ~= to[check_keys[i]] then return false end
+    for i = 1, #talent_keys do
+        if not ignore_talent_keys[talent_keys[i]] then
+            local lhs, rhs = from[talent_keys[i]], to[talent_keys[i]]
+            -- Minimal table support.  For now, we only need arrays.
+            if type(lhs) == 'table' and type(rhs) == 'table' then
+                for j, v in ipairs(lhs) do
+                    if lhs[j] ~= rhs[j] then return false end
+                end
+            elseif lhs ~= rhs then return false end
+        end
     end
     return true
 end
