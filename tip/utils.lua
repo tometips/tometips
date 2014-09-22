@@ -51,6 +51,8 @@ end
 local source_lines = {}
 function tip.util.resolveSource(dbginfo)
     local filename = dbginfo.source:sub(2)
+    -- Filename minus leading version subdirectory
+    local relative_filename = filename:sub(filename:find('/') + 1)
 
     if not source_lines[filename] then
         local f = assert(io.open(filename, 'r'))
@@ -59,7 +61,7 @@ function tip.util.resolveSource(dbginfo)
     end
 
     for line = dbginfo.linedefined, 1, -1 do
-        if source_lines[filename][line]:sub(1, 3) == "new" or source_lines[filename][line]:sub(1, 4) == "uber" then return { filename, line } end
+        if source_lines[filename][line]:sub(1, 3) == "new" or source_lines[filename][line]:sub(1, 4) == "uber" then return { relative_filename, line } end
     end
 end
 

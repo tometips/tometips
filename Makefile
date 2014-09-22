@@ -24,8 +24,15 @@ html/js/partials.js: html/js/partials/*.handlebars
 html/js/templates.js: html/js/templates/*.handlebars
 	handlebars --min html/js/templates > $@
 
+# "make clean" support.  To avoid creating spurious changes, this does not
+# delete images.
 clean:
-	rm -rf html/data/* html/img/talents/*.png html/img/talents/*/*.png html/js/templates.js html/js/partials.js
+	find html/data -mindepth 1 -maxdepth 1 -not -name README.txt | xargs rm -rf
+	rm html/js/templates.js html/js/partials.js
+
+# Cleaner than clean.  This *does* delete images.
+clean-all: clean
+	rm -rf html/img/talents/*.png html/img/talents/*/*.png
 
 publish:
 	test -d $(PAGES_OUTPUT)
