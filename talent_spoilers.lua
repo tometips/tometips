@@ -417,6 +417,10 @@ for tid, t in pairs(Actor.talents_def) do
     t.info_text = t.info_text:gsub('%-%-', '&mdash;')
     t.info_text = t.info_text:gsub('%.%.%.', '&hellip;')
 
+    -- Handle font tags. Duplicated from tip.util.tstringToHtml.
+    t.info_text = t.info_text:gsub('#{bold}#', '<span style="font-weight: bold"><span style="tstr-font-bold">')
+    t.info_text = t.info_text:gsub('#{normal}#', '</span></span>')
+
     -- Ending of info text.
 
     t.mode = t.mode or "activated"
