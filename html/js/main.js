@@ -145,6 +145,13 @@ function toTitleCase(s)
 function toHtmlId(s)
 {
     // For now, only replace characters known to cause issues.
+    return s.toLowerCase().replace(/[':\/]/, '_');
+}
+
+///As toHtmlId, but leaves slashes intact, for code like talents that
+///legitimately uses them (e.g., "spells/fire").
+function toUnsafeHtmlId(s)
+{
     return s.toLowerCase().replace(/[':]/, '_');
 }
 

@@ -25,7 +25,7 @@ function fillNavTalents(tome, category) {
     }
 
     for (var i = 0; i < talent_types.length; i++) {
-        $el.append('<li><a href="#talents/' + toHtmlId(talent_types[i].type) + currentQuery() + '">' + toTitleCase(talent_types[i].name + '</a></li>'));
+        $el.append('<li><a href="#talents/' + toUnsafeHtmlId(talent_types[i].type) + currentQuery() + '">' + toTitleCase(talent_types[i].name + '</a></li>'));
         // "type" happens to be category/name, which is what we want for routing
     }
 }
