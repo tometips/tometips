@@ -7,11 +7,17 @@ spoilers = {
     -- Currently active parameters.  TODO: Configurable
     active = {
         mastery = 1.3,
+
         -- To simplify implementation, we use one value for stats (str, dex,
         -- etc.) and powers (physical power, accuracy, mindpower, spellpower).
         stat_power = 100,
+
         -- According to chronomancer.lua, 300 is "the optimal balance"
         paradox = 300,
+
+        -- The goal is to display effectiveness at 50% of max psi.
+        psi = 50,
+        max_psi = 100,
     },
 
     -- We iterate over these parameters to display the effects of a talent at
@@ -88,6 +94,14 @@ spoilers = {
         end
 
         if self.used.paradox then msg[#msg+1] = ("paradox %i"):format(self.active.paradox) use_stat_power = true end
+
+        if self.used.psi and self.used.max_psi then msg[#msg+1] = ("psi %i%%"):format(self.active.psi / self.active.max_psi * 100)
+        elseif self.used.psi or self.used.max_psi then
+            -- Abort, since we won't know how to handle.
+            -- Can add handling if/when ToME starts using it
+            tip.util.logError("Unexpected use of psi without max_psi or vice versa")
+            os.exit(1)
+        end
 
         local css_class
         if use_stat_power and use_talent then
@@ -209,6 +223,16 @@ end
 player.getParadox = function(self)
     spoilers.used.paradox = true
     return spoilers.active.paradox
+end
+
+player.getPsi = function(self)
+    spoilers.used.psi = true
+    return spoilers.active.psi
+end
+
+player.getMaxPsi = function(self)
+    spoilers.used.max_psi = true
+    return spoilers.active.max_psi
 end
 
 player.isTalentActive = function() return false end  -- TODO: Doesn't handle spiked auras
