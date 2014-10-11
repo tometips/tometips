@@ -14,6 +14,9 @@ end
 function string.starts(s, start)
    return string.sub(s, 1, string.len(start)) == start
 end
+function string.ends(s, ends)
+   return ends == '' or string.sub(s, -string.len(ends)) == ends
+end
 
 function string.escapeHtml(self)
     return self:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
