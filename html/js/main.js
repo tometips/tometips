@@ -325,7 +325,7 @@ var versions = (function() {
 
     var versions = {
         DEFAULT: '1.2.4',
-        ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2', '1.2.3', '1.2.4' /*, 'master'*/ ],
+        ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2', '1.2.3', '1.2.4', 'master' ],
         DISPLAY: { 'master': 'next' },
 
         name: function(ver) {
