@@ -26,14 +26,6 @@ function currentQuery()
     }
 }
 
-function updateNav()
-{
-    // Update nav links to use the current version query.
-    $("a[data-base-href]").each(function () {
-        $(this).attr('href', $(this).attr('data-base-href') + currentQuery());
-    });
-}
-
 function setActiveNav(active_nav_route)
 {
     $(".nav li").removeClass("active");
@@ -304,10 +296,82 @@ function configureImgSize() {
     });
 }
 
+var typeahead = (function() {
+    var categories = [ 'classes', 'talents-types', 'talents' ];
+    var category_header = {
+        'classes': 'Classes',
+        'talents-types': 'Talent Categories',
+        'talents': 'Talents'
+    };
+
+    // Bloodhound search objects.  These are indexed by version number and have
+    // subkeys for each data source.
+    var search = {};
+
+    function updateSearch(version) {
+        if (search[version]) {
+            return;
+        }
+
+        search[version] = {};
+        for (var i = 0; i < categories.length; i++) {
+            search[version][categories[i]] = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                prefetch: 'data/' + version + '/search.' + categories[i] + '.json'
+            });
+            search[version][categories[i]].initialize();
+        }
+    }
+
+    function initTypeahead(version) {
+        var datasets = [];
+        for (var i = 0; i < categories.length; i++) {
+            datasets.push({
+                name: version.replace(/\./g, '_') + '-' + categories[i],
+                displayKey: 'name',
+                source: search[version][categories[i]].ttAdapter(),
+                templates: {
+                    header: '<h4>' + category_header[categories[i]] + '</h4>',
+                }
+            });
+        }
+        $('.typeahead').typeahead({ highlight: true, minLength: 1 }, datasets);
+    }
+
+    function updateTypeahead(version) {
+        $('.typeahead').typeahead('destroy');
+        initTypeahead(version);
+    }
+
+    return {
+        init: function(version) {
+            updateSearch(version);
+            initTypeahead(version);
+        },
+
+        update: function(version) {
+            updateSearch(version);
+            updateTypeahead(version);
+        },
+    };
+})();
+
 // ToME versions.
 var versions = (function() {
-    var $_dropdown,
-        prev_expanded;
+    var $_dropdown;
+
+    // List of collapsible IDs which are currently expanded, so that we can
+    // maintain expanded/collapsed state when switching versions.
+    var prev_expanded;
+
+    ///Updates navigation after the version is initialized or changed.
+    function updateNav() {
+        // Update nav links to use the current version query.
+        $("a[data-base-href]").each(function () {
+            $(this).attr('href', $(this).attr('data-base-href') + currentQuery());
+        });
+    }
 
     function onChange() {
         $_dropdown.val(versions.current);
@@ -321,6 +385,7 @@ var versions = (function() {
         $("#side-nav").html("");
 
         updateNav();
+        typeahead.update(versions.current);
     }
 
     var versions = {
@@ -397,6 +462,7 @@ var versions = (function() {
             versions.list($el, $container);
             versions.listen($el);
             updateNav();
+            typeahead.init(versions.current);
         }
     };
     versions.current = versions.DEFAULT;
