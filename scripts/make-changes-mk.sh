@@ -6,7 +6,7 @@ make_entry() {
     local prefix=$3
 cat <<EOF
 html/data/$ver/${prefix}changes.talents.json: html/data/$prev/tome.json html/data/$ver/tome.json
-	lua make_change_list.lua html/data/ $prev $ver $prefix
+	\$(LUA) make_change_list.lua html/data/ $prev $ver $prefix
 EOF
 }
 
@@ -32,13 +32,13 @@ for ver in $*; do
     fi
     if [ -n "$prev_major" ]; then
         make_entry $prev_major $ver
-	else
-		make_dummy_entry $ver
+    else
+        make_dummy_entry $ver
     fi
     if [ -n "$prev" -a "$prev" != "$prev_major" ]; then
         make_entry $prev $ver recent-
-	else
-		make_dummy_entry $ver recent-
+    else
+        make_dummy_entry $ver recent-
     fi
     prev=$ver
 done

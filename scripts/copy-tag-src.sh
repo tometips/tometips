@@ -17,11 +17,11 @@ trap "(cd t-engine4 && git checkout master)" EXIT SIGINT SIGTERM
 
 rm -rf $tag
 mkdir $tag
-list_dirs | while read src dst; do
+while read src dst; do
     # Canonicalize destination directory
     destdir=$(readlink -f $tag/$dst)
 
     mkdir -p $destdir
-	(cd t-engine4/$src && cp -v --parents $(find -name '*.lua') $destdir)
-done
+	(cd t-engine4/$src && cp -v --parents $(find . -name '*.lua') $destdir)
+done < <(list_dirs)
 
