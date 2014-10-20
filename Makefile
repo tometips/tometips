@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3
+VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4
 VERSIONS += master
 
 # GitHub Pages output
