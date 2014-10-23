@@ -1,0 +1,33 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Text files - scripts, makefiles, docs
+Makefile text
+*.mk text
+*.sh text eol=lf
+*.bash text eol=lf
+*.md text
+*.txt text
+
+# Text files - Lua
+*.lua text
+
+# Text files - web
+*.html text
+*.css text
+*.js text
+*.handlebars text
+*.xml text
+*.map text
+
+# Denote all files that are truly binary and should not be modified.
+*.gif binary
+*.jpg binary
+*.png binary
+
+# Web fonts
+*.otf binary
+*.eot binary
+*.svg binary
+*.ttf binary
+*.woff binary
