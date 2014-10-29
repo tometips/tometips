@@ -263,13 +263,39 @@ h3 img {
     color: #999;
 }
 
-/* Manually copied from dropdown-menu's style */
+/* ==========================================================================
+   Search dropdown (Twitter typeahead.js) styles.  Some of these are manually
+   copied from dropdown-menu.  TODO: Use LESS or Sass to remove duplication.
+   ========================================================================== */
+
 .tt-dropdown-menu {
     background-clip: padding-box;
     background-color: #3a3f44;
     border: 1px solid rgba(0, 0, 0, 0.15);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.176);
-    padding: 5px;
+    width: 100%;
+}
+
+.tt-dropdown-menu h4, .tt-dropdown-menu a {
+    padding: 0 5px;
+}
+
+.tt-suggestion .description {
+    font-style: italic;
+}
+
+.tt-suggestion .description strong.tt-highlight {
+    font-weight: normal;
+}
+
+.tt-suggestion a {
+    display: block;
+    padding: 0 5px;
+}
+
+.tt-suggestion a:hover {
+    background: #272b30;
+    text-decoration: none;
 }
 
 /* ==========================================================================

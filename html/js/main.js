@@ -227,10 +227,9 @@ Handlebars.registerHelper('toDecimal', function(context, places, options) {
    return context.toFixed(places || 2);
 });
 
-// ToME-specific function that makes a ToME ID a valid and standard HTML ID
-Handlebars.registerHelper('toHtmlId', function(context, options) {
-    return toHtmlId(context);
-});
+// ToME-specific functions that makes a ToME ID a valid and standard HTML ID
+Handlebars.registerHelper('toHtmlId', toHtmlId);
+Handlebars.registerHelper('toUnsafeHtmlId', toUnsafeHtmlId);
 
 // ToME-specific function that tries to make a name or ID into a te4.org wiki page name
 Handlebars.registerHelper('toWikiPage', function(context, options) {
@@ -333,6 +332,7 @@ var typeahead = (function() {
                 source: search[version][categories[i]].ttAdapter(),
                 templates: {
                     header: '<h4>' + category_header[categories[i]] + '</h4>',
+                    suggestion: Handlebars.templates.search_suggestion
                 }
             });
         }

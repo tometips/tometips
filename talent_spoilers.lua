@@ -626,9 +626,9 @@ local talents_json = {}
 for cat_k, cat_v in pairs(talents_by_category) do    -- iterate over "categories" (celestial, cursed, etc.)
     for type_i, type_v in ipairs(cat_v) do           -- iterate over talent types (celestial/chants, celestial/combat, etc.)
         local type_name = cat_k .. '/' .. type_v.name
-        talents_types_json[#talents_types_json+1] = { name=type_name, desc=type_v.description }
+        talents_types_json[#talents_types_json+1] = { name=type_name, desc=type_v.description, href='talents/'..type_v.type }
         for talent_i, talent_v in ipairs(type_v.talents) do
-            talents_json[#talents_json+1] = { name=talent_v.name, desc=("%s %i"):format(talent_v.type[1], talent_v.type[2]) }
+            talents_json[#talents_json+1] = { name=talent_v.name, desc=("%s %i"):format(talent_v.type[1], talent_v.type[2]), href='talents/'..talent_v.type[1] }
         end
     end
 end
