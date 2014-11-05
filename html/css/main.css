@@ -122,7 +122,7 @@ html, body, #side-nav-container, #content-container
     margin: 0 20px 0 0;
 }
 
-#header-tools
+.header-tools
 {
     position: absolute;
     right: 0;
@@ -133,7 +133,7 @@ html, body, #side-nav-container, #content-container
 /* Give header fields the same size.
  * Not sure if there's a cleaner way of doing this.
  */
-#header-tools input[type='text'], #header-tools select
+.header-tools input[type='text'], .header-tools select
 {
     border: 1px;
     padding: 1px;
@@ -273,7 +273,6 @@ h3 img {
     background-color: #3a3f44;
     border: 1px solid rgba(0, 0, 0, 0.15);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.176);
-    width: 100%;
 }
 
 .tt-dropdown-menu h4, .tt-dropdown-menu a {

@@ -744,6 +744,7 @@ $(function() {
     enableExpandCollapseAll();
     versions.init($(".ver-dropdown"), $(".ver-dropdown-container"));
     configureImgSize();
+    $('.tt-dropdown-menu').width($('#content-header .header-tools').width());
 
     // Track Google Analytics as we navigate from one subpage / hash link to another.
     // Based on http://stackoverflow.com/a/4813223/25507
