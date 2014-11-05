@@ -280,8 +280,16 @@ h3 img {
     padding: 0 5px;
 }
 
+/* Based on .dropdown-header */
+.tt-dropdown-menu h4
+{
+    color: #7a8288;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
 .tt-suggestion .description {
     font-style: italic;
+    color: #c8c8c8;
 }
 
 .tt-suggestion .description strong.tt-highlight {

@@ -315,8 +315,8 @@ var typeahead = (function() {
         search[version] = {};
         for (var i = 0; i < categories.length; i++) {
             search[version][categories[i]] = new Bloodhound({
-                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                datumTokenizer: Bloodhound.tokenizers.obj.nonword('name'),
+                queryTokenizer: Bloodhound.tokenizers.nonword,
                 prefetch: 'data/' + version + '/search.' + categories[i] + '.json'
             });
             search[version][categories[i]].initialize();
