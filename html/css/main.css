@@ -108,6 +108,11 @@ html, body, #side-nav-container, #content-container
     height: 100%;
 }
 
+#content-container
+{
+    position: relative;
+}
+
 .page-header
 {
     position: relative;
@@ -141,8 +146,11 @@ html, body, #side-nav-container, #content-container
 
 .sticky
 {
-    position: fixed;
-    z-index: 1;
+    position: absolute;
+    z-index: 9999;
+    /* left and right are duplicated from Bootstrap's columns' padding */
+    left: 15px;
+    right: 15px;
 }
 
 .sticky, .sticky h1

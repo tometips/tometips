@@ -92,25 +92,25 @@ function expandIds(id_list, disable_transitions)
 
 function makeStickyHeader($header, $container)
 {
-    var $sticky = $header.clone();
-    $sticky.attr('id', $header.attr('id') + '-sticky')
-        .addClass('sticky')
-        .css('width', $header.width())
-        .hide()
-        .insertBefore($header);
+    var header_top = $header.children('h1').offset().top;
+
+    // Making the header sticky (fixed/absolute position) removes it from
+    // layout, causing content to jump up.  To prevent this, create an empty
+    // placeholder div that takes up the same space as the non-sticky
+    // header.
+    var $placeholder = $("<div class='sticky-placeholder'></div>").hide().css('height', $header.outerHeight(true) + 'px').insertAfter($header);
+
     $container.scroll(function() {
-        // Generic approach.  Lets the full header skip up a bit before the sticky header appears.
-        //if ($container.scrollTop() >= $sticky.outerHeight())
-        if ($header.children('h1').offset().top < $sticky.children('h1').offset().top) {
-            $sticky.show();
-            $header.css('visibility', 'hidden');
+        if ($container.scrollTop() > header_top) {
+            // Standard approach to sticky header is position: fixed.
+            // That's hard to make work with our two-column, padding/margin
+            // design, so manually set positioning instead.
+            $header.addClass('sticky').css('top', $container.scrollTop() + 'px');
+            $placeholder.show();
         } else {
-            $sticky.hide();
-            $header.css('visibility', '');
+            $header.removeClass('sticky').css('top', '');
+            $placeholder.hide();
         }
-    });
-    $(window).resize(function() {
-        $sticky.css('width', $header.width());
     });
 }
 
