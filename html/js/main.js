@@ -319,6 +319,10 @@ var typeahead = (function() {
                 queryTokenizer: Bloodhound.tokenizers.nonword,
                 prefetch: 'data/' + version + '/search.' + categories[i] + '.json'
             });
+	    
+	    // FIXME: Do this if we detect a version change
+            //search[version][categories[i]].clearPrefetchCache();
+	    
             search[version][categories[i]].initialize();
         }
     }
