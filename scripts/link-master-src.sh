@@ -11,7 +11,7 @@ trap "rm -rf master" ERR
 
 rm -rf master
 mkdir -p master
-list_dirs | while read src dst; do
+while read src dst; do
     ln -sv ../t-engine4/$src master/$dst
-done
+done < <(list_dirs)
 

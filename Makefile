@@ -1,4 +1,5 @@
 SHELL := /bin/bash
+LUA ?= lua
 
 VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4
 VERSIONS += master
@@ -13,10 +14,10 @@ all: t-engine4 img html/js/templates.js html/js/partials.js \
 	$(patsubst %,html/data/%/recent-changes.talents.json,$(VERSIONS))
 
 html/data/%/tome.json: % talent_spoilers.lua
-	lua talent_spoilers.lua $< $(dir $@)
+	$(LUA) talent_spoilers.lua $< $(dir $@)
 
 html/data/%/classes.json: % class_spoilers.lua
-	lua class_spoilers.lua $< $(dir $@)
+	$(LUA) class_spoilers.lua $< $(dir $@)
 
 html/js/partials.js: html/js/partials/*.handlebars
 	handlebars --min --partial html/js/partials > $@
