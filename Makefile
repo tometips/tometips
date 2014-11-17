@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 LUA ?= lua
 
-VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4
+VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4 1.2.5
 VERSIONS += master
 
 # GitHub Pages output

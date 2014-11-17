@@ -7,7 +7,7 @@
         {{#eachProperty talents_types}}
             {{#if value.[2]}}
                 <li>
-                    <a href="#talents/{{key}}{{currentQuery}}">{{toTitleCase value.[2]}}</a>
+                    <a href="#talents/{{toUnsafeHtmlId key}}{{currentQuery}}">{{toTitleCase value.[2]}}</a>
                     {{> talent_mastery value}}
                     <br>
                     <div data-talent-type="{{toHtmlId key}}" class="class-talents-detail {{#unless value.[0]}}locked{{/unless}}"></div>
