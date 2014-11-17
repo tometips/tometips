@@ -89,7 +89,7 @@ textarea {
 }
 
 /* ==========================================================================
-   Author's custom styles
+   ToME Tips styles - main/top-level
    ========================================================================== */
 
 /* See http://stackoverflow.com/a/22428493/25507 */
@@ -108,6 +108,11 @@ html, body, #side-nav-container, #content-container
     height: 100%;
 }
 
+#content-container
+{
+    position: relative;
+}
+
 .page-header
 {
     position: relative;
@@ -122,7 +127,7 @@ html, body, #side-nav-container, #content-container
     margin: 0 20px 0 0;
 }
 
-#header-tools
+.header-tools
 {
     position: absolute;
     right: 0;
@@ -130,10 +135,22 @@ html, body, #side-nav-container, #content-container
     padding-bottom: 10px;
 }
 
+/* Give header fields the same size.
+ * Not sure if there's a cleaner way of doing this.
+ */
+.header-tools input[type='text'], .header-tools select
+{
+    border: 1px;
+    padding: 1px;
+}
+
 .sticky
 {
-    position: fixed;
-    z-index: 1;
+    position: absolute;
+    z-index: 9999;
+    /* left and right are duplicated from Bootstrap's columns' padding */
+    left: 15px;
+    right: 15px;
 }
 
 .sticky, .sticky h1
@@ -239,6 +256,67 @@ h3 img {
     border-bottom: dotted 1px #7a8288;
 }
 
+.clickable {
+    cursor: pointer;
+}
+
+#footer {
+    color: #999;
+    float: right;
+    font-style: italic;
+    font-size: 13px;
+}
+
+#footer a {
+    color: #999;
+}
+
+/* ==========================================================================
+   Search dropdown (Twitter typeahead.js) styles.  Some of these are manually
+   copied from dropdown-menu.  TODO: Use LESS or Sass to remove duplication.
+   ========================================================================== */
+
+.tt-dropdown-menu {
+    background-clip: padding-box;
+    background-color: #3a3f44;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.176);
+}
+
+.tt-dropdown-menu h4, .tt-dropdown-menu a {
+    padding: 0 5px;
+}
+
+/* Based on .dropdown-header */
+.tt-dropdown-menu h4
+{
+    color: #7a8288;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.tt-suggestion .description {
+    font-style: italic;
+    color: #c8c8c8;
+}
+
+.tt-suggestion .description strong.tt-highlight {
+    font-weight: normal;
+}
+
+.tt-suggestion a {
+    display: block;
+    padding: 0 5px;
+}
+
+.tt-suggestion a:hover {
+    background: #272b30;
+    text-decoration: none;
+}
+
+/* ==========================================================================
+   ToME Tips styles - individual pages
+   ========================================================================== */
+
 .variable, .stat-variable, .talent-variable {
     border-bottom: dotted 1px;
     font-weight: bold;
@@ -254,21 +332,6 @@ h3 img {
 
 .talent-variable {
     color: #00a000;
-}
-
-.clickable {
-    cursor: pointer;
-}
-
-#footer {
-    color: #999;
-    float: right;
-    font-style: italic;
-    font-size: 13px;
-}
-
-#footer a {
-    color: #999;
 }
 
 .panel-body {

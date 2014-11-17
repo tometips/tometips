@@ -26,14 +26,6 @@ function currentQuery()
     }
 }
 
-function updateNav()
-{
-    // Update nav links to use the current version query.
-    $("a[data-base-href]").each(function () {
-        $(this).attr('href', $(this).attr('data-base-href') + currentQuery());
-    });
-}
-
 function setActiveNav(active_nav_route)
 {
     $(".nav li").removeClass("active");
@@ -100,25 +92,25 @@ function expandIds(id_list, disable_transitions)
 
 function makeStickyHeader($header, $container)
 {
-    var $sticky = $header.clone();
-    $sticky.attr('id', $header.attr('id') + '-sticky')
-        .addClass('sticky')
-        .css('width', $header.width())
-        .hide()
-        .insertBefore($header);
+    var header_top = $header.children('h1').offset().top;
+
+    // Making the header sticky (fixed/absolute position) removes it from
+    // layout, causing content to jump up.  To prevent this, create an empty
+    // placeholder div that takes up the same space as the non-sticky
+    // header.
+    var $placeholder = $("<div class='sticky-placeholder'></div>").hide().css('height', $header.outerHeight(true) + 'px').insertAfter($header);
+
     $container.scroll(function() {
-        // Generic approach.  Lets the full header skip up a bit before the sticky header appears.
-        //if ($container.scrollTop() >= $sticky.outerHeight())
-        if ($header.children('h1').offset().top < $sticky.children('h1').offset().top) {
-            $sticky.show();
-            $header.css('visibility', 'hidden');
+        if ($container.scrollTop() > header_top) {
+            // Standard approach to sticky header is position: fixed.
+            // That's hard to make work with our two-column, padding/margin
+            // design, so manually set positioning instead.
+            $header.addClass('sticky').css('top', $container.scrollTop() + 'px');
+            $placeholder.show();
         } else {
-            $sticky.hide();
-            $header.css('visibility', '');
+            $header.removeClass('sticky').css('top', '');
+            $placeholder.hide();
         }
-    });
-    $(window).resize(function() {
-        $sticky.css('width', $header.width());
     });
 }
 
@@ -235,10 +227,9 @@ Handlebars.registerHelper('toDecimal', function(context, places, options) {
    return context.toFixed(places || 2);
 });
 
-// ToME-specific function that makes a ToME ID a valid and standard HTML ID
-Handlebars.registerHelper('toHtmlId', function(context, options) {
-    return toHtmlId(context);
-});
+// ToME-specific functions that makes a ToME ID a valid and standard HTML ID
+Handlebars.registerHelper('toHtmlId', toHtmlId);
+Handlebars.registerHelper('toUnsafeHtmlId', toUnsafeHtmlId);
 
 // ToME-specific function that tries to make a name or ID into a te4.org wiki page name
 Handlebars.registerHelper('toWikiPage', function(context, options) {
@@ -304,10 +295,87 @@ function configureImgSize() {
     });
 }
 
+var typeahead = (function() {
+    var categories = [ 'classes', 'talents-types', 'talents' ];
+    var category_header = {
+        'classes': 'Classes',
+        'talents-types': 'Talent Categories',
+        'talents': 'Talents'
+    };
+
+    // Bloodhound search objects.  These are indexed by version number and have
+    // subkeys for each data source.
+    var search = {};
+
+    function updateSearch(version) {
+        if (search[version]) {
+            return;
+        }
+
+        search[version] = {};
+        for (var i = 0; i < categories.length; i++) {
+            search[version][categories[i]] = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.obj.nonword('name'),
+                queryTokenizer: Bloodhound.tokenizers.nonword,
+                prefetch: 'data/' + version + '/search.' + categories[i] + '.json'
+            });
+	    
+	    // FIXME: Do this if we detect a version change
+            //search[version][categories[i]].clearPrefetchCache();
+	    
+            search[version][categories[i]].initialize();
+        }
+    }
+
+    function initTypeahead(version) {
+        var datasets = [];
+        for (var i = 0; i < categories.length; i++) {
+            datasets.push({
+                name: version.replace(/\./g, '_') + '-' + categories[i],
+                displayKey: 'name',
+                source: search[version][categories[i]].ttAdapter(),
+                templates: {
+                    header: '<h4>' + category_header[categories[i]] + '</h4>',
+                    suggestion: Handlebars.templates.search_suggestion
+                }
+            });
+        }
+        $('.typeahead').typeahead({ highlight: true, minLength: 1 }, datasets);
+    }
+
+    function updateTypeahead(version) {
+        $('.typeahead').typeahead('destroy');
+        initTypeahead(version);
+    }
+
+    return {
+        init: function(version) {
+            updateSearch(version);
+            initTypeahead(version);
+        },
+
+        update: function(version) {
+            updateSearch(version);
+            updateTypeahead(version);
+        },
+    };
+})();
+
 // ToME versions.
 var versions = (function() {
-    var $_dropdown,
-        prev_expanded;
+    var $_dropdown;
+
+    // List of collapsible IDs which are currently expanded, so that we can
+    // maintain expanded/collapsed state when switching versions.
+    var prev_expanded;
+
+    ///Updates navigation after the version is initialized or changed.
+    function updateNav() {
+        // Update nav links to use the current version query.
+        $("a[data-base-href]").each(function () {
+            $(this).attr('href', $(this).attr('data-base-href') + currentQuery());
+        });
+    }
 
     function onChange() {
         $_dropdown.val(versions.current);
@@ -321,6 +389,7 @@ var versions = (function() {
         $("#side-nav").html("");
 
         updateNav();
+        typeahead.update(versions.current);
     }
 
     var versions = {
@@ -397,6 +466,7 @@ var versions = (function() {
             versions.list($el, $container);
             versions.listen($el);
             updateNav();
+            typeahead.init(versions.current);
         }
     };
     versions.current = versions.DEFAULT;
@@ -678,6 +748,7 @@ $(function() {
     enableExpandCollapseAll();
     versions.init($(".ver-dropdown"), $(".ver-dropdown-container"));
     configureImgSize();
+    $('.tt-dropdown-menu').width($('#content-header .header-tools').width());
 
     // Track Google Analytics as we navigate from one subpage / hash link to another.
     // Based on http://stackoverflow.com/a/4813223/25507

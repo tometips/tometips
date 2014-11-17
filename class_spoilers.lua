@@ -77,6 +77,7 @@ for i, cls in ipairs(Birther.birth_descriptor_def.class) do
 end
 
 local subclasses = {}
+local subclass_short_desc = {}
 for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
     -- Process talent types for HTML, and split them into class and generic
     local talents_types_class = {}
@@ -123,6 +124,7 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
         copy_add = sub.copy_add,
         images = table.mapv(function(v) return type(v) == 'table' and img(unpack(v)) or img(v) end, subclass_images[sub.short_name] or {}),
     }
+    subclass_short_desc[sub.short_name] = sub.desc:split('\n')[1]
 end
 
 -- Output the data
@@ -136,3 +138,14 @@ out:write(json.encode({
 }))
 out:close()
 
+-- Output the search indexes
+local classes_json = {}
+for class_k, class_v in pairs(classes) do
+    for subclass_i, subclass_v in ipairs(class_v.subclass_list) do
+        local subclass = subclasses[subclass_v]
+        classes_json[#classes_json+1] = { name=subclass.display_name, desc=subclass_short_desc[subclass_v], href='classes/'..class_v.short_name:lower()..'/'..subclass.short_name:lower() }
+    end
+end
+local classes_out = io.open(output_dir .. 'search.classes.json', 'w')
+classes_out:write(json.encode(classes_json))
+classes_out:close()
