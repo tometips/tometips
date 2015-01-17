@@ -448,7 +448,9 @@ for tid, t in pairs(Actor.talents_def) do
     t.info_text = t.info_text:gsub('%.%.%.', '&hellip;')
 
     -- Handle font tags. Duplicated from tip.util.tstringToHtml.
-    t.info_text = t.info_text:gsub('#{bold}#', '<span style="font-weight: bold"><span style="tstr-font-bold">')
+    t.info_text = t.info_text:gsub('#{bold}#', '<span style="font-weight: bold"><span class="tstr-font-bold">')
+    t.info_text = t.info_text:gsub('#{italic}#', '<span style="font-style: italic"><span class="tstr-font-italic">')
+    t.info_text = t.info_text:gsub('#{underline}#', '<span style="text-decoration: underline"><span class="tstr-font-underline">')
     t.info_text = t.info_text:gsub('#{normal}#', '</span></span>')
 
     -- Ending of info text.

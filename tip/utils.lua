@@ -72,6 +72,12 @@ function tip.util.logError(s)
     io.stderr:write((spoilers.active.talent_id or "unknown") .. ': ' .. s .. '\n')
 end
 
+local font_to_css = {
+    italic = 'font-style: italic',
+    underline = 'text-decoration: underline',
+    bold = 'font-weight: bold',
+}
+
 function tip.util.tstringToHtml(tstr)
     local html = { '<p>' }, in_color, in_font
 
@@ -91,16 +97,16 @@ function tip.util.tstringToHtml(tstr)
             closeColorIfNeeded()
             in_color = true
             if #v == 4 then
-                html[#html+1] = ('<span style="color: #%02x%02x%02x"><span style="tstr-color-%02x%02x%02x">'):format(v[2], v[3], v[4], v[2], v[3], v[4])
+                html[#html+1] = ('<span style="color: #%02x%02x%02x"><span class="tstr-color-%02x%02x%02x">'):format(v[2], v[3], v[4], v[2], v[3], v[4])
             else
                 local c = colors[v[2]]
-                html[#html+1] = ('<span style="color: #%02x%02x%02x"><span style="tstr-color-%s">'):format(c.r, c.g, c.b, v[2])
+                html[#html+1] = ('<span style="color: #%02x%02x%02x"><span class="tstr-color-%s">'):format(c.r, c.g, c.b, v[2])
             end
         elseif v[1] == "font" then
             closeFontIfNeeded()
             if v[2] ~= 'normal' then
                 in_font = true
-                html[#html+1] = ('<span style="font-weight: %s"><span style="tstr-font-%s">'):format(v[2], v[2])
+                html[#html+1] = ('<span style="%s"><span class="tstr-font-%s">'):format(font_to_css[v[2]], v[2])
             end
         else
             html[#html+1] = string.escapeHtml(v)
