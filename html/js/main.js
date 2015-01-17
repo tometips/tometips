@@ -172,6 +172,10 @@ function enableTalentTooltips() {
         .tooltip({ html: true });
 }
 
+Handlebars.registerHelper('tome_git_url', function() {
+    return 'http://git.net-core.org/tome/t-engine4';
+});
+
 ///Iterates over properties, sorted. Based on http://stackoverflow.com/a/9058854/25507.
 Handlebars.registerHelper('eachProperty', function(context, options) {
     var ret = "",

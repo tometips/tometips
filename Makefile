@@ -1,6 +1,8 @@
 SHELL := /bin/bash
 LUA ?= lua
 
+TOME_GIT_URL := http://git.net-core.org/tome/t-engine4.git
+
 VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4 1.2.5
 VERSIONS += master
 
@@ -54,12 +56,14 @@ pretty: html/data/$(VERSION)
 
 # git shortcuts to automate maintenance of the local source tree
 t-engine4:
-	git clone http://git.net-core.org/darkgod/t-engine4.git
+	git clone $(TOME_GIT_URL)
 
 # git shortcut - git pull
 pull:
-	cd t-engine4 && git checkout master
-	cd t-engine4 && git pull
+	cd t-engine4 && \
+		git remote set-url origin $(TOME_GIT_URL) && \
+		git checkout master && \
+		git pull
 
 # Symlinks and working copies
 master:
