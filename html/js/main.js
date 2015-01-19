@@ -1,3 +1,5 @@
+var VERSION = '2015-01-15';
+
 // http://stackoverflow.com/a/2548133/25507
 if (typeof String.prototype.endsWith !== 'function') {
     String.prototype.endsWith = function(suffix) {
@@ -321,7 +323,10 @@ var typeahead = (function() {
             search[version][categories[i]] = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.nonword('name'),
                 queryTokenizer: Bloodhound.tokenizers.nonword,
-                prefetch: 'data/' + version + '/search.' + categories[i] + '.json'
+                prefetch: {
+                    url: 'data/' + version + '/search.' + categories[i] + '.json',
+                    thumbprint: VERSION
+                }
             });
 
             // FIXME: Do this if we detect a version change

@@ -7,5 +7,6 @@
 /html/.idea/
 /1.*/
 /master/
+/node_modules/
 *.swp
 *.swo

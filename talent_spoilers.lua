@@ -551,6 +551,8 @@ end
 --        if speed then d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, ""..(speed * 100).."% of base", true)
 --        else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)
 --        end
+--
+-- Skip sustain_slots ("Will Deactivate"); talent descriptions are hopefully good enough.
 
 -- TODO: Special cases:
 -- Golem's armor reconfiguration depends on armor mastery
