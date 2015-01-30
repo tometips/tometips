@@ -78,6 +78,15 @@ local font_to_css = {
     bold = 'font-weight: bold',
 }
 
+function tip.util.fontToSpan(font)
+    return ('<span style="%s"><span class="tstr-font-%s">'):format(font_to_css[font], font)
+end
+
+function tip.util.colorNameToSpan(color)
+    local c = colors[color]
+    return ('<span style="color: #%02x%02x%02x"><span class="tstr-color-%s">'):format(c.r, c.g, c.b, color)
+end
+
 function tip.util.tstringToHtml(tstr)
     local html = { '<p>' }, in_color, in_font
 
@@ -99,14 +108,13 @@ function tip.util.tstringToHtml(tstr)
             if #v == 4 then
                 html[#html+1] = ('<span style="color: #%02x%02x%02x"><span class="tstr-color-%02x%02x%02x">'):format(v[2], v[3], v[4], v[2], v[3], v[4])
             else
-                local c = colors[v[2]]
-                html[#html+1] = ('<span style="color: #%02x%02x%02x"><span class="tstr-color-%s">'):format(c.r, c.g, c.b, v[2])
+                html[#html+1] = tip.util.colorNametoSpan(v[2])
             end
         elseif v[1] == "font" then
             closeFontIfNeeded()
             if v[2] ~= 'normal' then
                 in_font = true
-                html[#html+1] = ('<span style="%s"><span class="tstr-font-%s">'):format(font_to_css[v[2]], v[2])
+                html[#html+1] = tip.util.fontToSpan(v[2])
             end
         else
             html[#html+1] = string.escapeHtml(v)

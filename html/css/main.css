@@ -23,22 +23,6 @@ body {
 }
 
 /*
- * Remove text-shadow in selection highlight: h5bp.com/i
- * These selection rule sets have to be separate.
- * Customize the background color to match your design.
- */
-
-::-moz-selection {
-    background: #b3d4fc;
-    text-shadow: none;
-}
-
-::selection {
-    background: #b3d4fc;
-    text-shadow: none;
-}
-
-/*
  * A better looking default horizontal rule
  */
 
@@ -381,6 +365,10 @@ table.old-new td {
 .flavor {
     font-style: italic;
     padding-bottom: 1em;
+}
+
+.stock-text {
+    font-style: italic;
 }
 
 .class-images {

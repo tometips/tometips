@@ -448,10 +448,12 @@ for tid, t in pairs(Actor.talents_def) do
     t.info_text = t.info_text:gsub('%.%.%.', '&hellip;')
 
     -- Handle font tags. Duplicated from tip.util.tstringToHtml.
-    t.info_text = t.info_text:gsub('#{bold}#', '<span style="font-weight: bold"><span class="tstr-font-bold">')
-    t.info_text = t.info_text:gsub('#{italic}#', '<span style="font-style: italic"><span class="tstr-font-italic">')
-    t.info_text = t.info_text:gsub('#{underline}#', '<span style="text-decoration: underline"><span class="tstr-font-underline">')
+    t.info_text = t.info_text:gsub('#{bold}#', tip.util.fontToSpan('bold'))
+    t.info_text = t.info_text:gsub('#{italic}#', tip.util.fontToSpan('italic'))
+    t.info_text = t.info_text:gsub('#{underline}#', tip.util.fontToSpan('underline'))
     t.info_text = t.info_text:gsub('#{normal}#', '</span></span>')
+    t.info_text = t.info_text:gsub('#LAST#', '</span></span>')
+    t.info_text = t.info_text:gsub('#([A-Z_]+)#', tip.util.colorNameToSpan)
 
     -- Ending of info text.
 
@@ -552,7 +554,9 @@ end
 --        else d:add({"color",0x6f,0xff,0x83}, "Travel Speed: ", {"color",0xFF,0xFF,0xFF}, "instantaneous", true)
 --        end
 --
--- Skip sustain_slots ("Will Deactivate"); talent descriptions are hopefully good enough.
+-- Skip sustain_slots ("Will Deactivate"); it would be nontrivial (ToME's own
+-- version just checks currently active sustains), and talent descriptions are
+-- hopefully good enough.
 
 -- TODO: Special cases:
 -- Golem's armor reconfiguration depends on armor mastery

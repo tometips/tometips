@@ -20,5 +20,13 @@
     {{#if range}}<dt>Range</dt><dd>{{{range}}}</dd>{{/if}}
     {{#if cooldown}}<dt>Cooldown</dt><dd>{{{cooldown}}}</dd>{{/if}}
     {{#if use_speed}}<dt>Use Speed</dt><dd>{{use_speed}}</dd>{{/if}}
-    {{#if info_text}}<dt class="multiline-dd">Description</dt><dd>{{{info_text}}}</dd>{{/if}}
+    {{#if info_text}}
+        <dt class="multiline-dd">Description</dt>
+        <dd>
+            {{{info_text}}}
+            {{#if no_unlearn_last}}
+                <p class="stock-text">This talent can alter the world in a permanent way, as such you can never unlearn it once known.</p>
+            {{/if}}
+        </dd>
+    {{/if}}
 </dl>
