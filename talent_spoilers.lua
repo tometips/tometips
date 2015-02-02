@@ -15,6 +15,8 @@ spoilers = {
         -- According to chronomancer.lua, 300 is "the optimal balance"
         paradox = 300,
 
+        _level = 50,
+
         -- The goal is to display effectiveness at 50% of max psi.
         psi = 50,
         max_psi = 100,
@@ -26,15 +28,15 @@ spoilers = {
     -- determineDisabled depends on this particular layout (5 varying stats and
     -- 5 varying talent levels).
     all_active = {
-        { stat_power=10,  talent_level=1},
-        { stat_power=25,  talent_level=1},
-        { stat_power=50,  talent_level=1},
-        { stat_power=75,  talent_level=1},
-        { stat_power=100, talent_level=1},
-        { stat_power=100, talent_level=2}, 
-        { stat_power=100, talent_level=3}, 
-        { stat_power=100, talent_level=4}, 
-        { stat_power=100, talent_level=5}, 
+        { stat_power=10,  _level=1,  talent_level=1},
+        { stat_power=25,  _level=10, talent_level=1},
+        { stat_power=50,  _level=25, talent_level=1},
+        { stat_power=75,  _level=40, talent_level=1},
+        { stat_power=100, _level=50, talent_level=1},
+        { stat_power=100, _level=50, talent_level=2},
+        { stat_power=100, _level=50, talent_level=3},
+        { stat_power=100, _level=50, talent_level=4},
+        { stat_power=100, _level=50, talent_level=5},
     },
 
     -- Merged into active whenever we're not processing per-stat /
@@ -42,6 +44,7 @@ spoilers = {
     default_active = {
         stat = 100,
         power = 100,
+        _level = 50,
         talent_level = 0,
     },
 
@@ -78,8 +81,10 @@ spoilers = {
         -- effect, hide the stats / powers to cut down on space usage.
         if use_talent then
             stat_power_text = tostring(self.active.stat_power)
+            level_text = tostring(self.active._level)
         else
-            stat_power_text = '10, 25, 50, 75, 100' -- HACK/TODO: Remove duplication with self.all_active
+            stat_power_text = '10, 25, 50, 75, 100' -- HACK: Duplicated from self.all_active
+            level_text = '1, 10, 25, 40, 50'
         end
 
         local use_stat_power = false
@@ -91,6 +96,14 @@ spoilers = {
             if self.used.physicalpower then msg[#msg+1] = ("physical power %s"):format(stat_power_text) use_stat_power = true end
             if self.used.spellpower then msg[#msg+1] = ("spellpower %s"):format(stat_power_text) use_stat_power = true end
             if self.used.mindpower then msg[#msg+1] = ("mindpower %s"):format(stat_power_text) use_stat_power = true end
+            if self.used.combat_physresist then msg[#msg+1] = ("physical save %s"):format(stat_power_text) use_stat_power = true end
+            if self.used.combat_spellresist then msg[#msg+1] = ("spell save %s"):format(stat_power_text) use_stat_power = true end
+            if self.used.combat_mentalresist then msg[#msg+1] = ("mental save %s"):format(stat_power_text) use_stat_power = true end
+        end
+
+        if self.used.level and not disable.stat_power then
+            msg[#msg+1] = 'character level ' .. level_text
+            use_stat_power = true   -- not exactly, but close enough
         end
 
         if self.used.paradox then msg[#msg+1] = ("paradox %i"):format(self.active.paradox) use_stat_power = true end
@@ -136,8 +149,8 @@ spoilers = {
         elseif table.allSame(results, 5, 9) then
             return table.concat(results, ', ', 1, 5), { talent = true }
 
-        -- Values 1-5 have varying stats / powers.  If they're all the
-        -- same, then stats / powers have no effect.
+        -- Values 1-5 have varying stats / powers / levels.  If they're all the
+        -- same, then stats / powers / levels have no effect.
         elseif table.allSame(results, 1, 5) then
             return table.concat(results, ', ', 5, 9), { stat_power = true }
 
@@ -173,10 +186,23 @@ spoilers = {
 }
 
 local player = game.player
+local player_metatable = getmetatable(player)
+setmetatable(player, {
+    __index = function(t, k)
+        if k == 'level' then
+            spoilers.used.level = true
+            return spoilers.active._level
+        else
+            return player_metatable.__index[k]
+        end
+    end
+})
+-- Clear values that we need to route through our __index
+player.level = nil -- clea
 
 player.getStat = function(self, stat, scale, raw, no_inc)
     spoilers.used.stat = spoilers.used.stat or {}
-    spoilers.used.stat[stat] = true
+    spoilers.used.stat[Actor.stats_def[stat].id] = true
 
     local val = spoilers.active.stat_power
     if no_inc then
@@ -224,6 +250,21 @@ player.combatMindpower = function(self, mod, add)
     end
     spoilers.used.mindpower = true
     return spoilers.active.stat_power * mod
+end
+
+player.combatPhysicalResist = function(self, fake)
+    spoilers.used.combat_physresist = true
+    return spoilers.active.stat_power
+end
+
+player.combatSpellResist = function(self, fake)
+    spoilers.used.combat_spellresist = true
+    return spoilers.active.stat_power
+end
+
+player.combatMentalResist = function(self, fake)
+    spoilers.used.combat_mentalresist = true
+    return spoilers.active.stat_power
 end
 
 player.getParadox = function(self)
@@ -298,11 +339,14 @@ function getByTalentLevel(actor, f)
     spoilers.used = {}
     for i, v in ipairs(spoilers.all_active) do
         table.merge(spoilers.active, v)
-        result[#result+1] = tostring(f())
+        local this_result = f()
+        if this_result then result[#result+1] = tostring(this_result) end
     end
     table.merge(spoilers.active, spoilers.default_active)
 
-    if table.allSame(result) and not spoilers:usedParadoxOnly() then
+    if next(result) == nil then
+        return nil
+    elseif table.allSame(result) and not spoilers:usedParadoxOnly() then
         assert(next(spoilers.used) == nil)
         return result[1]
     else
@@ -513,7 +557,10 @@ for tid, t in pairs(Actor.talents_def) do
     local cost = {}
     for i, v in ipairs(tip.raw_resources) do
         if t[v] then
-            cost[#cost+1] = string.format("%s %s", getvalByTalentLevel(t[v], player, t), tip.resources[v])
+            local c = getvalByTalentLevel(t[v], player, t)
+            if c then
+                cost[#cost+1] = string.format("%s %s", c, tip.resources[v])
+            end
         end
     end
     if #cost > 0 then t.cost = table.concat(cost, ", ") end
@@ -534,6 +581,7 @@ for tid, t in pairs(Actor.talents_def) do
     t.tactical = nil
     t.allow_random = nil
     t.no_npc_use = nil
+    t.__ATOMIC = nil
 
     -- Find the info function, and use that to find where the talent is defined.
     --

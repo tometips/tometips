@@ -108,7 +108,7 @@ function tip.util.tstringToHtml(tstr)
             if #v == 4 then
                 html[#html+1] = ('<span style="color: #%02x%02x%02x"><span class="tstr-color-%02x%02x%02x">'):format(v[2], v[3], v[4], v[2], v[3], v[4])
             else
-                html[#html+1] = tip.util.colorNametoSpan(v[2])
+                html[#html+1] = tip.util.colorNameToSpan(v[2])
             end
         elseif v[1] == "font" then
             closeFontIfNeeded()

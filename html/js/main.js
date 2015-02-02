@@ -1,4 +1,4 @@
-var VERSION = '2015-01-15';
+var VERSION = '2015-02-01';
 
 // http://stackoverflow.com/a/2548133/25507
 if (typeof String.prototype.endsWith !== 'function') {
@@ -323,6 +323,7 @@ var typeahead = (function() {
             search[version][categories[i]] = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.nonword('name'),
                 queryTokenizer: Bloodhound.tokenizers.nonword,
+                limit: 10,
                 prefetch: {
                     url: 'data/' + version + '/search.' + categories[i] + '.json',
                     thumbprint: VERSION
