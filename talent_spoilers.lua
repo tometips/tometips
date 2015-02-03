@@ -25,13 +25,21 @@ spoilers = {
     -- We iterate over these parameters to display the effects of a talent at
     -- different stats and talent levels.
     --
-    -- determineDisabled depends on this particular layout (5 varying stats and
-    -- 5 varying talent levels).
+    -- determineDisabled depends on this particular layout (5 varying stats,
+    -- 5 varying character levels, and 5 varying talent levels).
     all_active = {
-        { stat_power=10,  _level=1,  talent_level=1},
-        { stat_power=25,  _level=10, talent_level=1},
-        { stat_power=50,  _level=25, talent_level=1},
-        { stat_power=75,  _level=40, talent_level=1},
+        { stat_power=10,  _level=50, talent_level=5},
+        { stat_power=25,  _level=50, talent_level=5},
+        { stat_power=50,  _level=50, talent_level=5},
+        { stat_power=75,  _level=50, talent_level=5},
+        { stat_power=100, _level=50, talent_level=5},
+
+        { stat_power=100, _level=1,  talent_level=5},
+        { stat_power=100, _level=10, talent_level=5},
+        { stat_power=100, _level=25, talent_level=5},
+        { stat_power=100, _level=40, talent_level=5},
+        { stat_power=100, _level=50, talent_level=5},
+
         { stat_power=100, _level=50, talent_level=1},
         { stat_power=100, _level=50, talent_level=2},
         { stat_power=100, _level=50, talent_level=3},
@@ -101,7 +109,7 @@ spoilers = {
             if self.used.combat_mentalresist then msg[#msg+1] = ("mental save %s"):format(stat_power_text) use_stat_power = true end
         end
 
-        if self.used.level and not disable.stat_power then
+        if self.used.level and not disable.level then
             msg[#msg+1] = 'character level ' .. level_text
             use_stat_power = true   -- not exactly, but close enough
         end
@@ -138,26 +146,39 @@ spoilers = {
     -- which active parameters were actually used for a particular set of
     -- results.
     determineDisabled = function(self, results)
-        assert(#results == 9)
+        assert(#results == 15)
+        -- Values 1-5: stats/powers
+        -- Values 6-10: character level
+        -- Values 11-15: talent level
+        local not_stat_power = table.allSame(results, 1, 5)
+        local not_level = table.allSame(results, 6, 10)
+        local not_talent = table.allSame(results, 11, 15)
 
         -- All values are the same.  It must be paradox.
         if table.allSame(results) then
             return results[1], {}
 
-        -- Values 5-10 have varying talents.  If they're all the same,
-        -- then talents have no effect.
-        elseif table.allSame(results, 5, 9) then
-            return table.concat(results, ', ', 1, 5), { talent = true }
+        -- Stat/power dependent
+        elseif not_level and not_talent then
+            return table.concat(results, ', ', 1, 5), { level = true, talent = true }
 
-        -- Values 1-5 have varying stats / powers / levels.  If they're all the
-        -- same, then stats / powers / levels have no effect.
-        elseif table.allSame(results, 1, 5) then
-            return table.concat(results, ', ', 5, 9), { stat_power = true }
+        -- Talent dependent
+        elseif not_level and not_stat_power then
+            return table.concat(results, ', ', 11, 15), { level = true, stat_power = true }
 
-        -- Both stats / powers and talents have an effect, but hide the
-        -- stats / powers to cut down on space usage.
+        -- Character level dependent
+        elseif not_talent and not_stat_power then
+            return table.concat(results, ', ', 6, 10), { talent = true, stat_power = true }
+
+        -- Both stats and character level have an effect.  Show stats only
+        -- to cut down on space usage.
+        elseif not_talent then
+            return table.concat(results, ', ', 1, 5), {}
+
+        -- Both talents and something else have an effect.  Show talent level
+        -- only to cut down on space usage.
         else
-            return table.concat(results, ', ', 5, 9), {}
+            return table.concat(results, ', ', 11, 15), {}
         end
     end,
 

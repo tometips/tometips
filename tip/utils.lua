@@ -27,7 +27,7 @@ function tip.util.multiDiff(str, on_diff)
     local res = tstring{}
     for i = 1, #str[1] do
         local s = {}
-        for j = 1, #str do s[j] = str[j][i] end
+        for j = 1, #str do s[j] = str[j][i] or '' end
         if type(str[1][i]) == "string" and not table.allSame(s) then
             on_diff(s, res)
         else
