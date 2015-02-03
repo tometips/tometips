@@ -1,4 +1,4 @@
-var VERSION = '2015-02-01';
+var VERSION = '2015-02-02';
 
 // http://stackoverflow.com/a/2548133/25507
 if (typeof String.prototype.endsWith !== 'function') {

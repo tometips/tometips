@@ -182,7 +182,13 @@ spoilers = {
         ["T_SHERTUL_FORTRESS_BEAM"] = true,
         ["T_SHERTUL_FORTRESS_ORBIT"] = true,
         ["T_GLOBAL_CD"] = true,                  -- aka "charms"
-    }
+   },
+
+   alt_talent = {
+        ["cunning/poisons-effects"] = Actor.T_VILE_POISONS,
+        ["cunning/traps"] = Actor.T_TRAP_MASTERY,
+        ["chronomancy/manifold"] = Actor.T_WEAPON_MANIFOLD,
+    },
 }
 
 local player = game.player
@@ -407,15 +413,11 @@ end
 for tid, t in pairs(Actor.talents_def) do
     spoilers.active.talent_id = tid
 
-    -- Special cases: Poison effects depend on the Vile Poisons talent.  Traps depend on Trap Mastery.
+    -- Special cases: Some talent categories depend on particular talents.
     spoilers.active.alt_talent = false
     spoilers.active.alt_talent_fake_id = nil
-    if t.type[1] == "cunning/poisons-effects" then
-        spoilers.active.talent_id = Actor.T_VILE_POISONS
-        spoilers.active.alt_talent = true
-    end
-    if t.type[1] == "cunning/traps" then
-        spoilers.active.talent_id = Actor.T_TRAP_MASTERY
+    if spoilers.alt_talent[t.type[1]] then
+        spoilers.active.talent_id = spoilers.alt_talent[t.type[1]]
         spoilers.active.alt_talent = true
     end
     -- Special case: Jumpgate's talent is tied to Jumpgate: Teleport.
