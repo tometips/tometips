@@ -37,7 +37,7 @@ end
 function diff(o, n)
     local os = {}
     local ns = {}
-  
+
     for i = 1, #n do
         if not ns[n[i]] then
             ns[n[i]] = { rows = {}, o = nil }
@@ -128,9 +128,9 @@ changes = { talents = {} }
 
 local talent_keys = { 'info_text', 'cooldown', 'mode', 'cost', 'range', 'use_speed', 'require' }
 
--- Post 1.2.4 changes how use speed is displayed (from "1 turn" to "Weapon", "Spell", etc.)
+-- 1.3 changes how use speed is displayed (from "1 turn" to "Weapon", "Spell", etc.)
 local ignore_talent_keys = {}
-if from_version == '1.2.4' and (to_version == '1.2.5' or to_version == 'master') then
+if from_version == '1.2.5' and (to_version == '1.3.0' or to_version == 'master') then
     ignore_talent_keys.use_speed = true
 end
 
