@@ -358,7 +358,7 @@ table.old-new td {
     vertical-align: top;
 }
 
-.class-desc {
+.class-desc, .race-desc {
     position: relative;
 }
 
@@ -371,7 +371,7 @@ table.old-new td {
     font-style: italic;
 }
 
-.class-images {
+.class-images, .race-images {
     float: left;
     padding-right: 10px;
 }

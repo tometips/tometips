@@ -12,6 +12,7 @@ PAGES_OUTPUT = ../tometips.github.io
 all: t-engine4 img html/js/templates.js html/js/partials.js \
 	$(patsubst %,html/data/%/tome.json,$(VERSIONS)) \
 	$(patsubst %,html/data/%/classes.json,$(VERSIONS)) \
+	$(patsubst %,html/data/%/races.json,$(VERSIONS)) \
 	$(patsubst %,html/data/%/changes.talents.json,$(VERSIONS)) \
 	$(patsubst %,html/data/%/recent-changes.talents.json,$(VERSIONS))
 
@@ -20,6 +21,9 @@ html/data/%/tome.json: % talent_spoilers.lua
 
 html/data/%/classes.json: % class_spoilers.lua
 	$(LUA) class_spoilers.lua $< $(dir $@)
+
+html/data/%/races.json: % race_spoilers.lua
+	$(LUA) race_spoilers.lua $< $(dir $@)
 
 html/js/partials.js: html/js/partials/*.handlebars
 	handlebars --min --partial html/js/partials > $@

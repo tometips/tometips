@@ -15,7 +15,7 @@ function fixupClasses(tome) {
         });
     });
 
-        // Replace subclass IDs in each class's subclass_list with references
+    // Replace subclass IDs in each class's subclass_list with references
     // to the actual subclass definition.
     _.each(c.classes, function(elem) {
         elem.subclass_list = _.map(elem.subclass_list, function(sub) { return c.subclasses[sub]; });

@@ -1,17 +1,17 @@
 {{! No anchor. Since there's only one h2, we don't want to jump to putting the anchor at the top of the screen. }}
-{{!-- <h2><a class="anchor" id="classes/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h2><div> --}}
+{{!-- <h2><a class="anchor" id="races/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h2><div> --}}
 <h2>{{toTitleCase display_name}}</h2>
 <div>
-    {{#unless single_subclass}}
+    {{#unless single_subrace}}
         {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
         {{{desc}}}
     {{/unless}}
-    {{#each subclass_list}}
-        <h3 {{#if ../single_subclass}}style="display: none;"{{/if}}>
-            <a class="anchor" id="classes/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}
+    {{#each subrace_list}}
+        <h3 {{#if ../single_subrace}}style="display: none;"{{/if}}>
+            <a class="anchor" id="races/{{toHtmlId ../short_name}}/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}
         </h3>
-        <div class="class-desc well">
-            <div class="class-images">
+        <div class="race-desc well">
+            <div class="race-images">
                 {{#each images}}
                     <img src="img/{{file}}" width="{{#if width}}{{width}}{{else}}64{{/if}}" height="{{#if height}}{{height}}{{else}}64{{/if}}"/>
                 {{/each}}
@@ -32,13 +32,10 @@
                     {{stat "Magic" stats.mag}}
                     {{stat "Willpower" stats.wil}}
                     {{stat "Cunning" stats.cun}}
-                    {{stat "Life per level" copy_add.life_rating}}
+                    {{customStat "Life per level" copy.life_rating copy.life_rating 1 10}}
+                    {{customStat "Experience penalty" experience exp_penalty -1 1}}
                 </dl>
             </div>
-        </div>
-        <div class="class-detail-container container-fluid">
-            {{$ 'class_talents' talents_types=talents_types_class title='Class Talents' css_class='class-talents' }}
-            {{$ 'class_talents' talents_types=talents_types_generic title='Generic Talents' css_class='generic-talents' }}
         </div>
     {{/each}}
 </div>

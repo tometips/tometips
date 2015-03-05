@@ -1,4 +1,4 @@
-var VERSION = '2015-02-02';
+var VERSION = '2015-03-04';
 
 // http://stackoverflow.com/a/2548133/25507
 if (typeof String.prototype.endsWith !== 'function') {
@@ -260,16 +260,37 @@ Handlebars.registerHelper('labelForChangeType', function(type) {
     return '<span class="label label-' + css_class[type] + '">' + text[type] + ':</span>';
 });
 
-Handlebars.registerHelper('stat', function(desc, value) {
-    var value_html;
-    if (!value) {
-        value_html = '<span class="stat-neutral">+0</span>';
-    } else if (value > 0) {
-        value_html = '<span class="stat-bonus">+' + value + '</span>';
+/* Displays an entry in a stat block.
+ * @param value
+ *   the internal value to process
+ * @display
+ *   how to display the value
+ * @mult
+ *   if -1, invert the comparison
+ * @compare
+ *   if value is > compare, then a bonus; if < compare, a penalty
+ */
+function stat(desc, value, display, mult, compare) {
+    var internal_value = value * (mult || 1),
+        value_html;
+    compare = (compare || 0) * (mult || 1);
+    if (internal_value == compare) {
+        value_html = '<span class="stat-neutral">' + display + '</span>';
+    } else if (internal_value > compare) {
+        value_html = '<span class="stat-bonus">' + display + '</span>';
     } else {
-        value_html = '<span class="stat-penalty">' + value + '</span>';
+        value_html = '<span class="stat-penalty">' + display + '</span>';
     }
     return new Handlebars.SafeString("<dt>" + desc + ":</dt><dd>" + value_html + "</dd>");
+}
+
+Handlebars.registerHelper('stat', function(desc, value) {
+    value = value || 0;
+    return stat(desc, value, value >= 0 ? '+' + value : value);
+});
+
+Handlebars.registerHelper('customStat', function(desc, value, display, mult, compare) {
+    return stat(desc, value, display, mult, compare);
 });
 
 function configureImgSize() {
@@ -302,8 +323,9 @@ function configureImgSize() {
 }
 
 var typeahead = (function() {
-    var categories = [ 'classes', 'talents-types', 'talents' ];
+    var categories = [ 'races', 'classes', 'talents-types', 'talents' ];
     var category_header = {
+        'races': 'Races',
         'classes': 'Classes',
         'talents-types': 'Talent Categories',
         'talents': 'Talents'
@@ -405,7 +427,7 @@ var versions = (function() {
     var versions = {
         DEFAULT: '1.2.5',
         ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2', '1.2.3', '1.2.4', '1.2.5', 'master' ],
-        DISPLAY: { 'master': 'next' },
+        DISPLAY: { 'master': '1.3beta' },
 
         name: function(ver) {
             return versions.DISPLAY[ver] || ver;
@@ -581,6 +603,43 @@ function initializeRoutes() {
         talents_category_type_id: crossroads.addRoute("talents/{category}/{type}/{talent_id}:?query:", function(category, type, talent_id, query) {
             // TODO: scrollToId not yet working for talent_id links, and talent_id links aren't yet published
             routes.talents_category.matched.dispatch(category, query);
+        }),
+
+        races: crossroads.addRoute('races:?query:', function(query) {
+            versions.update(query);
+            document.title += ' - Races';
+            setActiveNav("#races");
+
+            if (!$("#nav-races").length) {
+                loadRacesIfNeeded(function() {
+                    $("#side-nav").html(navRaces(tome));
+                    load_nav_data_handler = false;
+                    $("#content").html($("#news").html());
+                });
+            }
+        }),
+
+        races_race: crossroads.addRoute("races/{r}:?query:", function(r, query) {
+            versions.update(query);
+
+            loadRacesIfNeeded(function() {
+                routes.races.matched.dispatch(query);
+                document.title += ' - ' + tome[versions.current].races.races_by_id[r].display_name;
+
+                $("#content-container").scrollTop(0);
+
+                var this_nav = "#nav-" + r;
+                showCollapsed(this_nav);
+
+                $("#content").html(listRaces(tome, r));
+                scrollToId();
+
+                versions.updateFinished();
+            });
+        }),
+
+        races_race_subrace: crossroads.addRoute("races/{r}/{subrace}:?query:", function(r, subrace, query) {
+            routes.races_race.matched.dispatch(r, query);
         }),
 
         classes: crossroads.addRoute('classes:?query:', function(query) {

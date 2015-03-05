@@ -1,3 +1,5 @@
+Races - handle switching from 1.3's ogre back to an earlier version; add extra info (e.g., ghoul); link to racial talents
+
 AJAX requests may arrive out of order
 Undo Close Tab may cause errors
 Distortion no longer displays stuff like "decreasing physical resistance by 0%" for 1.2.0.
