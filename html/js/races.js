@@ -12,10 +12,9 @@ function fixupRaces(tome) {
     _.each(r.races, function(elem) {
         _.each(elem.subrace_list, function (sub) {
             var exp_penalty = r.subraces[sub].experience;
-            exp_penalty = ((exp_penalty || 1.0) - 1.0) * 100;
-            exp_penalty = (exp_penalty > 0 ? '+' : '') + exp_penalty.toFixed(0) + '%';
-            r.subraces[sub].race_short_name = elem.short_name;
+            exp_penalty = (exp_penalty || 1.0) - 1.0;
             r.subraces[sub].exp_penalty = exp_penalty;
+            r.subraces[sub].race_short_name = elem.short_name;
         });
     });
 
@@ -23,7 +22,7 @@ function fixupRaces(tome) {
     // to the actual subrace definition.
     _.each(r.races, function(elem) {
         elem.subrace_list = _.map(elem.subrace_list, function(sub) { return r.subraces[sub]; });
-        elem.single_subrace = elem.subrace_list.length == 1
+        elem.single_subrace = elem.subrace_list.length == 1;
     });
 
     r.races_by_id = indexByHtmlId(r.races, 'short_name');

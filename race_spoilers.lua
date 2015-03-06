@@ -60,10 +60,14 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subrace) do
         desc = birtherRaceDescToHtml(sub.desc),
         locked_desc = sub.locked_desc,
         stats = sub.inc_stats,
-        copy = sub.copy,
+        copy = table.clone(sub.copy),
         experience = sub.experience,
         images = table.mapv(function(v) return type(v) == 'table' and img(unpack(v)) or img(v) end, subrace_images[sub.short_name] or {}),
     }
+
+    -- Hack: Look up size category text without an Actor object
+    if sub.copy.size_category then subraces[sub.short_name].size = Actor.TextSizeCategory(sub.copy) end
+
     subrace_short_desc[sub.short_name] = sub.desc:split('\n')[1]
 end
 

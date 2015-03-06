@@ -23,17 +23,29 @@
             </div>
         </div>
         <div class="class-detail-container container-fluid">
-            <div class="col-md-4">
+            <div class="col-md-4 stats">
                 <h4>Stats</h4>
-                <dl class="dl-horizontal stats">
+                <dl class="dl-horizontal">
                     {{stat "Strength" stats.str}}
                     {{stat "Dexterity" stats.dex}}
                     {{stat "Constitution" stats.con}}
                     {{stat "Magic" stats.mag}}
                     {{stat "Willpower" stats.wil}}
                     {{stat "Cunning" stats.cun}}
-                    {{customStat "Life per level" copy.life_rating copy.life_rating 1 10}}
-                    {{customStat "Experience penalty" experience exp_penalty -1 1}}
+                    {{customStat "Life per level" copy.life_rating 1 10}}
+                    {{percentStat "Experience penalty" exp_penalty -1 0}}
+                </dl>
+            </div>
+            <div class="col-md-4 stats extra-stats">
+                <h4>Additional Stats</h4>
+                <dl class="dl-horizontal">
+                    {{#if size}}{{textStat "Size" size}}{{/if}}
+                    {{#if copy.global_speed_base}}{{percentStat "Global speed" copy.global_speed_base 0 1}}{{/if}}
+                    {{#if copy.poison_immune}}{{percentStat "Poison resistance" copy.poison_immune 0 0}}{{/if}}
+                    {{#if copy.cut_immune}}{{percentStat "Bleed resistance" copy.cut_immune 0 0}}{{/if}}
+                    {{#if copy.stun_immune}}{{percentStat "Stun resistance" copy.stun_immune 0 0}}{{/if}}
+                    {{#if copy.fear_immune}}{{percentStat "Fear resistance" copy.fear_immune 0 0}}{{/if}}
+                    {{#if copy.no_breath}}{{textStat "Special" "No need to breathe"}}{{/if}}
                 </dl>
             </div>
         </div>

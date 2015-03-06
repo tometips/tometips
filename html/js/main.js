@@ -266,13 +266,14 @@ Handlebars.registerHelper('labelForChangeType', function(type) {
  * @display
  *   how to display the value
  * @mult
- *   if -1, invert the comparison
+ *   If -1, invert the comparison.  If 0, don't prepend with '+'.
  * @compare
  *   if value is > compare, then a bonus; if < compare, a penalty
  */
 function stat(desc, value, display, mult, compare) {
     var internal_value = value * (mult || 1),
         value_html;
+    display = display || (value >= 0 ? '+' + value : value);
     compare = (compare || 0) * (mult || 1);
     if (internal_value == compare) {
         value_html = '<span class="stat-neutral">' + display + '</span>';
@@ -286,11 +287,21 @@ function stat(desc, value, display, mult, compare) {
 
 Handlebars.registerHelper('stat', function(desc, value) {
     value = value || 0;
-    return stat(desc, value, value >= 0 ? '+' + value : value);
+    return stat(desc, value);
 });
 
-Handlebars.registerHelper('customStat', function(desc, value, display, mult, compare) {
-    return stat(desc, value, display, mult, compare);
+Handlebars.registerHelper('customStat', function(desc, value, mult, compare) {
+    return stat(desc, value, value, mult, compare);
+});
+
+Handlebars.registerHelper('percentStat', function(desc, value, mult, compare) {
+    var percent = value * 100;
+    percent = (mult && percent > 0 ? '+' : '') + percent.toFixed(0) + '%';
+    return stat(desc, value, percent, mult, compare);
+});
+
+Handlebars.registerHelper('textStat', function(desc, value) {
+    return new Handlebars.SafeString('<dt>' + desc + ':</dt><dd><span class="stat-neutral">' + value + '</span></dd>');
 });
 
 function configureImgSize() {

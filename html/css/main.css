@@ -423,7 +423,11 @@ table.old-new td {
     -webkit-filter: grayscale(0%);
 }
 
-.stats {
+.extra-stats h4 {
+    visibility: hidden;
+}
+
+.stats dl {
     margin-left: -40px;
 }
 
