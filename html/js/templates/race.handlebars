@@ -12,9 +12,9 @@
         </h3>
         <div class="race-desc well">
             <div class="race-images">
-                {{#each images}}
+                {{#choose images}}
                     <img src="img/{{file}}" width="{{#if width}}{{width}}{{else}}64{{/if}}" height="{{#if height}}{{height}}{{else}}64{{/if}}"/>
-                {{/each}}
+                {{/choose}}
             </div>
             {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
             {{{desc}}}

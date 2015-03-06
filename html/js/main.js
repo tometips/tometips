@@ -221,6 +221,10 @@ Handlebars.registerHelper('$', function (partial) {
     return new Handlebars.SafeString(partial(context));
 });
 
+Handlebars.registerHelper('choose', function(context, options) {
+  return options.fn(context[Math.floor(Math.random() * context.length)]);
+});
+
 Handlebars.registerHelper('toTitleCase', function(context, options) {
     return toTitleCase(context);
 });

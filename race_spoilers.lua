@@ -15,6 +15,7 @@ end
 
 -- Manually configured images for each subrace.  See class_spoilers.lua.
 local subrace_images = {
+    OGRE = { { 'giant_ogre_ogre_guard-cropped', 64, 112 } },
 }
 
 function birtherRaceDescToHtml(desc)
@@ -44,6 +45,10 @@ for i, r in ipairs(Birther.birth_descriptor_def.race) do
 
         for j, sub in ipairs(Birther.birth_descriptor_def.subrace) do
             if r.descriptor_choices.subrace[sub.name] and not blacklist_subraces[sub.name] then
+                -- Hack: Apply race's copy to subrace.  This modifies ToME's
+                -- data structures, but we don't reuse them, so it's harmless.
+                sub.full_copy = table.clone(r.copy)
+                table.merge(sub.full_copy, sub.copy)
                 table.insert(races[r.short_name].subrace_list, sub.short_name)
             end
         end
@@ -53,22 +58,24 @@ end
 local subraces = {}
 local subrace_short_desc = {}
 for i, sub in ipairs(Birther.birth_descriptor_def.subrace) do
-    subraces[sub.short_name] = {
-        name = sub.name,
-        display_name = sub.display_name,
-        short_name = sub.short_name,
-        desc = birtherRaceDescToHtml(sub.desc),
-        locked_desc = sub.locked_desc,
-        stats = sub.inc_stats,
-        copy = table.clone(sub.copy),
-        experience = sub.experience,
-        images = table.mapv(function(v) return type(v) == 'table' and img(unpack(v)) or img(v) end, subrace_images[sub.short_name] or {}),
-    }
+    if not blacklist_subraces[sub.name] then
+        subraces[sub.short_name] = {
+            name = sub.name,
+            display_name = sub.display_name,
+            short_name = sub.short_name,
+            desc = birtherRaceDescToHtml(sub.desc),
+            locked_desc = sub.locked_desc,
+            stats = sub.inc_stats,
+            copy = sub.full_copy,
+            experience = sub.experience,
+            images = table.mapv(function(v) return type(v) == 'table' and img(unpack(v)) or img(v) end, subrace_images[sub.short_name] or {}),
+        }
 
-    -- Hack: Look up size category text without an Actor object
-    if sub.copy.size_category then subraces[sub.short_name].size = Actor.TextSizeCategory(sub.copy) end
+        -- Hack: Look up size category text without an Actor object
+        if sub.full_copy.size_category then subraces[sub.short_name].size = Actor.TextSizeCategory(sub.full_copy) end
 
-    subrace_short_desc[sub.short_name] = sub.desc:split('\n')[1]
+        subrace_short_desc[sub.short_name] = sub.desc:split('\n')[1]
+    end
 end
 
 -- Output the data

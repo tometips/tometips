@@ -79,52 +79,54 @@ end
 local subclasses = {}
 local subclass_short_desc = {}
 for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
-    -- Process talent types for HTML, and split them into class and generic
-    local talents_types_class = {}
-    local talents_types_generic = {}
+    if not blacklist_subclasses[sub.name] then
+        -- Process talent types for HTML, and split them into class and generic
+        local talents_types_class = {}
+        local talents_types_generic = {}
 
-    local check_talents_types = function(talents_types, unlockable)
-        if type(talents_types) == 'table' then
-            for k, v in pairs(talents_types) do
-                -- This "if" is necessary to handle unimplemented or nonexistent talents (!?)
-                if Actor.talents_types_def[k] then
-                    -- Our output is the same as the array used by ToME, with
-                    -- the following modifications:
-                    --
-                    -- Make masteries 1-based
-                    v[2] = v[2] + 1.0
-                    -- Add talent type name
-                    v[3] = k:split('/')[1] .. ' / ' .. Actor.talents_types_def[k].name
-                    -- Add whether or not it's unlockable
-                    v[4] = unlockable
+        local check_talents_types = function(talents_types, unlockable)
+            if type(talents_types) == 'table' then
+                for k, v in pairs(talents_types) do
+                    -- This "if" is necessary to handle unimplemented or nonexistent talents (!?)
+                    if Actor.talents_types_def[k] then
+                        -- Our output is the same as the array used by ToME, with
+                        -- the following modifications:
+                        --
+                        -- Make masteries 1-based
+                        v[2] = v[2] + 1.0
+                        -- Add talent type name
+                        v[3] = k:split('/')[1] .. ' / ' .. Actor.talents_types_def[k].name
+                        -- Add whether or not it's unlockable
+                        v[4] = unlockable
 
-                    if Actor.talents_types_def[k].generic then
-                        talents_types_generic[k] = v
-                    else
-                        talents_types_class[k] = v
+                        if Actor.talents_types_def[k].generic then
+                            talents_types_generic[k] = v
+                        else
+                            talents_types_class[k] = v
+                        end
                     end
                 end
             end
         end
+
+        check_talents_types(sub.talents_types)
+        check_talents_types(sub.unlockable_talents_types, true)
+
+        subclasses[sub.short_name] = {
+            name = sub.name,
+            display_name = sub.display_name,
+            short_name = sub.short_name,
+            desc = birtherDescToHtml(sub.desc),
+            locked_desc = sub.locked_desc,
+            stats = sub.stats,
+            talents_types_class = talents_types_class,
+            talents_types_generic = talents_types_generic,
+            talents = sub.talents,
+            copy_add = sub.copy_add,
+            images = table.mapv(function(v) return type(v) == 'table' and img(unpack(v)) or img(v) end, subclass_images[sub.short_name] or {}),
+        }
+        subclass_short_desc[sub.short_name] = sub.desc:split('\n')[1]
     end
-
-    check_talents_types(sub.talents_types)
-    check_talents_types(sub.unlockable_talents_types, true)
-
-    subclasses[sub.short_name] = {
-        name = sub.name,
-        display_name = sub.display_name,
-        short_name = sub.short_name,
-        desc = birtherDescToHtml(sub.desc),
-        locked_desc = sub.locked_desc,
-        stats = sub.stats,
-        talents_types_class = talents_types_class,
-        talents_types_generic = talents_types_generic,
-        talents = sub.talents,
-        copy_add = sub.copy_add,
-        images = table.mapv(function(v) return type(v) == 'table' and img(unpack(v)) or img(v) end, subclass_images[sub.short_name] or {}),
-    }
-    subclass_short_desc[sub.short_name] = sub.desc:split('\n')[1]
 end
 
 -- Output the data

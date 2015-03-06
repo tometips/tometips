@@ -8,11 +8,18 @@ function fixupRaces(tome) {
     // Replace IDs in race_list with references to the actual race definition.
     r.race_list = _.map(r.race_list, function(race) { return r.races[race]; });
 
-    // Store a reference from each subrace back to the race ID.
+    // Process subraces, and store a reference from each subrace back to the
+    // race ID.
     _.each(r.races, function(elem) {
         _.each(elem.subrace_list, function (sub) {
             var exp_penalty = r.subraces[sub].experience;
             exp_penalty = (exp_penalty || 1.0) - 1.0;
+            if (!r.subraces[sub].images || !r.subraces[sub].images.length) {
+                r.subraces[sub].images = [
+                    { file: 'player/' + sub.toLowerCase() + '_male.png' },
+                    { file: 'player/' + sub.toLowerCase() + '_female.png' }
+                ];
+            }
             r.subraces[sub].exp_penalty = exp_penalty;
             r.subraces[sub].race_short_name = elem.short_name;
         });

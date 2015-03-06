@@ -1,4 +1,4 @@
-Races - handle switching from 1.3's ogre back to an earlier version; add extra info (e.g., ghoul); link to racial talents
+Races - handle switching from 1.3's ogre back to an earlier version; link to racial talents; listify undead
 
 AJAX requests may arrive out of order
 Undo Close Tab may cause errors
