@@ -639,6 +639,12 @@ function initializeRoutes() {
 
             loadRacesIfNeeded(function() {
                 routes.races.matched.dispatch(query);
+
+                if (!tome[versions.current].races.races_by_id[r]) {
+                    handleUnknownRace(tome, r);
+                    return;
+                }
+
                 document.title += ' - ' + tome[versions.current].races.races_by_id[r].display_name;
 
                 $("#content-container").scrollTop(0);

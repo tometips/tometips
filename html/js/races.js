@@ -52,3 +52,11 @@ function loadRacesIfNeeded(success) {
         success(data);
     });
 }
+
+function handleUnknownRace(tome, r) {
+    document.title += ' - ' + toTitleCase(r);
+
+    $("#content-container").scrollTop(0);
+
+    $("#content").html('<div class="alert alert-warning">The ' + escapeHtml(r) + ' race does not exist in ToME ' + versions.name(versions.current) + '.</div>');
+}
