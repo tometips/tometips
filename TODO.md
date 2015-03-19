@@ -9,3 +9,4 @@ Color-code resource usage, to match ToME?
 Try improving pluralization for, e.g., Reload - avoid saying "shot, shots, shots, shots, shots"
 Improve prodigies' display (sort by stats, include prerequisites)
 Error handling if loading Typeahead fails
+Easy way to keep images from old versions?  E.g., 1.3.0 removed `warp_mines`

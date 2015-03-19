@@ -73,6 +73,8 @@ pull:
 		git remote set-url origin $(TOME_GIT_URL) && \
 		git checkout master && \
 		git pull
+	@# Mark html/data/master/* as needing updating
+	touch master
 
 # Symlinks and working copies
 master:
