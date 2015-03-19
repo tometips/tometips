@@ -1,9 +1,14 @@
 SHELL := /bin/bash
+
+ifneq ($(shell which luajit),)
+LUA ?= luajit
+else
 LUA ?= lua
+endif
 
 TOME_GIT_URL := http://git.net-core.org/tome/t-engine4.git
 
-VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4 1.2.5
+VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4 1.2.5 1.3.0
 VERSIONS += master
 
 # GitHub Pages output
