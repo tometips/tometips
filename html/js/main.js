@@ -7,6 +7,28 @@ if (typeof String.prototype.endsWith !== 'function') {
     };
 }
 
+/**Parses query string-like parameters out of the end of the hash.
+ * Based on http://stackoverflow.com/a/2880929/25507
+ */
+function parseHashQueryString() {
+    var match,
+        pl     = /\+/g,  // Regex for replacing addition symbol with a space
+        search = /([^&=]+)=?([^&]*)/g,
+        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+        query  = window.location.hash.substring(1),
+        url_params = {};
+
+    if (query.indexOf('?') != -1) {
+        query = query.substring(query.indexOf('?') + 1);
+
+        while (match = search.exec(query)) {
+           url_params[decode(match[1])] = decode(match[2]);
+        }
+    }
+
+    return url_params;
+}
+
 function escapeHtml(s)
 {
     return s.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -508,6 +530,14 @@ var versions = (function() {
             });
         },
 
+        // If 'master' isn't shown, then redirect queries to current release.
+        redirectMasterToDefault(new_hash, old_hash) {
+            if (parseHashQueryString().ver == 'master') {
+                hasher.replaceHash(locationHashNoQuery());
+                return true;
+            }
+        },
+
         init: function($el, $container) {
             $_dropdown = $el;
             versions.list($el, $container);
@@ -527,7 +557,7 @@ var routes,
 function initializeRoutes() {
     routes = {
 
-        // Default route.  We currently just have talents.
+        // Default route.
         default_route: crossroads.addRoute(':?query:', function(query) {
             versions.update(query);
             document.title = base_title;
@@ -704,7 +734,9 @@ function initializeRoutes() {
     };
 
     function parseHash(new_hash, old_hash) {
-         crossroads.parse(new_hash);
+        if (!versions.redirectMasterToDefault()) {
+            crossroads.parse(new_hash);
+        }
     }
 
     hasher.prependHash = '';
