@@ -48,7 +48,7 @@ clean-all: clean
 
 publish:
 	test -d $(PAGES_OUTPUT)
-	rsync --recursive --times --exclude=*.handlebars --delete --verbose html/* $(PAGES_OUTPUT)
+	rsync --recursive --times --exclude=*.handlebars --exclude=*.swp --delete --verbose html/* $(PAGES_OUTPUT)
 
 # Changes from one version to the next
 changes.mk: Makefile scripts/make-changes-mk.sh
