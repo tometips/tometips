@@ -21,7 +21,7 @@ function parseHashQueryString() {
     if (query.indexOf('?') != -1) {
         query = query.substring(query.indexOf('?') + 1);
 
-        while (match = search.exec(query)) {
+        while ((match = search.exec(query))) {
            url_params[decode(match[1])] = decode(match[2]);
         }
     }
@@ -531,7 +531,7 @@ var versions = (function() {
         },
 
         // If 'master' isn't shown, then redirect queries to current release.
-        redirectMasterToDefault(new_hash, old_hash) {
+        redirectMasterToDefault: function(new_hash, old_hash) {
             if (parseHashQueryString().ver == 'master') {
                 hasher.replaceHash(locationHashNoQuery());
                 return true;
@@ -831,7 +831,7 @@ window.onerror = function(msg, url, line) {
             '<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'  +
         '</div>'
     );
-}
+};
 
 $(function() {
     // See http://stackoverflow.com/a/10801889/25507
@@ -877,7 +877,7 @@ $(function() {
     // Really old browsers don't support hashchange.  A plugin is available, but I don't really care right now.
     $(window).on('hashchange', function() {
         _gaq.push(['_trackPageview', location.pathname + location.search + location.hash]);
-    })
+    });
 
     // We explicitly do NOT use var, for now, to facilitate inspection in Firebug.
     // (Our route handlers and such currently also rely on tome being global.)

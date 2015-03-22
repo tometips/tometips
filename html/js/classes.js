@@ -54,8 +54,8 @@ function fillClassTalents(tome, cls) {
         loadDataIfNeeded('talents.' + category, function() {
             _.each(talents, function(value, this_type, list) {
                 // TODO: Should index talents by talent_type as well as sequential list to avoid the need to use _.find
-                var talent_details = _.find(tome[versions.current].talents[category], function(t) { return t.type == this_type }),
-                    talent_html = Handlebars.partials['class_talents_detail'](talent_details);
+                var talent_details = _.find(tome[versions.current].talents[category], function(t) { return t.type == this_type; }),
+                    talent_html = Handlebars.partials.class_talents_detail(talent_details);
                 $('.class-talents-detail[data-talent-type="' + toHtmlId(this_type) + '"]').html(talent_html);
             });
 
