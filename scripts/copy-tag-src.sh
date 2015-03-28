@@ -10,10 +10,17 @@ cd $(dirname $0)/..
 
 tag=$1
 
+# Fix up alternate schemes for tag names.
+if [ "$tag" = "1.3.0" ]; then
+    gittag=1.3.0-release
+else
+    gittag=$tag
+fi
+
 trap "rm -rf $tag" ERR
 
 trap "(cd t-engine4 && git checkout master)" EXIT SIGINT SIGTERM
-(cd t-engine4 && git checkout tome-$tag)
+(cd t-engine4 && git checkout tome-$gittag)
 
 rm -rf $tag
 mkdir $tag

@@ -1,10 +1,6 @@
 SHELL := /bin/bash
 
-ifneq ($(shell which luajit),)
-LUA ?= luajit
-else
-LUA ?= lua
-endif
+LUA := luajit
 
 TOME_GIT_URL := http://git.net-core.org/tome/t-engine4.git
 
