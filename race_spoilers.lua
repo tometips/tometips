@@ -1,5 +1,5 @@
 require 'tip.engine'
-require 'lib.json4lua.json.json'
+json = require 'lib.json4lua.json.json'
 
 local Actor = require 'mod.class.Actor'
 local Birther = require 'engine.Birther'
@@ -86,7 +86,7 @@ out:write(json.encode({
     races = races,
     race_list = race_list,
     subraces = subraces,
-}))
+}, {sort_keys=true}))
 out:close()
 
 -- Output the search indexes
@@ -98,5 +98,5 @@ for race_k, race_v in pairs(races) do
     end
 end
 local races_out = io.open(output_dir .. 'search.races.json', 'w')
-races_out:write(json.encode(races_json))
+races_out:write(json.encode(races_json, {sort_keys=true}))
 races_out:close()

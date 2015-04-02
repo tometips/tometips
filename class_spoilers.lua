@@ -1,5 +1,5 @@
 require 'tip.engine'
-require 'lib.json4lua.json.json'
+json = require 'lib.json4lua.json.json'
 
 local Actor = require 'mod.class.Actor'
 local Birther = require 'engine.Birther'
@@ -137,7 +137,7 @@ out:write(json.encode({
     classes = classes,
     class_list = class_list,
     subclasses = subclasses,
-}))
+}, {sort_keys=true}))
 out:close()
 
 -- Output the search indexes
@@ -149,5 +149,5 @@ for class_k, class_v in pairs(classes) do
     end
 end
 local classes_out = io.open(output_dir .. 'search.classes.json', 'w')
-classes_out:write(json.encode(classes_json))
+classes_out:write(json.encode(classes_json, {sort_keys=true}))
 classes_out:close()

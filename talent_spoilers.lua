@@ -1,5 +1,5 @@
 require 'tip.engine'
-require 'lib.json4lua.json.json'
+json = require 'lib.json4lua.json.json'
 
 local Actor = require 'mod.class.Actor'
 
@@ -669,12 +669,12 @@ out:write(json.encode({
     version = tip.version,
 
     talent_categories = talent_categories,
-}))
+}, {sort_keys=true}))
 out:close()
 
 for k, v in pairs(talents_by_category) do
     local out = io.open(output_dir .. 'talents.'..k:gsub("[']", "_")..'.json', 'w')
-    out:write(json.encode(v))
+    out:write(json.encode(v, {sort_keys=true}))
     out:close()
 end
 
@@ -692,8 +692,8 @@ for cat_k, cat_v in pairs(talents_by_category) do    -- iterate over "categories
 end
 local talents_types_out = io.open(output_dir .. 'search.talents-types.json', 'w')
 local talents_out = io.open(output_dir .. 'search.talents.json', 'w')
-talents_types_out:write(json.encode(talents_types_json))
-talents_out:write(json.encode(talents_json))
+talents_types_out:write(json.encode(talents_types_json, {sort_keys=true}))
+talents_out:write(json.encode(talents_json, {sort_keys=true}))
 talents_types_out:close()
 talents_out:close()
 

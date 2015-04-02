@@ -1,4 +1,4 @@
-require 'lib.json4lua.json.json'
+json = require 'lib.json4lua.json.json'
 
 if #arg < 3 or #arg > 4 then
     print(("Usage: %s json_dir from_version to_version [prefix]"):format(arg[0]))
@@ -201,6 +201,6 @@ processDiffTable(tome[from_version].talent_categories, tome[to_version].talent_c
     end)
 
 local out = io.open(json_dir .. to_version .. '/' .. prefix .. 'changes.talents.json', 'w')
-out:write(json.encode(changes.talents))
+out:write(json.encode(changes.talents, {sort_keys=true}))
 out:close()
 
