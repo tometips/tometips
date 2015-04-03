@@ -7,7 +7,7 @@ cd $(dirname $0)/..
 
 mkdir -p html/img/talents/{64,48,32}
 
-for gfx in t-engine4/game/modules/tome/data/gx dlc/*/overload/data/gfx; do
+for gfx in t-engine4/game/modules/tome/data/gfx dlc/*/overload/data/gfx; do
     for img in $gfx/talents/*.png; do
         newimg=html/img/talents/64/${img##*/}
         if [ $img -nt $newimg ]; then

@@ -7,6 +7,9 @@ TOME_GIT_URL := http://git.net-core.org/tome/t-engine4.git
 VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4 1.2.5 1.3.0
 VERSIONS += master
 
+# Enable DLC for these versions
+DLC_VERSIONS := 1.3.0
+
 # GitHub Pages output
 PAGES_OUTPUT = ../tometips.github.io
 
@@ -17,13 +20,13 @@ all: t-engine4 img html/js/templates.js html/js/partials.js \
 	$(patsubst %,html/data/%/changes.talents.json,$(VERSIONS)) \
 	$(patsubst %,html/data/%/recent-changes.talents.json,$(VERSIONS))
 
-html/data/%/tome.json: % talent_spoilers.lua
+html/data/%/tome.json: % talent_spoilers.lua dlc
 	$(LUA) talent_spoilers.lua $< $(dir $@)
 
-html/data/%/classes.json: % class_spoilers.lua
+html/data/%/classes.json: % class_spoilers.lua dlc
 	$(LUA) class_spoilers.lua $< $(dir $@)
 
-html/data/%/races.json: % race_spoilers.lua
+html/data/%/races.json: % race_spoilers.lua dlc
 	$(LUA) race_spoilers.lua $< $(dir $@)
 
 html/js/partials.js: html/js/partials/*.handlebars
@@ -52,7 +55,7 @@ changes.mk: Makefile scripts/make-changes-mk.sh
 -include changes.mk
 
 # Convert and publish images.
-img: t-engine4
+img: t-engine4 dlc
 	scripts/prepare-img.sh
 
 # Pretty-prints each of the JSON files.
@@ -78,6 +81,9 @@ master:
 
 $(filter-out master,$(VERSIONS)):
 	scripts/copy-tag-src.sh $@
+
+dlc: $(VERSIONS)
+	scripts/fetch-dlc.sh $(DLC_VERSIONS)
 
 .PHONY: clean pretty img pull publish
 

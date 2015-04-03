@@ -22,6 +22,19 @@ function string.escapeHtml(self)
     return self:gsub("&", "&amp;"):gsub("<", "&lt;"):gsub(">", "&gt;")
 end
 
+-- Alternative to installing Lua's lfs module
+-- Based on http://stackoverflow.com/a/11130774/25507
+function tip.util.scandir(directory)
+    local i, t, popen = 0, {}, io.popen
+    for filename in popen('ls -a "'..directory..'" 2>/dev/null'):lines() do
+        if filename ~= '.' and filename ~= '..' then
+            i = i + 1
+            t[i] = filename
+        end
+    end
+    return t
+end
+
 -- Based on T-Engine's tstring:diffWith
 function tip.util.multiDiff(str, on_diff)
     local res = tstring{}
