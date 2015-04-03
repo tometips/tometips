@@ -84,7 +84,12 @@ end
 
 function tip.util.colorNameToSpan(color)
     local c = colors[color]
-    return ('<span style="color: #%02x%02x%02x"><span class="tstr-color-%s">'):format(c.r, c.g, c.b, color)
+    if c then
+        return ('<span style="color: #%02x%02x%02x"><span class="tstr-color-%s">'):format(c.r, c.g, c.b, color)
+    else
+        -- Assume/hope that color is a hex code and can be used directly
+        return ('<span style="color: #%s"><span class="tstr-color-%s">'):format(color, color)
+    end
 end
 
 function tip.util.tstringToHtml(tstr)

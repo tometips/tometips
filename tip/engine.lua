@@ -87,10 +87,12 @@ load = loadfile_and_execute
 require 'engine.dialogs.Chat'
 
 require 'engine.utils'
+local class = require "engine.class"
 local DamageType = require "engine.DamageType"
 local ActorStats = require "engine.interface.ActorStats"
 local ActorResource = require "engine.interface.ActorResource"
 local ActorTalents = require 'engine.interface.ActorTalents'
+local ActorTemporaryEffects = require "engine.interface.ActorTemporaryEffects"
 local ActorInventory = require "engine.interface.ActorInventory"
 local Birther = require 'engine.Birther'
 
@@ -149,6 +151,7 @@ ActorInventory:defineInventory("QS_QUIVER", "Second weapon set: Quiver", false, 
 -- Copied from ToME's load.lua
 DamageType:loadDefinition("/data/damage_types.lua")
 ActorTalents:loadDefinition("/data/talents.lua")
+ActorTemporaryEffects:loadDefinition("/data/timed_effects.lua")
 
 -- Actor resources - copied from ToME's load.lua
 ActorResource:defineResource("Air", "air", nil, "air_regen", "Air capacity in your lungs. Entities that need not breath are not affected.")
@@ -175,6 +178,19 @@ ActorStats:defineStat("Luck",         "lck", 50, 1, 100, "Luck defines your char
 
 -- Birther descriptor - copied from ToME's load.lua
 Birther:loadDefinition("/data/birth/descriptors.lua")
+
+-- Load DLC
+if arg[3] then
+    dlc = 'stone-wardens'
+    package.path = package.path..(';./dlc/tome-%s/overload/?.lua;./dlc/tome-%s/?.lua'):format(dlc, dlc)
+    old_loadfile(('dlc/tome-%s/hooks/load.lua'):format(dlc))()
+
+    dlc = 'ashes-urhrok'
+    package.path = package.path..(';./dlc/tome-%s/overload/?.lua;./dlc/tome-%s/?.lua'):format(dlc, dlc)
+    old_loadfile(('dlc/tome-%s/hooks/load.lua'):format(dlc))()
+
+    class:triggerHook({'ToME:load'})
+end
 
 tip.raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_stamina', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback' }
 

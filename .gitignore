@@ -1,5 +1,6 @@
 /changes.mk
 /t-engine4
+/dlc/*/
 /html/img/talents/*/
 /html/data/*/
 /html/js/partials.js
