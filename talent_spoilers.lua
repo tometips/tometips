@@ -475,7 +475,7 @@ for tid, orig_t in pairs(Actor.talents_def) do
     t.info_text = t.info_text:gsub('\nAt level %d+:[^\n]+', function(s)
         return '<li>' .. s:sub(2) .. '</li>'
     end)
-    t.info_text = t.info_text:gsub('\n%-[^\n]+', function(s)
+    t.info_text = t.info_text:gsub('\n[-*][^\n]+', function(s)
         return '<li>' .. s:sub(3) .. '</li>'
     end)
 
