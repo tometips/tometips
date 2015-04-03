@@ -410,7 +410,9 @@ function getTalentReqDesc(player, t, tlev)
 end
 
 -- Process each talent, adding text descriptions of the various attributes
-for tid, t in pairs(Actor.talents_def) do
+local talents_def_out = {}
+for tid, orig_t in pairs(Actor.talents_def) do
+    t = table.clone(orig_t)
     spoilers.active.talent_id = tid
 
     -- Special cases: Some talent categories depend on particular talents.
@@ -506,7 +508,7 @@ for tid, t in pairs(Actor.talents_def) do
     t.mode = t.mode or "activated"
 
     if t.mode ~= "passive" then
-        if t.range == Actor.talents_def[Actor.T_SHOOT].range then
+        if orig_t.range == Actor.talents_def[Actor.T_SHOOT].range then
             t.range = "archery"
         else
             t.range = getByTalentLevel(player, function() return ("%.1f"):format(player:getTalentRange(t)) end)
@@ -596,6 +598,8 @@ for tid, t in pairs(Actor.talents_def) do
     if d then
         t.source_code = tip.util.resolveSource(d)
     end
+
+    talents_def_out[tid] = t
 end
 
 -- TODO: travel speed
@@ -637,16 +641,17 @@ for k, v in pairs(Actor.talents_types_def) do
     if type(k) ~= 'number' and not spoilers.blacklist_talent_type[k] then
         if next(v.talents) ~= nil then   -- skip talent categories with no talents
 
-            -- This modifies the real in-memory talents table, but we shouldn't need the original version...
-            for i = #v.talents, 1, -1 do
-                if shouldSkipTalent(v.talents[i]) then
-                    table.remove(v.talents, i)
+            local v_out = table.clone(v)
+            v_out.talents = {}
+            for i = 1, #v.talents do
+                if not shouldSkipTalent(v.talents[i]) then
+                    table.insert(v_out.talents, talents_def_out[v.talents[i].id])
                 end
             end
 
             local category = k:split('/')[1]
             talents_by_category[category] = talents_by_category[category] or {}
-            table.insert(talents_by_category[category], v)
+            table.insert(talents_by_category[category], v_out)
             talent_categories[category] = true
         end
     end
