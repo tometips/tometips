@@ -183,9 +183,12 @@ Birther:loadDefinition("/data/birth/descriptors.lua")
 local all_dlc = tip.util.scandir(tip.version .. '/dlc')
 if next(all_dlc) ~= nil then
     for i, v in pairs(all_dlc) do
-        local dlc = tip.version .. '/dlc/' .. v
-        package.path = package.path..(';%s/overload/?.lua;%s/?.lua'):format(dlc, dlc)
-        old_loadfile(('%s/hooks/load.lua'):format(dlc))()
+        if not v:starts('.') then
+            local dlc = tip.version .. '/dlc/' .. v
+            print(("Loading %s"):format(dlc))
+            package.path = package.path..(';%s/overload/?.lua;%s/?.lua'):format(dlc, dlc)
+            old_loadfile(('%s/hooks/load.lua'):format(dlc))()
+        end
     end
 
     class:triggerHook({'ToME:load'})

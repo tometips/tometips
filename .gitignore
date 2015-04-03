@@ -1,6 +1,6 @@
 /changes.mk
 /t-engine4
-/dlc/*/
+/dlc/
 /html/img/talents/*/
 /html/data/*/
 /html/js/partials.js
@@ -11,3 +11,4 @@
 /node_modules/
 *.swp
 *.swo
+.DS_Store

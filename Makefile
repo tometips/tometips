@@ -84,6 +84,7 @@ $(filter-out master,$(VERSIONS)):
 
 dlc: $(VERSIONS)
 	scripts/fetch-dlc.sh $(DLC_VERSIONS)
+	touch dlc
 
 .PHONY: clean pretty img pull publish
 
