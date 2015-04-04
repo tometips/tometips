@@ -179,13 +179,35 @@ ActorStats:defineStat("Luck",         "lck", 50, 1, 100, "Luck defines your char
 -- Birther descriptor - copied from ToME's load.lua
 Birther:loadDefinition("/data/birth/descriptors.lua")
 
+-- Hook the T-Engine's various new... functions to track where items are from
+local function hookNew(module, name)
+    local old_new = module[name]
+    module[name] = function(self, t)
+        t._dlc = tip.util.getDlc()
+        return old_new(self, t)
+    end
+end
+hookNew(Birther, 'newBirthDescriptor')
+hookNew(ActorTalents, 'newTalent')
+hookNew(ActorTalents, 'newTalentType')
+
 -- Load DLC
 local all_dlc = tip.util.scandir(tip.version .. '/dlc')
+tip.dlc = {}
 if next(all_dlc) ~= nil then
     for i, v in pairs(all_dlc) do
         if not v:starts('.') then
             local dlc = tip.version .. '/dlc/' .. v
             print(("Loading %s"):format(dlc))
+
+            tip.dlc[v] = {}
+            local dlc_def = old_loadfile(dlc .. '/init.lua')
+            setfenv(dlc_def, tip.dlc[v])
+            dlc_def()
+
+            -- The "right" thing to do is to process init.lua to check for
+            -- hooks, overload, and superload.  For our purposes, we can assume
+            -- hooks and overload are enabled and can ignore superload.
             package.path = package.path..(';%s/overload/?.lua;%s/?.lua'):format(dlc, dlc)
             old_loadfile(('%s/hooks/load.lua'):format(dlc))()
         end

@@ -146,3 +146,17 @@ function tip.util.tstringToHtml(tstr)
     return table.concat(html, '')
 end
 
+-- Walks the call stack to try and determine the DLC that the current function
+-- was loaded by. Returns a string like "tome-ashes-urhrok".
+function tip.util.getDlc()
+    local i = 2
+    while true do
+        local dbg = debug.getinfo(i)
+        if not dbg then return end
+
+        local source = dbg.source:split('/')
+        if source[2] == 'dlc' then return source[3] end
+
+        i = i + 1
+    end
+end

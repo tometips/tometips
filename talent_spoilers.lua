@@ -580,6 +580,8 @@ for tid, orig_t in pairs(Actor.talents_def) do
         t.multi_require = t.points > 1
     end
 
+    if t._dlc then t._dlc_name = tip.dlc[t._dlc].long_name end
+
     -- Strip unused elements in order to save space.
     t.display_entity = nil
     t.tactical = nil

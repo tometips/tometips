@@ -17,7 +17,7 @@
                 <div id="collapse-{{toHtmlId id}}" class="talent-details panel-collapse collapse">
                     <div class="panel-body">
                         {{> talent_details}}
-                        {{#if source_code}}<div class="source-link"><a href="{{tome_git_url}}/blob/{{tag}}/game/modules/tome/{{source_code.[0]}}#L{{source_code.[1]}}" target="_blank">View source</a></div>{{/if}}
+                        {{#if source_code}}{{#unless _dlc}}<div class="source-link"><a href="{{tome_git_url}}/blob/{{tag}}/game/modules/tome/{{source_code.[0]}}#L{{source_code.[1]}}" target="_blank">View source</a></div>{{/unless}}{{/if}}
                         </div>
                     </div>
                 </div>

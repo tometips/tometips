@@ -125,6 +125,8 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subclass) do
             talents_types_generic = talents_types_generic,
             talents = sub.talents,
             copy_add = sub.copy_add,
+            _dlc = sub._dlc,
+            _dlc_name = sub._dlc and tip.dlc[sub._dlc].long_name or nil,
             images = table.mapv(function(v) return type(v) == 'table' and img(unpack(v)) or img(v) end, subclass_images[sub.short_name] or {}),
         }
         subclass_short_desc[sub.short_name] = sub.desc:split('\n')[1]

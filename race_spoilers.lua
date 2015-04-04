@@ -69,6 +69,8 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subrace) do
             stats = sub.inc_stats,
             copy = sub.full_copy,
             experience = sub.experience,
+            _dlc = sub._dlc,
+            _dlc_name = sub._dlc and tip.dlc[sub._dlc].long_name or nil,
             images = table.mapv(function(v) return type(v) == 'table' and img(unpack(v)) or img(v) end, subrace_images[sub.short_name] or {}),
         }
 

@@ -18,6 +18,9 @@
             </div>
             {{#if locked_desc}}<p class="flavor">{{locked_desc}}</p>{{/if}}
             {{{desc}}}
+            {{#if _dlc}}
+            <p>DLC: {{_dlc_name}}</p>
+            {{/if}}
             <div class="wiki-link">
                 <a href="http://te4.org/wiki/{{toWikiPage name}}">View Wiki</a>
             </div>
