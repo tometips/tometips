@@ -367,7 +367,7 @@ table.old-new td {
     padding-bottom: 1em;
 }
 
-.stock-text {
+.stock-text, .dlc-notice {
     font-style: italic;
 }
 
