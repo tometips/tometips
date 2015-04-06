@@ -16,6 +16,8 @@ spoilers = {
         paradox = 300,
 
         _level = 50,
+        _life = 1000,
+        _max_life = 1000,
 
         -- The goal is to display effectiveness at 50% of max psi.
         psi = 50,
@@ -106,6 +108,11 @@ spoilers = {
             use_stat_power = true   -- not exactly, but close enough
         end
 
+        -- TODO: Properly determine which talent components depend on max life
+        -- See, e.g., Pride of the Orcs for a talent affected by this
+        --if self.used.life then msg[#msg+1] = ("life %i"):format(self.active._life) use_stat_power = true end
+        --if self.used.max_life then msg[#msg+1] = ("max life %i"):format(self.active._max_life) use_stat_power = true end
+
         if self.used.paradox then msg[#msg+1] = ("paradox %i"):format(self.active.paradox) use_stat_power = true end
 
         if self.used.psi and self.used.max_psi then
@@ -195,16 +202,18 @@ local player = game.player
 local player_metatable = getmetatable(player)
 setmetatable(player, {
     __index = function(t, k)
-        if k == 'level' then
-            spoilers.used.level = true
-            return spoilers.active._level
+        if k == 'level' or k == 'max_life' or k == 'life' then
+            spoilers.used[k] = true
+            return spoilers.active['_' .. k]
         else
             return player_metatable.__index[k]
         end
     end
 })
 -- Clear values that we need to route through our __index
-player.level = nil -- clea
+player.level = nil
+player.max_life = nil
+player.life = nil
 
 player.getStat = function(self, stat, scale, raw, no_inc)
     spoilers.used.stat = spoilers.used.stat or {}

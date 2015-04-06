@@ -189,6 +189,8 @@ processDiffTable(tome[from_version].talent_categories, tome[to_version].talent_c
 
                     -- Iterate over individual talents
                     function(from, to)
+                        if (from and from._dlc) or (to and to._dlc) then return end
+
                         if not from then
                             recordChange(changes.talents, category_name, "added", from, to)
                         elseif not to then
