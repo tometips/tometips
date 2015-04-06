@@ -1,4 +1,4 @@
-var VERSION = '2015-03-19';
+var VERSION = '2015-04-05';
 
 // http://stackoverflow.com/a/2548133/25507
 if (typeof String.prototype.endsWith !== 'function') {
@@ -462,8 +462,8 @@ var versions = (function() {
     }
 
     var versions = {
-        DEFAULT: '1.3.0',
-        ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2', '1.2.3', '1.2.4', '1.2.5', '1.3.0' /*, 'master'*/ ],
+        DEFAULT: '1.3.1',
+        ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2', '1.2.3', '1.2.4', '1.2.5', '1.3.0', '1.3.1' /*, 'master'*/ ],
         DISPLAY: { 'master': 'next' },
 
         name: function(ver) {
