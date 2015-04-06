@@ -695,6 +695,7 @@ for k, v in pairs(talents_by_category) do
 end
 
 -- Output search indexes
+-- Search indexes are sorted by name for more stable diffs
 local talents_types_json = {}
 local talents_json = {}
 for cat_k, cat_v in pairs(talents_by_category) do    -- iterate over "categories" (celestial, cursed, etc.)
@@ -706,6 +707,8 @@ for cat_k, cat_v in pairs(talents_by_category) do    -- iterate over "categories
         end
     end
 end
+table.sort(talents_types_json, function(a, b) return a.name < b.name end)
+table.sort(talents_json, function(a, b) return a.name < b.name end)
 local talents_types_out = io.open(output_dir .. 'search.talents-types.json', 'w')
 local talents_out = io.open(output_dir .. 'search.talents.json', 'w')
 talents_types_out:write(json.encode(talents_types_json, {sort_keys=true}))

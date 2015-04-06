@@ -93,6 +93,7 @@ out:write(json.encode({
 out:close()
 
 -- Output the search indexes
+-- Search indexes are sorted by name for more stable diffs
 local races_json = {}
 for race_k, race_v in pairs(races) do
     for subrace_i, subrace_v in ipairs(race_v.subrace_list) do
@@ -100,6 +101,7 @@ for race_k, race_v in pairs(races) do
         races_json[#races_json+1] = { name=subrace.display_name, desc=subrace_short_desc[subrace_v], href='races/'..race_v.short_name:lower()..'/'..subrace.short_name:lower() }
     end
 end
+table.sort(races_json, function(a, b) return a.name < b.name end)
 local races_out = io.open(output_dir .. 'search.races.json', 'w')
 races_out:write(json.encode(races_json, {sort_keys=true}))
 races_out:close()

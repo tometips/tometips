@@ -145,6 +145,7 @@ out:write(json.encode({
 out:close()
 
 -- Output the search indexes
+-- Search indexes are sorted by name for more stable diffs
 local classes_json = {}
 for class_k, class_v in pairs(classes) do
     for subclass_i, subclass_v in ipairs(class_v.subclass_list) do
@@ -152,6 +153,7 @@ for class_k, class_v in pairs(classes) do
         classes_json[#classes_json+1] = { name=subclass.display_name, desc=subclass_short_desc[subclass_v], href='classes/'..class_v.short_name:lower()..'/'..subclass.short_name:lower() }
     end
 end
+table.sort(classes_json, function(a, b) return a.name < b.name end)
 local classes_out = io.open(output_dir .. 'search.classes.json', 'w')
 classes_out:write(json.encode(classes_json, {sort_keys=true}))
 classes_out:close()
