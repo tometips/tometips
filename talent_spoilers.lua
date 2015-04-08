@@ -2,6 +2,7 @@ require 'tip.engine'
 json = require 'lib.json4lua.json.json'
 
 local Actor = require 'mod.class.Actor'
+local ActorTalents = require 'engine.interface.ActorTalents'
 
 spoilers = {
     -- Currently active parameters.  TODO: Configurable
@@ -189,14 +190,27 @@ spoilers = {
         ["T_SHERTUL_FORTRESS_BEAM"] = true,
         ["T_SHERTUL_FORTRESS_ORBIT"] = true,
         ["T_GLOBAL_CD"] = true,                  -- aka "charms"
-   },
+    },
 
-   alt_talent = {
+    alt_talent = {
         ["cunning/poisons-effects"] = Actor.T_VILE_POISONS,
         ["cunning/traps"] = Actor.T_TRAP_MASTERY,
         ["chronomancy/manifold"] = Actor.T_WEAPON_MANIFOLD,
     },
+
+    -- Indexed by active talent ID; gives the set of additional talent IDs
+    -- to pass through (give the loaded talent level instead of forcing to 0)
+    talent_passthrough = {
+    }
 }
+
+-- Add DLC to talent configs if loaded
+if Actor.T_VOLCANIC_ROCK then
+    spoilers.talent_passthrough[Actor.T_VOLCANIC_ROCK] = { [Actor.T_VOLCANO] = true }
+end
+if Actor.T_BOULDER_ROCK then
+    spoilers.talent_passthrough[Actor.T_BOULDER_ROCK] = { [Actor.T_THROW_BOULDER] = true }
+end
 
 local player = game.player
 local player_metatable = getmetatable(player)
@@ -327,6 +341,8 @@ player.getTalentLevel = function(self, id)
         spoilers.used.talent = true
         spoilers.used.mastery = true
         return spoilers.active.talent_level * spoilers.active.mastery
+    elseif spoilers.talent_passthrough[spoilers.active.talent_id] and spoilers.talent_passthrough[spoilers.active.talent_id][id] then
+        return ActorTalents.getTalentLevel(player, id)
     else
         return 0
     end
@@ -336,6 +352,8 @@ player.getTalentLevelRaw = function(self, id)
     if id == spoilers.active.talent_id then
         spoilers.used.talent = true
         return spoilers.active.talent_level
+    elseif spoilers.talent_passthrough[spoilers.active.talent_id] and spoilers.talent_passthrough[spoilers.active.talent_id][id] then
+        return ActorTalents.getTalentLevelRaw(player, id)
     else
         return 0
     end
@@ -510,7 +528,7 @@ for tid, orig_t in pairs(Actor.talents_def) do
     t.info_text = t.info_text:gsub('#{underline}#', tip.util.fontToSpan('underline'))
     t.info_text = t.info_text:gsub('#{normal}#', '</span></span>')
     t.info_text = t.info_text:gsub('#LAST#', '</span></span>')
-    t.info_text = t.info_text:gsub('#([A-Z_]+)#', tip.util.colorNameToSpan)
+    t.info_text = t.info_text:gsub('#([A-Z0-9_]+)#', tip.util.colorNameToSpan)
 
     -- Ending of info text.
 
