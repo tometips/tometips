@@ -8,7 +8,7 @@ RELEASE_VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4 1.2.5 1.3.0 1.3.1
 VERSIONS := $(RELEASE_VERSIONS) master
 
 # Enable DLC for these versions
-DLC_VERSIONS := 1.3.0
+DLC_VERSIONS := 1.3.0 1.3.1
 
 # GitHub Pages output
 PAGES_OUTPUT = ../tometips.github.io

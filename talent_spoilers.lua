@@ -531,7 +531,7 @@ for tid, orig_t in pairs(Actor.talents_def) do
             --end
         end
         -- Note: Not the same logic as ToME (which checks <= 1), but seems to work
-        if t.range == 1 or t.range == "1" then t.range = "melee/personal" end
+        if t.range == 1 or t.range == "1" or t.range == "1.0" then t.range = "melee/personal" end
 
         -- Simple speed logic from 1.2.3 and earlier
         if not player.getTalentSpeed then
