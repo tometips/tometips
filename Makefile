@@ -39,7 +39,7 @@ html/js/templates.js: html/js/templates/*.handlebars
 # delete images.
 clean:
 	find html/data -mindepth 1 -maxdepth 1 -not -name README.txt | xargs rm -rf
-	rm html/js/templates.js html/js/partials.js
+	rm -f html/js/templates.js html/js/partials.js
 
 # Cleaner than clean.  This *does* delete images.
 clean-all: clean

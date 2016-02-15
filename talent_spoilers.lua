@@ -20,6 +20,11 @@ spoilers = {
         _life = 1000,
         _max_life = 1000,
 
+        -- Equipment - roughly plausible end-game stats
+        -- Base voratun shield has 180-220 block.  Using 200 is probably a bit
+        -- low for an end-game character with egos/artifacts, but it's not bad.
+        _shield_block = 200,
+
         -- The goal is to display effectiveness at 50% of max psi.
         psi = 50,
         max_psi = 100,
@@ -128,6 +133,11 @@ spoilers = {
             -- We can add handling if/when ToME starts using it.
             tip.util.logError("Unexpected use of psi without max_psi or vice versa")
             os.exit(1)
+        end
+
+        -- Equipment.  A work in progress.
+        if self.used._shield_block then
+            msg[#msg+1] = ("shield block %i"):format(self.active._shield_block)
         end
 
         local css_class
@@ -297,9 +307,8 @@ player.combatMentalResist = function(self, fake)
 end
 
 player.combatShieldBlock = function(self)
-    -- Base voratun shield has 180-220 block.  Using 200 is probably a bit low
-    -- for an end-game character with egos/artifacts, but it's not bad.
-    return 200
+    spoilers.used._shield_block = true
+    return spoilers.active._shield_block
 end
 
 player.getParadox = function(self)
@@ -475,7 +484,7 @@ for tid, orig_t in pairs(Actor.talents_def) do
         local status, err = pcall(function()
             info_text[i] = t.info(player, t):escapeHtml():toTString():tokenize(" ()[]")
         end)
-		
+
 		-- Minimal error handling - just enough to print the failing talent,
 		-- instead of simply crashing with no context.
         if not status then
