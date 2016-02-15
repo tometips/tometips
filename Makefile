@@ -4,11 +4,11 @@ LUA := luajit
 
 TOME_GIT_URL := http://git.net-core.org/tome/t-engine4.git
 
-RELEASE_VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4 1.2.5 1.3.0 1.3.1
+RELEASE_VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4 1.2.5 1.3.0 1.3.1 1.3.3 1.4.0 1.4.1 1.4.2 1.4.3
 VERSIONS := $(RELEASE_VERSIONS) master
 
 # Enable DLC for these versions
-DLC_VERSIONS := 1.3.0 1.3.1
+DLC_VERSIONS := 1.3.0 1.3.1 1.3.3 1.4.0 1.4.1 1.4.2 1.4.3
 
 # GitHub Pages output
 PAGES_OUTPUT = ../tometips.github.io

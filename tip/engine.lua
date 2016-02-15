@@ -236,6 +236,10 @@ local player = Actor.new{
 }
 game.player = player
 
+-- Dummy map coordinates.  Talents such as Stealth need this.
+player.x = 0
+player.y = 0
+
 -- table.mapv was added in newer versions of T-Engine's utils.lua.
 -- Copy its implementation and add it to older versions if needed.
 if not table.mapv then
