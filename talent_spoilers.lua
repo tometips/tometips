@@ -296,6 +296,12 @@ player.combatMentalResist = function(self, fake)
     return spoilers.active.stat_power
 end
 
+player.combatShieldBlock = function(self)
+    -- Base voratun shield has 180-220 block.  Using 200 is probably a bit low
+    -- for an end-game character with egos/artifacts, but it's not bad.
+    return 200
+end
+
 player.getParadox = function(self)
     spoilers.used.paradox = true
     return spoilers.active.paradox
@@ -466,7 +472,17 @@ for tid, orig_t in pairs(Actor.talents_def) do
     spoilers.used = {}
     for i, v in ipairs(spoilers.all_active) do
         table.merge(spoilers.active, v)
-        info_text[i] = t.info(player, t):escapeHtml():toTString():tokenize(" ()[]")
+        local status, err = pcall(function()
+            info_text[i] = t.info(player, t):escapeHtml():toTString():tokenize(" ()[]")
+        end)
+		
+		-- Minimal error handling - just enough to print the failing talent,
+		-- instead of simply crashing with no context.
+        if not status then
+            print(("Error while processing %s:"):format(tid))
+            -- Hack: Reinvoke the t.info call for full error message, call stack, exit
+            t.info(player, t):escapeHtml():toTString():tokenize(" ()[]")
+        end
     end
     table.merge(spoilers.active, spoilers.default_active)
 
