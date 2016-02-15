@@ -28,8 +28,8 @@ cd ..
 rm -f [0-9]*/dlc [0-9]*/data-
 
 for ver in $*; do
-    ln -sv ../dlc $ver
+    ln -sfv ../dlc $ver
     for dlc in stone-wardens ashes-urhrok; do
-        ln -sv ../dlc/tome-$dlc/data $ver/data-$dlc
+        ln -sfv ../dlc/tome-$dlc/data $ver/data-$dlc
     done
 done
