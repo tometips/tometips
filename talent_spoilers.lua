@@ -21,6 +21,7 @@ spoilers = {
         _max_life = 1000,
 
         -- Equipment - roughly plausible end-game stats
+        _archery_range = 10,
         -- Base voratun shield has 180-220 block.  Using 200 is probably a bit
         -- low for an end-game character with egos/artifacts, but it's not bad.
         _shield_block = 200,
@@ -135,10 +136,16 @@ spoilers = {
             os.exit(1)
         end
 
-        -- Equipment.  A work in progress.
+        -- Equipment.  Partially supported:
+        -- * No attempt to give it its own CSS.
+        -- * Won't be shown for talents like Block that have no other stat dependencies.
         if self.used._shield_block then
             msg[#msg+1] = ("shield block %i"):format(self.active._shield_block)
         end
+        -- Not currently tracked
+        --if self.used._archery_range then
+        --    msg[#msg+1] = ("archery range %i"):format(self.active._archery_range)
+        --end
 
         local css_class
         if use_stat_power and use_talent then
@@ -475,6 +482,11 @@ for tid, orig_t in pairs(Actor.talents_def) do
     if tid == 'T_ARMOUR_TRAINING' then
         player.inven[player.INVEN_BODY][1] = { subtype = "heavy" }
     end
+    -- Special case: Archery weapon for talents that need that
+    if tid == 'T_SKIRMISHER_THROAT_SMASHER' then
+        player.inven[player.INVEN_MAINHAND][1] = { combat = { range=spoilers.active._archery_range }, archery = 'sling', archery_kind = 'sling' }
+        player.inven[player.INVEN_QUIVER][1] = { combat = {}, archery_ammo = 'sling' }
+    end
 
     -- Beginning of info text.  This is a bit complicated.
     local info_text = {}
@@ -514,6 +526,11 @@ for tid, orig_t in pairs(Actor.talents_def) do
     if tid == 'T_ARMOUR_TRAINING' then
         player.inven[player.INVEN_BODY][1] = nil
         t.info_text = t.info_text:gsub(' with your current body armour', ', assuming heavy mail armour')
+    end
+    -- Special case: Finish archery talents
+    if tid == 'T_SKIRMISHER_THROAT_SMASHER' then
+        player.inven[player.INVEN_MAINHAND][1] = nil
+        player.inven[player.INVEN_QUIVER][1] = nil
     end
 
     -- Hack: Fix text like "increases foo by 1., 2., 3., 4., 5."
