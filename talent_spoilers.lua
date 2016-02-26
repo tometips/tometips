@@ -354,7 +354,8 @@ player.getInscriptionData = function()
         mana = 0,
         apply = 0,
         radius = 0,
-        what = { ["physical, mental, or magical"] = true }
+        what = { ["physical, mental, or magical"] = true },
+        cooldown_mod = 100,
     }
 end
 player.getTalentLevel = function(self, id)
@@ -502,7 +503,7 @@ for tid, orig_t in pairs(Actor.talents_def) do
         if not status then
             print(("Error while processing %s:"):format(tid))
             -- Hack: Reinvoke the t.info call for full error message, call stack, exit
-            t.info(player, t):escapeHtml():toTString():tokenize(" ()[]")
+            t.info(player, t)
         end
     end
     table.merge(spoilers.active, spoilers.default_active)

@@ -19,9 +19,10 @@ fi
 mkdir -p dlc
 cd dlc
 
-rm -rf tome-stone-wardens tome-ashes-urhrok
+rm -rf tome-stone-wardens tome-ashes-urhrok tome-orcs
 unzip "$steamgame/addons/tome-stone-wardens.teaa" -d tome-stone-wardens
 unzip "$steamgame/dlcs/ashes-urhrok.teaac" "tome-ashes-urhrok/*"
+unzip "$steamgame/dlcs/orcs.teaac" "tome-orcs/*"
 
 cd ..
 
@@ -29,7 +30,7 @@ rm -f [0-9]*/dlc [0-9]*/data-
 
 for ver in $*; do
     ln -sfv ../dlc $ver
-    for dlc in stone-wardens ashes-urhrok; do
+    for dlc in stone-wardens ashes-urhrok orcs; do
         ln -sfv ../dlc/tome-$dlc/data $ver/data-$dlc
     done
 done

@@ -51,6 +51,12 @@ rng = {
 }
 
 game = {
+    state = {
+        birth = {
+            -- For orcs DLC - this causes orc content to load into the main campaign, I think.
+            merge_tinkers_data = true,
+        },
+    },
     level = {
         data = {},
         entities = {},
@@ -58,6 +64,15 @@ game = {
     party = {
         hasMember = function(actor) return false end,
     },
+}
+
+profile = {
+    mod = {
+        allow_build = {
+            -- For orcs DLC - allows steam classes, steam stuff for Adventurer
+            orcs_tinker_eyal = true
+        }
+    }
 }
 
 -- Load init.lua and get version number.  Based on Module.lua.
@@ -84,6 +99,11 @@ function loadfile_and_execute(file)
 end
 load = loadfile_and_execute
 
+local old_dofile = dofile
+dofile = function(file)
+    return old_dofile(tip.version .. file)
+end
+
 require 'engine.dialogs.Chat'
 
 require 'engine.utils'
@@ -98,6 +118,12 @@ local Birther = require 'engine.Birther'
 
 -- FIXME: Figure out where these should go and what they should do
 resolvers = {
+    calc = {
+    },
+
+    racials_defs = {
+    },
+
     equip = function() end,
     inscriptions = function() end,
     levelup = function() end,
@@ -118,6 +144,7 @@ resolvers = {
     inventory = function() end,
     equipbirth = function() end,
     inventorybirth = function() end,
+    attachtinkerbirth = function() end,
 }
 
 config.settings.tome = {}
@@ -175,6 +202,9 @@ ActorStats:defineStat("Cunning",      "cun", 10, 1, 100, "Cunning defines your c
 ActorStats:defineStat("Constitution", "con", 10, 1, 100, "Constitution defines your character's ability to withstand and resist damage. It increases your maximum life and physical resistance.")
 -- Luck is hidden and starts at half max value (50) which is considered the standard
 ActorStats:defineStat("Luck",         "lck", 50, 1, 100, "Luck defines your character's fortune when dealing with unknown events. It increases your critical strike chance, your chance of random encounters, ...")
+
+-- Factions - copied from ToME's load.lua
+dofile("/data/factions.lua")
 
 -- Birther descriptor - copied from ToME's load.lua
 Birther:loadDefinition("/data/birth/descriptors.lua")
