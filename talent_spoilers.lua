@@ -467,7 +467,12 @@ function getTalentReqDesc(player, t, tlev)
     end
     if req.special then
         if #new_require > 0 then new_require[#new_require+1] = '; ' end
-        new_require[#new_require+1] = req.special.desc
+
+        -- Ad hoc HTML handling
+        local desc = req.special.desc
+        desc = desc:gsub('#{italic}#', tip.util.fontToSpan('italic')):gsub('#{normal}#', tip.util.closeFontSpan())
+
+        new_require[#new_require+1] = desc
     end
     if req.talent then
         for _, tid in ipairs(req.talent) do

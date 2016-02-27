@@ -95,6 +95,10 @@ function tip.util.fontToSpan(font)
     return ('<span style="%s"><span class="tstr-font-%s">'):format(font_to_css[font], font)
 end
 
+function tip.util.closeFontSpan()
+    return '</span></span>'
+end
+
 function tip.util.colorNameToSpan(color)
     local c = colors[color]
     if c then
@@ -105,14 +109,18 @@ function tip.util.colorNameToSpan(color)
     end
 end
 
+function tip.util.closeColorSpan()
+    return '</span></span>'
+end
+
 function tip.util.tstringToHtml(tstr)
     local html = { '<p>' }, in_color, in_font
 
     local function closeColorIfNeeded()
-        if in_color then html[#html+1] = '</span></span>' in_color = false end
+        if in_color then html[#html+1] = closeFontSpan() in_color = false end
     end
     local function closeFontIfNeeded()
-        if in_font then html[#html+1] = '</span></span>' in_font = false end
+        if in_font then html[#html+1] = closeColorSpan() in_font = false end
     end
 
     for i, v in ipairs(tstr) do
