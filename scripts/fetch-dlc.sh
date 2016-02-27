@@ -1,6 +1,8 @@
 #!/bin/bash
 # Fetches DLC from Steam
 
+set -e
+
 cd $(dirname $0)/..
 
 if [ $(uname) = Darwin ]; then
@@ -28,9 +30,20 @@ cd ..
 
 rm -f [0-9]*/dlc [0-9]*/data-
 
+function link_dlc() {
+    dlc=$1
+    ver=$2
+    ln -sfv ../dlc/tome-$dlc/data $ver/data-$dlc
+}
+
 for ver in $*; do
     ln -sfv ../dlc $ver
-    for dlc in stone-wardens ashes-urhrok orcs; do
-        ln -sfv ../dlc/tome-$dlc/data $ver/data-$dlc
+
+    for dlc in stone-wardens ashes-urhrok; do
+        link_dlc $dlc $ver
     done
+
+    if [ $ver '>' 1.4.3 ]; then
+        link_dlc orcs $ver
+    fi
 done

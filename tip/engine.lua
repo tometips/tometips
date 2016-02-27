@@ -224,10 +224,11 @@ hookNew(ActorTalents, 'newTalentType')
 
 -- Load DLC
 local all_dlc = tip.util.scandir(tip.version .. '/dlc')
+local min_dlc_version = { ['tome-orcs'] = '1.4.4' }
 tip.dlc = {}
 if next(all_dlc) ~= nil then
     for i, v in pairs(all_dlc) do
-        if not v:starts('.') then
+        if not v:starts('.') and (not min_dlc_version[v] or tip.version >= min_dlc_version[v]) then
             local dlc = tip.version .. '/dlc/' .. v
             print(("Loading %s"):format(dlc))
 
