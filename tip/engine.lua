@@ -63,6 +63,7 @@ game = {
     },
     party = {
         hasMember = function(actor) return false end,
+        known_tinkers = {},
     },
 }
 
@@ -237,9 +238,29 @@ if next(all_dlc) ~= nil then
 
             -- The "right" thing to do is to process init.lua to check for
             -- hooks, overload, and superload.  For our purposes, we can assume
-            -- hooks and overload are enabled and can ignore superload.
+            -- hooks and overload are enabled and can hard-code needed
+            -- superload modules.
             package.path = package.path..(';%s/overload/?.lua;%s/?.lua'):format(dlc, dlc)
             old_loadfile(('%s/hooks/load.lua'):format(dlc))()
+
+            -- Hack: Hard-code loading Combat.lua.
+            -- We run after mod.class.Actor, so pass that in loadPrevious
+            local f = old_loadfile(('%s/superload/mod/class/interface/Combat.lua'):format(dlc))
+            setfenv(f, setmetatable({
+				loadPrevious = function()
+                    return require 'mod.class.Actor'
+				end
+			}, {__index=_G}))
+            f()
+
+            -- Hack: Further patches for specific DLC
+            if v == 'tome-orcs' then
+                local PartyTinker = require 'mod.class.interface.PartyTinker'
+                game.party.__tinkers_ings = PartyTinker.__tinkers_ings
+                game.party.knowTinker = PartyTinker.knowTinker
+                local Actor = require 'mod.class.Actor'
+                Actor.T_METALSTAR = 'T_METALSTAR'
+            end
         end
     end
 
