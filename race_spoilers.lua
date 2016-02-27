@@ -4,7 +4,9 @@ json = require 'lib.json4lua.json.json'
 local Actor = require 'mod.class.Actor'
 local Birther = require 'engine.Birther'
 
-local world = Birther.birth_descriptor_def.world["Maj'Eyal"]
+-- "Arena" and the Infinite Dungeon contain all available races from all normal (full) campaigns.
+-- Normal campaigns like "Maj'Eyal" may have only a subset.
+local world = Birther.birth_descriptor_def.world["Arena"]
 
 local blacklist_races = { ['Tutorial Human'] = true, Construct = true }
 local blacklist_subraces = { ['Tutorial Basic'] = true, ['Tutorial Stats'] = true, ['Runic Golem'] = true }
@@ -75,7 +77,7 @@ for i, sub in ipairs(Birther.birth_descriptor_def.subrace) do
         }
 
         -- Hack: Look up size category text without an Actor object
-        if sub.full_copy.size_category then subraces[sub.short_name].size = Actor.TextSizeCategory(sub.full_copy) end
+        if sub.full_copy and sub.full_copy.size_category then subraces[sub.short_name].size = Actor.TextSizeCategory(sub.full_copy) end
 
         subrace_short_desc[sub.short_name] = sub.desc:split('\n')[1]
     end
