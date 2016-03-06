@@ -219,8 +219,6 @@ spoilers = {
     },
 
     alt_talent = {
-        [Actor.T_WARP_MINE_TOWARD] = Actor.T_WARP_MINES,
-        [Actor.T_WARP_MINE_AWAY] = Actor.T_WARP_MINES,
     },
 
     -- Indexed by active talent ID; gives the set of additional talent IDs
@@ -229,7 +227,11 @@ spoilers = {
     }
 }
 
--- Add DLC to talent configs if loaded
+-- Add talents from newer versions and from DLC
+if Actor.T_WARP_MINE_TOWARD then
+    spoilers.alt_talent[Actor.T_WARP_MINE_TOWARD] = Actor.T_WARP_MINES
+    spoilers.alt_talent[Actor.T_WARP_MINE_AWAY] = Actor.T_WARP_MINES
+end
 if Actor.T_VOLCANIC_ROCK then
     spoilers.talent_passthrough[Actor.T_VOLCANIC_ROCK] = { [Actor.T_VOLCANO] = true }
 end
