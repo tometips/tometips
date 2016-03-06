@@ -117,10 +117,10 @@ function tip.util.tstringToHtml(tstr)
     local html = { '<p>' }, in_color, in_font
 
     local function closeColorIfNeeded()
-        if in_color then html[#html+1] = closeFontSpan() in_color = false end
+        if in_color then html[#html+1] = tip.util.closeFontSpan() in_color = false end
     end
     local function closeFontIfNeeded()
-        if in_font then html[#html+1] = closeColorSpan() in_font = false end
+        if in_font then html[#html+1] = tip.util.closeColorSpan() in_font = false end
     end
 
     for i, v in ipairs(tstr) do
