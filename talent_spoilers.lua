@@ -209,10 +209,15 @@ spoilers = {
         ["T_GLOBAL_CD"] = true,                  -- aka "charms"
     },
 
-    alt_talent = {
+    alt_talent_type = {
         ["cunning/poisons-effects"] = Actor.T_VILE_POISONS,
         ["cunning/traps"] = Actor.T_TRAP_MASTERY,
         ["chronomancy/manifold"] = Actor.T_WEAPON_MANIFOLD,
+    },
+
+    alt_talent = {
+        [Actor.T_WARP_MINE_TOWARD] = Actor.T_WARP_MINES,
+        [Actor.T_WARP_MINE_AWAY] = Actor.T_WARP_MINES,
     },
 
     -- Indexed by active talent ID; gives the set of additional talent IDs
@@ -467,8 +472,12 @@ for tid, orig_t in pairs(Actor.talents_def) do
     -- Special cases: Some talent categories depend on particular talents.
     spoilers.active.alt_talent = false
     spoilers.active.alt_talent_fake_id = nil
-    if spoilers.alt_talent[t.type[1]] then
-        spoilers.active.talent_id = spoilers.alt_talent[t.type[1]]
+    if spoilers.alt_talent[tid] then
+        spoilers.active.talent_id = spoilers.alt_talent[tid]
+        spoilers.active.alt_talent = true
+    end
+    if spoilers.alt_talent_type[t.type[1]] then
+        spoilers.active.talent_id = spoilers.alt_talent_type[t.type[1]]
         spoilers.active.alt_talent = true
     end
     -- Special case: Jumpgate's talent is tied to Jumpgate: Teleport.
