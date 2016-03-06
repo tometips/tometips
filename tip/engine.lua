@@ -51,13 +51,29 @@ rng = {
 }
 
 game = {
+    state = {
+        birth = {
+            -- For orcs DLC - this causes orc content to load into the main campaign, I think.
+            merge_tinkers_data = true,
+        },
+    },
     level = {
         data = {},
         entities = {},
     },
     party = {
         hasMember = function(actor) return false end,
+        known_tinkers = {},
     },
+}
+
+profile = {
+    mod = {
+        allow_build = {
+            -- For orcs DLC - allows steam classes, steam stuff for Adventurer
+            orcs_tinker_eyal = true
+        }
+    }
 }
 
 -- Load init.lua and get version number.  Based on Module.lua.
@@ -84,6 +100,11 @@ function loadfile_and_execute(file)
 end
 load = loadfile_and_execute
 
+local old_dofile = dofile
+dofile = function(file)
+    return old_dofile(tip.version .. file)
+end
+
 require 'engine.dialogs.Chat'
 
 require 'engine.utils'
@@ -98,6 +119,12 @@ local Birther = require 'engine.Birther'
 
 -- FIXME: Figure out where these should go and what they should do
 resolvers = {
+    calc = {
+    },
+
+    racials_defs = {
+    },
+
     equip = function() end,
     inscriptions = function() end,
     levelup = function() end,
@@ -118,6 +145,7 @@ resolvers = {
     inventory = function() end,
     equipbirth = function() end,
     inventorybirth = function() end,
+    attachtinkerbirth = function() end,
 }
 
 config.settings.tome = {}
@@ -176,6 +204,9 @@ ActorStats:defineStat("Constitution", "con", 10, 1, 100, "Constitution defines y
 -- Luck is hidden and starts at half max value (50) which is considered the standard
 ActorStats:defineStat("Luck",         "lck", 50, 1, 100, "Luck defines your character's fortune when dealing with unknown events. It increases your critical strike chance, your chance of random encounters, ...")
 
+-- Factions - copied from ToME's load.lua
+dofile("/data/factions.lua")
+
 -- Birther descriptor - copied from ToME's load.lua
 Birther:loadDefinition("/data/birth/descriptors.lua")
 
@@ -193,10 +224,11 @@ hookNew(ActorTalents, 'newTalentType')
 
 -- Load DLC
 local all_dlc = tip.util.scandir(tip.version .. '/dlc')
+local min_dlc_version = { ['tome-orcs'] = '1.4.4' }
 tip.dlc = {}
 if next(all_dlc) ~= nil then
     for i, v in pairs(all_dlc) do
-        if not v:starts('.') then
+        if not v:starts('.') and (not min_dlc_version[v] or tip.version >= min_dlc_version[v]) then
             local dlc = tip.version .. '/dlc/' .. v
             print(("Loading %s"):format(dlc))
 
@@ -207,9 +239,29 @@ if next(all_dlc) ~= nil then
 
             -- The "right" thing to do is to process init.lua to check for
             -- hooks, overload, and superload.  For our purposes, we can assume
-            -- hooks and overload are enabled and can ignore superload.
+            -- hooks and overload are enabled and can hard-code needed
+            -- superload modules.
             package.path = package.path..(';%s/overload/?.lua;%s/?.lua'):format(dlc, dlc)
             old_loadfile(('%s/hooks/load.lua'):format(dlc))()
+
+            -- Hack: Hard-code loading Combat.lua.
+            -- We run after mod.class.Actor, so pass that in loadPrevious
+            local f = old_loadfile(('%s/superload/mod/class/interface/Combat.lua'):format(dlc))
+            setfenv(f, setmetatable({
+				loadPrevious = function()
+                    return require 'mod.class.Actor'
+				end
+			}, {__index=_G}))
+            f()
+
+            -- Hack: Further patches for specific DLC
+            if v == 'tome-orcs' then
+                local PartyTinker = require 'mod.class.interface.PartyTinker'
+                game.party.__tinkers_ings = PartyTinker.__tinkers_ings
+                game.party.knowTinker = PartyTinker.knowTinker
+                local Actor = require 'mod.class.Actor'
+                Actor.T_METALSTAR = 'T_METALSTAR'
+            end
         end
     end
 

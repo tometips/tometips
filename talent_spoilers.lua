@@ -26,9 +26,11 @@ spoilers = {
         -- low for an end-game character with egos/artifacts, but it's not bad.
         _shield_block = 200,
 
-        -- The goal is to display effectiveness at 50% of max psi.
+        -- The goal is to display effectiveness at 50% of max.
         psi = 50,
         max_psi = 100,
+
+        steam = 100,
     },
 
     -- We iterate over these parameters to display the effects of a talent at
@@ -105,6 +107,7 @@ spoilers = {
             if self.used.physicalpower then msg[#msg+1] = ("physical power %s"):format(stat_power_text) use_stat_power = true end
             if self.used.spellpower then msg[#msg+1] = ("spellpower %s"):format(stat_power_text) use_stat_power = true end
             if self.used.mindpower then msg[#msg+1] = ("mindpower %s"):format(stat_power_text) use_stat_power = true end
+            if self.used.steampower then msg[#msg+1] = ("steampower %s"):format(stat_power_text) use_stat_power = true end
             if self.used.combat_physresist then msg[#msg+1] = ("physical save %s"):format(stat_power_text) use_stat_power = true end
             if self.used.combat_spellresist then msg[#msg+1] = ("spell save %s"):format(stat_power_text) use_stat_power = true end
             if self.used.combat_mentalresist then msg[#msg+1] = ("mental save %s"):format(stat_power_text) use_stat_power = true end
@@ -115,7 +118,7 @@ spoilers = {
             use_stat_power = true   -- not exactly, but close enough
         end
 
-        -- TODO: Properly determine which talent components depend on max life
+        -- FIXME: Properly determine which talent components depend on max life
         -- See, e.g., Pride of the Orcs for a talent affected by this
         --if self.used.life then msg[#msg+1] = ("life %i"):format(self.active._life) use_stat_power = true end
         --if self.used.max_life then msg[#msg+1] = ("max life %i"):format(self.active._max_life) use_stat_power = true end
@@ -303,6 +306,15 @@ player.combatMindpower = function(self, mod, add)
     return spoilers.active.stat_power * mod
 end
 
+player.combatSteampower = function(self, mod, add)
+    mod = mod or 1
+    if add then
+        tip.util.logError("Unsupported add to combatSteampower")
+    end
+    spoilers.used.steampower = true
+    return spoilers.active.stat_power * mod
+end
+
 player.combatPhysicalResist = function(self, fake)
     spoilers.used.combat_physresist = true
     return spoilers.active.stat_power
@@ -338,6 +350,11 @@ player.getMaxPsi = function(self)
     return spoilers.active.max_psi
 end
 
+player.getSteam = function(self)
+    spoilers.used.steam = true
+    return spoilers.active.steam
+end
+
 player.isTalentActive = function() return false end  -- TODO: Doesn't handle spiked auras
 player.hasEffect = function() return false end
 player.getSoul = function() return math.huge end
@@ -359,7 +376,8 @@ player.getInscriptionData = function()
         mana = 0,
         apply = 0,
         radius = 0,
-        what = { ["physical, mental, or magical"] = true }
+        what = { ["physical, mental, or magical"] = true },
+        cooldown_mod = 100,
     }
 end
 player.getTalentLevel = function(self, id)
@@ -454,11 +472,23 @@ function getTalentReqDesc(player, t, tlev)
     end
     if req.special then
         if #new_require > 0 then new_require[#new_require+1] = '; ' end
-        new_require[#new_require+1] = req.special.desc
+
+        -- Ad hoc HTML handling
+        local desc = req.special.desc
+        desc = desc:gsub('#{italic}#', tip.util.fontToSpan('italic')):gsub('#{normal}#', tip.util.closeFontSpan())
+
+        new_require[#new_require+1] = desc
     end
     if req.talent then
-        -- Currently unimplemented (not because it's hard, but because ToME doesn't use it)
-        assert(false)
+        for _, tid in ipairs(req.talent) do
+            if type(tid) == "table" then
+                if #new_require > 0 then new_require[#new_require+1] = ', ' end
+                new_require[#new_require+1] = ("Talent %s (%d)"):format(player:getTalentFromId(tid[1]).name, tid[2])
+            else
+                if #new_require > 0 then new_require[#new_require+1] = ', ' end
+                new_require[#new_require+1] = ("Talent %s"):format(player:getTalentFromId(tid).name)
+            end
+        end
     end
     return table.concat(new_require)
 end
@@ -511,7 +541,7 @@ for tid, orig_t in pairs(Actor.talents_def) do
         if not status then
             print(("Error while processing %s:"):format(tid))
             -- Hack: Reinvoke the t.info call for full error message, call stack, exit
-            t.info(player, t):escapeHtml():toTString():tokenize(" ()[]")
+            t.info(player, t)
         end
     end
     table.merge(spoilers.active, spoilers.default_active)
