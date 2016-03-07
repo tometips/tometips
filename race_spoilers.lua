@@ -18,7 +18,10 @@ end
 -- Manually configured images for each subrace.  See class_spoilers.lua.
 local subrace_images = {
     OGRE = { { 'giant_ogre_ogre_guard-cropped', 64, 112 } },
+    ORC = { 'humanoid_orc_orc_warrior' },
     DOOMELF = { { 'demon_statue_uruivellas-cropped', 61, 106 } },
+    KRUK_YETI = { { 'giant_yeti_yeti-cropped', 64, 77 } },
+    WHITEHOOF = { { 'undead_minotaur_whitehoof_maulotaur-cropped', 63, 92 } },
 }
 
 function birtherRaceDescToHtml(desc)
