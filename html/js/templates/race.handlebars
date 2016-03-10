@@ -1,5 +1,6 @@
 {{! No anchor. Since there's only one h2, we don't want to jump to putting the anchor at the top of the screen. }}
 {{!-- <h2><a class="anchor" id="races/{{toHtmlId short_name}}"></a>{{toTitleCase display_name}}</h2><div> --}}
+{{! TODO: If single_subrace and display_name != single_subrace.0.display_name, should show both }}
 <h2>{{toTitleCase display_name}}</h2>
 <div>
     {{#unless single_subrace}}
@@ -44,6 +45,7 @@
                     {{#if copy.global_speed_base}}{{percentStat "Global speed" copy.global_speed_base 0 1}}{{/if}}
                     {{#if copy.poison_immune}}{{percentStat "Poison resistance" copy.poison_immune 0 0}}{{/if}}
                     {{#if copy.cut_immune}}{{percentStat "Bleed resistance" copy.cut_immune 0 0}}{{/if}}
+                    {{#if copy.silence_immune}}{{percentStat "Silence resistance" copy.silence_immune 0 0}}{{/if}}
                     {{#if copy.stun_immune}}{{percentStat "Stun resistance" copy.stun_immune 0 0}}{{/if}}
                     {{#if copy.fear_immune}}{{percentStat "Fear resistance" copy.fear_immune 0 0}}{{/if}}
                     {{#if copy.no_breath}}{{textStat "Special" "No need to breathe"}}{{/if}}

@@ -25,6 +25,9 @@ local subrace_images = {
 }
 
 function birtherRaceDescToHtml(desc)
+    -- Fix typos
+    desc = desc:gsub("#GOLDAlgid Rage#", "#GOLD#Algid Rage")
+
     -- Replace the "Stat modifiers:" and "Life per level:" block,
     -- since we'll display those more neatly in HTML.
     desc = desc:gsub("\n#GOLD#Stat.*", "")

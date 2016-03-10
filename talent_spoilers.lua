@@ -434,12 +434,17 @@ function getByTalentLevel(actor, f)
     end
 end
 
-function getvalByTalentLevel(val, actor, t)
+function getvalByTalentLevel(val, actor, t, converter)
     if type(val) == "function" then
-        return getByTalentLevel(actor, function() return val(actor, t) end)
-    -- ToME supports random values, but we shouldn't need that.
+        -- Optional support for an extra converter operation on top of val
+        if not converter then converter = function(v) return v end end
+
+        return getByTalentLevel(actor, function() return converter(val(actor, t)) end)
+
+    -- Equivalent functions in ToME support random values, but we shouldn't need that.
     --elseif type(val) == "table" then
     --    return val[rng.range(1, #val)]
+
     else
         return val
     end
@@ -666,7 +671,7 @@ for tid, orig_t in pairs(Actor.talents_def) do
         end
     end
 
-    t.cooldown = getvalByTalentLevel(t.cooldown, player, t)
+    t.cooldown = getvalByTalentLevel(t.cooldown, player, t, function(v) return v and math.ceil(v) or v end)
 
     local cost = {}
     for i, v in ipairs(tip.raw_resources) do
