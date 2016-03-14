@@ -1,6 +1,11 @@
 #!/bin/bash
 # Checks available DLC via Steam
 
+cd $(dirname $0)/..
+
+HIGHLIGHT='\033[1;32m'  # Light green
+NORMAL='\033[0m'        # No Color
+
 if [ $(uname) = Darwin ]; then
     steamgame=~/Library/Application\ Support/Steam/SteamApps/common/TalesMajEyal/game
 elif [[ $(uname) == CYGWIN* ]]; then
@@ -33,7 +38,12 @@ function get_version() {
     else
         echo Version $ver
         filename=$(basename $addon)
-        echo Local filename: dlc/${filename/.teaa/-$ver.teaa}
+        local_filename=dlc/${filename/.teaa/-$ver.teaa}
+        if [ -f $local_filename ]; then
+            echo Local filename: $local_filename
+        else
+            echo -e "${HIGHLIGHT}NEW suggested filename: $local_filename${NORMAL}"
+        fi
     fi
 
     echo
