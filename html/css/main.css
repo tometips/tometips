@@ -97,6 +97,18 @@ html, body, #side-nav-container, #content-container
     position: relative;
 }
 
+#content
+{
+    padding-right: 160px;
+}
+
+#sidebar-ad
+{
+    position: absolute;
+    right: 0;
+    top: 120px;
+}
+
 .page-header
 {
     position: relative;
