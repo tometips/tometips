@@ -18,7 +18,7 @@ function link_dlc() {
     done
 }
 
-all_versions="1.3.0 1.3.1 1.3.3 1.4.0 1.4.1 1.4.2 1.4.3 1.4.4 1.4.5 1.4.6"
+all_versions="1.3.0 1.3.1 1.3.3 1.4.0 1.4.1 1.4.2 1.4.3 1.4.4 1.4.5 1.4.6 1.4.7 1.4.8"
 
 link_dlc stone-wardens 1.2.3 $all_versions
 link_dlc ashes-urhrok 1.0.5 $all_versions
