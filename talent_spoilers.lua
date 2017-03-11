@@ -405,6 +405,8 @@ player.getTalentLevelRaw = function(self, id)
         return 0
     end
 end
+-- for possessors
+player.bodies_storage = {}
 
 -- Overrides data/talents/psionic/psionic.lua.  TODO: Can we incorporate this at all?
 function getGemLevel()
@@ -546,6 +548,7 @@ for tid, orig_t in pairs(Actor.talents_def) do
 		-- Minimal error handling - just enough to print the failing talent,
 		-- instead of simply crashing with no context.
         if not status then
+            info_text[i] = 'Error while processing.'
             print(("Error while processing %s:"):format(tid))
             -- Hack: Reinvoke the t.info call for full error message, call stack, exit
             t.info(player, t)
@@ -675,7 +678,7 @@ for tid, orig_t in pairs(Actor.talents_def) do
 
     local cost = {}
     for i, v in ipairs(tip.raw_resources) do
-        if t[v] then
+        if t[v] and type(t[v]) ~= 'function' then
             local c = getvalByTalentLevel(t[v], player, t)
             if c then
                 cost[#cost+1] = string.format("%s %s", c, tip.resources[v])

@@ -1,4 +1,4 @@
-var VERSION = '2016-03-13';
+var VERSION = '2017-03-11';
 
 // http://stackoverflow.com/a/2548133/25507
 if (typeof String.prototype.endsWith !== 'function') {
@@ -462,8 +462,8 @@ var versions = (function() {
     }
 
     var versions = {
-        DEFAULT: '1.4.6',
-        ALL: [ '1.1.5', '1.2.0', '1.2.1', '1.2.2', '1.2.3', '1.2.4', '1.2.5', '1.3.0', '1.3.1', '1.3.3', '1.4.0', '1.4.1', '1.4.2', '1.4.3', '1.4.4', '1.4.5', '1.4.6' /*, 'master'*/ ],
+        DEFAULT: '1.5.0',
+        ALL: [ '1.4.9', '1.5.0', 'master' ],
         DISPLAY: { 'master': 'next' },
 
         name: function(ver) {
@@ -742,7 +742,7 @@ function initializeRoutes() {
     hasher.prependHash = '';
     hasher.initialized.add(parseHash);
     hasher.changed.add(parseHash);
-    hasher.changed.add(function() { googletag.pubads().refresh([ad_slot]) });
+//    hasher.changed.add(function() { googletag.pubads().refresh([ad_slot]) });
     hasher.init();
 }
 

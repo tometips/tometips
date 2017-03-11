@@ -18,11 +18,13 @@ function link_dlc() {
     done
 }
 
-all_versions="1.3.0 1.3.1 1.3.3 1.4.0 1.4.1 1.4.2 1.4.3 1.4.4 1.4.5 1.4.6"
+all_versions="1.4.9 1.5.0 master"
 
-link_dlc stone-wardens 1.2.3 $all_versions
-link_dlc ashes-urhrok 1.0.5 $all_versions
+link_dlc ashes-urhrok 1.0.5 1.4.9
+link_dlc ashes-urhrok 1.0.6 1.5.0 master
 
-link_dlc orcs 1.0.1 1.4.4
-link_dlc orcs 1.0.2 1.4.5
-link_dlc orcs 1.0.3 1.4.6
+link_dlc orcs 1.0.3 1.4.9
+link_dlc orcs 1.0.4 1.5.0 master
+
+link_dlc possessors 1.5 1.5.0 master
+

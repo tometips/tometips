@@ -56,6 +56,7 @@ game = {
             -- For orcs DLC - this causes orc content to load into the main campaign, I think.
             merge_tinkers_data = true,
         },
+        unlockTalentCheck = function(tid, who) return false end,
     },
     level = {
         data = {},
@@ -247,12 +248,14 @@ if next(all_dlc) ~= nil then
             -- Hack: Hard-code loading Combat.lua.
             -- We run after mod.class.Actor, so pass that in loadPrevious
             local f = old_loadfile(('%s/superload/mod/class/interface/Combat.lua'):format(dlc))
-            setfenv(f, setmetatable({
-				loadPrevious = function()
-                    return require 'mod.class.Actor'
-				end
-			}, {__index=_G}))
-            f()
+            if f ~= nil then
+                setfenv(f, setmetatable({
+                                    loadPrevious = function()
+                        return require 'mod.class.Actor'
+                                    end
+                            }, {__index=_G}))
+                f()
+            end
 
             -- Hack: Further patches for specific DLC
             if v == 'tome-orcs' then
@@ -268,7 +271,7 @@ if next(all_dlc) ~= nil then
     class:triggerHook({'ToME:load'})
 end
 
-tip.raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_stamina', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback' }
+tip.raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_stamina', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback', 'steam', 'sustain_steam' }
 
 tip.resources = {}
 for i, v in ipairs(tip.raw_resources) do
@@ -287,6 +290,7 @@ local player = Actor.new{
     preferred_paradox = 0,
 }
 game.player = player
+game.getPlayer = function(main) return game.player end
 
 -- Dummy map coordinates.  Talents such as Stealth need this.
 player.x = 0

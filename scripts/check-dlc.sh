@@ -49,6 +49,5 @@ function get_version() {
     echo
 }
 
-get_version addons/tome-stone-wardens.teaa
 get_version dlcs/ashes-urhrok.teaac tome-ashes-urhrok/
 get_version dlcs/orcs.teaac tome-orcs/

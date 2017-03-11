@@ -4,7 +4,7 @@ LUA := luajit
 
 TOME_GIT_URL := http://git.net-core.org/tome/t-engine4.git
 
-RELEASE_VERSIONS := 1.1.5 1.2.0 1.2.1 1.2.2 1.2.3 1.2.4 1.2.5 1.3.0 1.3.1 1.3.3 1.4.0 1.4.1 1.4.2 1.4.3 1.4.4 1.4.5 1.4.6
+RELEASE_VERSIONS := 1.4.9 1.5.0
 VERSIONS := $(RELEASE_VERSIONS) master
 
 # GitHub Pages output
@@ -79,7 +79,7 @@ master:
 $(RELEASE_VERSIONS):
 	scripts/copy-tag-src.sh $@
 
-dlc: $(RELEASE_VERSIONS)
+dlc: $(VERSIONS)
 	scripts/link-dlc.sh
 	touch dlc
 
