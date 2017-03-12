@@ -197,7 +197,6 @@ spoilers = {
 
     blacklist_talent_type = {
         ["chronomancy/temporal-archery"] = true, -- unavailable in this ToME version
-        ["psionic/possession"] = true,           -- unavailable in this ToME version
         ["psionic/psi-archery"] = true,          -- unavailable in this ToME version
         ["sher'tul/fortress"] = true,            -- unavailable in this ToME version
         ["tutorial"] = true,                     -- Do these even still exist?
@@ -361,6 +360,7 @@ player.isTalentActive = function() return false end  -- TODO: Doesn't handle spi
 player.hasEffect = function() return false end
 player.getSoul = function() return math.huge end
 player.knowTalent = function() return false end
+
 player.getInscriptionData = function()
     return {
         inc_stat = 0,
@@ -503,6 +503,9 @@ function getTalentReqDesc(player, t, tlev)
 end
 
 -- Process each talent, adding text descriptions of the various attributes
+for tid, orig_t in pairs(Actor.talents_def) do
+    player[tid] = table.clone(orig_t)
+end
 local talents_def_out = {}
 for tid, orig_t in pairs(Actor.talents_def) do
     t = table.clone(orig_t)

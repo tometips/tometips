@@ -222,6 +222,14 @@ end
 hookNew(Birther, 'newBirthDescriptor')
 hookNew(ActorTalents, 'newTalent')
 hookNew(ActorTalents, 'newTalentType')
+ActorTalents['callTalent'] = function (self, tid, name, ...)
+    if (type(tid)=='table') then tid = tid.id end
+    local t = self.talents_def[tid]
+    if (not t) then t = game.player.talents_def[tid] end
+    if (not t) then return nil end
+    name = name or "trigger"
+    if t[name] then return t[name](self, t, ...) end
+end
 
 -- Load DLC
 local all_dlc = tip.util.scandir(tip.version .. '/dlc')
