@@ -4,7 +4,7 @@ LUA := luajit
 
 TOME_GIT_URL := http://git.net-core.org/tome/t-engine4.git
 
-RELEASE_VERSIONS := 1.4.9 1.5.0
+RELEASE_VERSIONS := 1.1.5 1.2.5 1.3.3 1.4.9 1.5.0 1.5.1
 VERSIONS := $(RELEASE_VERSIONS) master
 
 # GitHub Pages output
