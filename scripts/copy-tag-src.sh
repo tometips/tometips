@@ -10,12 +10,7 @@ cd $(dirname $0)/..
 
 tag=$1
 
-# Fix up alternate schemes for tag names.
-if [ "$tag" = "1.3.0" ]; then
-    gittag=1.3.0-release
-else
-    gittag=$tag
-fi
+gittag=$tag
 
 trap "rm -rf $tag" ERR
 

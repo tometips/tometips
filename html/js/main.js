@@ -742,7 +742,7 @@ function initializeRoutes() {
     hasher.prependHash = '';
     hasher.initialized.add(parseHash);
     hasher.changed.add(parseHash);
-    hasher.changed.add(function() { googletag.pubads().refresh([ad_slot]) });
+    if (googletag && googletag.pubads) hasher.changed.add(function() { googletag.pubads().refresh([ad_slot]) });
     hasher.init();
 }
 

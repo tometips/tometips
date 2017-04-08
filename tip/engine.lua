@@ -1,6 +1,7 @@
 tip = tip or {}
 tip.version = arg[1]
 package.path = package.path..(';%s/?.lua;./%s/thirdparty/?.lua'):format(tip.version, tip.version)
+require 'versions'
 
 tip.outputDir = function()
     local output_dir = (arg[2] or '.') .. '/'
@@ -118,6 +119,7 @@ local ActorTemporaryEffects = require "engine.interface.ActorTemporaryEffects"
 local ActorInventory = require "engine.interface.ActorInventory"
 local Birther = require 'engine.Birther'
 
+
 -- FIXME: Figure out where these should go and what they should do
 resolvers = {
     calc = {
@@ -232,52 +234,50 @@ ActorTalents['callTalent'] = function (self, tid, name, ...)
 end
 
 -- Load DLC
-local all_dlc = tip.util.scandir(tip.version .. '/dlc')
-local min_dlc_version = { ['tome-orcs'] = '1.4.4' }
 tip.dlc = {}
-if next(all_dlc) ~= nil then
-    for i, v in pairs(all_dlc) do
-        if not v:starts('.') and (not min_dlc_version[v] or tip.version >= min_dlc_version[v]) then
-            local dlc = tip.version .. '/dlc/' .. v
-            print(("Loading %s"):format(dlc))
+local all_dlc = versions[tip.version]
+for i, v in ipairs(all_dlc) do
+    local dlc = 'dlc/tome-' .. v
+    print(("Loading %s"):format(dlc))
 
-            tip.dlc[v] = {}
-            local dlc_def = old_loadfile(dlc .. '/init.lua')
-            setfenv(dlc_def, tip.dlc[v])
-            dlc_def()
+    local dlcname = v:sub(1, string.find(v, "-[^-]*$") - 1)
+    os.execute ('ln -sf ../'..dlc..'/data '..tip.version..'/data-'..dlcname)
 
-            -- The "right" thing to do is to process init.lua to check for
-            -- hooks, overload, and superload.  For our purposes, we can assume
-            -- hooks and overload are enabled and can hard-code needed
-            -- superload modules.
-            package.path = package.path..(';%s/overload/?.lua;%s/?.lua'):format(dlc, dlc)
-            old_loadfile(('%s/hooks/load.lua'):format(dlc))()
+    tip.dlc[v] = {}
+    local dlc_def = old_loadfile(dlc .. '/init.lua')
+    setfenv(dlc_def, tip.dlc[v])
+    dlc_def()
 
-            -- Hack: Hard-code loading Combat.lua.
-            -- We run after mod.class.Actor, so pass that in loadPrevious
-            local f = old_loadfile(('%s/superload/mod/class/interface/Combat.lua'):format(dlc))
-            if f ~= nil then
-                setfenv(f, setmetatable({
-                                    loadPrevious = function()
-                        return require 'mod.class.Actor'
-                                    end
-                            }, {__index=_G}))
-                f()
-            end
+    -- The "right" thing to do is to process init.lua to check for
+    -- hooks, overload, and superload.  For our purposes, we can assume
+    -- hooks and overload are enabled and can hard-code needed
+    -- superload modules.
+    package.path = package.path..(';%s/overload/?.lua;%s/?.lua'):format(dlc, dlc)
+    old_loadfile(('%s/hooks/load.lua'):format(dlc))()
 
-            -- Hack: Further patches for specific DLC
-            if v == 'tome-orcs' then
-                local PartyTinker = require 'mod.class.interface.PartyTinker'
-                game.party.__tinkers_ings = PartyTinker.__tinkers_ings
-                game.party.knowTinker = PartyTinker.knowTinker
-                local Actor = require 'mod.class.Actor'
-                Actor.T_METALSTAR = 'T_METALSTAR'
-            end
-        end
+    -- Hack: Hard-code loading Combat.lua.
+    -- We run after mod.class.Actor, so pass that in loadPrevious
+    local f = old_loadfile(('%s/superload/mod/class/interface/Combat.lua'):format(dlc))
+    if f ~= nil then
+        setfenv(f, setmetatable({
+                            loadPrevious = function()
+                return require 'mod.class.Actor'
+                            end
+                    }, {__index=_G}))
+        f()
     end
 
-    class:triggerHook({'ToME:load'})
+    -- Hack: Further patches for specific DLC
+    if v:sub(1,4) == 'orcs' then
+        local PartyTinker = require 'mod.class.interface.PartyTinker'
+        game.party.__tinkers_ings = PartyTinker.__tinkers_ings
+        game.party.knowTinker = PartyTinker.knowTinker
+        local Actor = require 'mod.class.Actor'
+        Actor.T_METALSTAR = 'T_METALSTAR'
+    end
+
 end
+class:triggerHook({'ToME:load'})
 
 tip.raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_stamina', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback', 'steam', 'sustain_steam' }
 

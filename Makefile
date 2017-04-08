@@ -80,7 +80,6 @@ $(RELEASE_VERSIONS):
 	scripts/copy-tag-src.sh $@
 
 dlc: $(VERSIONS)
-	scripts/link-dlc.sh
 	touch dlc
 
 .PHONY: clean pretty img pull publish
