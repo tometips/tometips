@@ -29,6 +29,11 @@ function parseHashQueryString() {
     return url_params;
 }
 
+function getData()
+{
+    return tome[versions.current + '-' + masteries.current];
+}
+
 function escapeHtml(s)
 {
     return s.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
@@ -41,13 +46,14 @@ function locationHashNoQuery()
 
 function currentQuery()
 {
-    var query = '';
-    query += versions.asQuery();
+    var query = versions.asQuery();
+    var mquery = masteries.asQuery();
     if (query) {
-        return '?' + query;
+        if (mquery) query += '&' + mquery;
     } else {
-        return '';
+        query = mquery;
     }
+    return query ? '?' + query : '';
 }
 
 function setActiveNav(active_nav_route)
@@ -57,6 +63,15 @@ function setActiveNav(active_nav_route)
         $(".nav a[data-base-href='" + active_nav_route + "']").parent().addClass("active");
     }
 }
+
+///Updates navigation after a change
+function updateNav() {
+    // Update nav links to use the current version query.
+    $("a[data-base-href]").each(function () {
+        $(this).attr('href', $(this).attr('data-base-href') + currentQuery());
+    });
+}
+
 
 function scrollToId()
 {
@@ -111,6 +126,17 @@ function expandIds(id_list, disable_transitions)
 {
     for (var i = 0; i < id_list.length; i++) {
         showCollapsed(id_list[i], disable_transitions);
+    }
+}
+
+// List of collapsible IDs which are currently expanded, so that we can
+// maintain expanded/collapsed state when switching versions.
+var prev_expanded = null;
+
+function updateFinished() {
+    if (prev_expanded) {
+        expandIds(prev_expanded, true);
+        prev_expanded = null;
     }
 }
 
@@ -269,7 +295,7 @@ Handlebars.registerHelper('toWikiPage', function(context, options) {
 });
 
 Handlebars.registerHelper('tag', function(context, options) {
-    return tome[versions.current].tag;
+    return getData().tag;
 });
 
 Handlebars.registerHelper('currentQuery', function(context, options) {
@@ -436,15 +462,6 @@ var versions = (function() {
 
     // List of collapsible IDs which are currently expanded, so that we can
     // maintain expanded/collapsed state when switching versions.
-    var prev_expanded;
-
-    ///Updates navigation after the version is initialized or changed.
-    function updateNav() {
-        // Update nav links to use the current version query.
-        $("a[data-base-href]").each(function () {
-            $(this).attr('href', $(this).attr('data-base-href') + currentQuery());
-        });
-    }
 
     function onChange() {
         $_dropdown.val(versions.current);
@@ -484,13 +501,6 @@ var versions = (function() {
             if (versions.current != query.ver) {
                 versions.current = query.ver;
                 onChange();
-            }
-        },
-
-        updateFinished: function() {
-            if (prev_expanded) {
-                expandIds(prev_expanded, true);
-                prev_expanded = null;
             }
         },
 
@@ -550,6 +560,83 @@ var versions = (function() {
     return versions;
 }());
 
+// talent masteries.
+var masteries = (function() {
+    var $_dropdown;
+
+    function onChange() {
+        $_dropdown.val(masteries.current);
+
+        prev_expanded = getExpandedIds();
+        $("#side-nav").html("");
+
+        updateNav();
+    }
+
+    var masteries = {
+        DEFAULT: '1.3',
+        ALL: [ '0.8', '1.0', '1.1', '1.2', '1.3', '1.5' ],
+
+        name: function(ver) {
+            return ver;
+        },
+
+        update: function(query) {
+            query = query || {};
+            query.ver = query.mastery || versions.DEFAULT;
+            if (masteries.current != query.mastery) {
+                masteries.current = query.mastery;
+                onChange();
+            }
+        },
+
+        asQuery: function() {
+            if (masteries.current == masteries.DEFAULT) {
+                return '';
+            } else {
+                return 'mastery=' + masteries.current;
+            }
+        },
+
+        // Lists available versions in the given <option> element(s).
+        list: function($el, $container) {
+            var html;
+            if (masteries.ALL.length < 2) {
+                ($container || $el).hide();
+            } else {
+                html = '';
+                for (var i = 0; i < masteries.ALL.length; i++) {
+                    html += '<option value="' + masteries.ALL[i] + '"';
+                    if (masteries.ALL[i] == masteries.DEFAULT) {
+                        html += ' selected';
+                    }
+                    html += '>' + masteries.name(masteries.ALL[i]) + '</option>';
+                }
+                ($container || $el).removeClass("hidden").show();
+                $el.html(html);
+            }
+        },
+
+        // Listens for change events in the given <option> element(s).
+        listen: function($el) {
+            $el.change(function() {
+                masteries.current = $(this).val();
+                onChange();
+                hasher.setHash(locationHashNoQuery() + currentQuery());
+            });
+        },
+
+        init: function($el, $container) {
+            $_dropdown = $el;
+            masteries.list($el, $container);
+            masteries.listen($el);
+            updateNav();
+        }
+    };
+    masteries.current = masteries.DEFAULT;
+    return masteries;
+}());
+
 var routes,
     load_nav_data_handler,
     base_title = document.title;
@@ -577,12 +664,11 @@ function initializeRoutes() {
 
             $("#content-container").scrollTop(0);
             loadDataIfNeeded('changes.talents', function() {
-                document.title += ' - New in ' + tome[versions.current].majorVersion;
+                document.title += ' - New in ' + getData().majorVersion;
                 $("#content").html(listChangesTalents(tome));
 
                 enableTalentTooltips();
-
-                versions.updateFinished();
+                updateFinished();
             });
         }),
 
@@ -592,12 +678,11 @@ function initializeRoutes() {
 
             $("#content-container").scrollTop(0);
             loadDataIfNeeded('recent-changes.talents', function() {
-                document.title += ' - New in ' + tome[versions.current].version;
+                document.title += ' - New in ' + getData().version;
                 $("#content").html(listRecentChangesTalents(tome));
 
                 enableTalentTooltips();
-
-                versions.updateFinished();
+                updateFinished();
             });
         }),
 
@@ -636,8 +721,7 @@ function initializeRoutes() {
                 enableTalentTooltips();
 
                 fillTalentAvailability(tome, category);
-
-                versions.updateFinished();
+                updateFinished();
             });
         }),
 
@@ -670,12 +754,13 @@ function initializeRoutes() {
             loadRacesIfNeeded(function() {
                 routes.races.matched.dispatch(query);
 
-                if (!tome[versions.current].races.races_by_id[r]) {
+                var data = getData();
+                if (!data.races.races_by_id[r]) {
                     handleUnknownRace(tome, r);
                     return;
                 }
 
-                document.title += ' - ' + tome[versions.current].races.races_by_id[r].display_name;
+                document.title += ' - ' + data.races.races_by_id[r].display_name;
 
                 $("#content-container").scrollTop(0);
 
@@ -685,7 +770,7 @@ function initializeRoutes() {
                 $("#content").html(listRaces(tome, r));
                 scrollToId();
 
-                versions.updateFinished();
+                updateFinished();
             });
         }),
 
@@ -712,7 +797,7 @@ function initializeRoutes() {
 
             loadClassesIfNeeded(function() {
                 routes.classes.matched.dispatch(query);
-                document.title += ' - ' + tome[versions.current].classes.classes_by_id[cls].display_name;
+                document.title += ' - ' + getData().classes.classes_by_id[cls].display_name;
 
                 $("#content-container").scrollTop(0);
 
@@ -724,7 +809,7 @@ function initializeRoutes() {
 
                 fillClassTalents(tome, cls);
 
-                versions.updateFinished();
+                updateFinished();
             });
         }),
 
@@ -747,8 +832,13 @@ function initializeRoutes() {
 }
 
 function loadData(data_file, success) {
+    var url = "data/" + versions.current + "/" + data_file;
+    // talent files include the mastery
+    if (data_file.substr(0, 8) == 'talents.')
+        url += '-' + ((masteries.current == '1.0') ? '1' : masteries.current);
+
     $.ajax({
-        url: "data/" + versions.current + "/" + data_file + ".json",
+        url: url + '.json',
         dataType: "json"
     }).success(success);
     // FIXME: Error handling
@@ -771,7 +861,7 @@ function loadDataIfNeeded(data_file, success) {
 
     // Special case: No data has been loaded at all.
     // Load top-level data, then reissue the request.
-    if (!tome[versions.current]) {
+    if (!getData()) {
         loadData('tome', function(data) {
             data.hasMajorChanges = versions.asMajor(data.version) != versions.asMajor(versions.ALL[0]);
             data.hasMinorChanges = data.version != versions.ALL[0] &&
@@ -783,7 +873,7 @@ function loadDataIfNeeded(data_file, success) {
 
             data.fixups = {};
 
-            tome[versions.current] = data;
+            tome[versions.current + '-' + masteries.current] = data;
             loadDataIfNeeded(data_file, success);
         });
         return;
@@ -799,7 +889,7 @@ function loadDataIfNeeded(data_file, success) {
     // should go, and load it.
     parts = data_file.split(".");
     last_part = parts.pop();
-    tome_part = tome[versions.current];
+    tome_part = getData();
 
     for (var i = 0; i < parts.length; i++) {
         if (typeof(tome_part[parts[i]]) === 'undefined') {
@@ -870,6 +960,7 @@ $(function() {
     makeStickyHeader($("#content-header"), $("#content-container"));
     enableExpandCollapseAll();
     versions.init($(".ver-dropdown"), $(".ver-dropdown-container"));
+    masteries.init($(".mastery-dropdown"), $(".mastery-dropdown-container"));
     configureImgSize();
     $('.tt-dropdown-menu').width($('#content-header .header-tools').width());
 

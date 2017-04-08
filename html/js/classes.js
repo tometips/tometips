@@ -1,7 +1,8 @@
 function fixupClasses(tome) {
-    var c = tome[versions.current].classes;
+  var data = getData();
+    var c = data.classes;
 
-    if (tome[versions.current].fixups.classes) {
+    if (data.fixups.classes) {
         return;
     }
 
@@ -24,19 +25,20 @@ function fixupClasses(tome) {
 
     c.classes_by_id = indexByHtmlId(c.classes, 'short_name');
 
-    tome[versions.current].fixups.classes = true;
+    data.fixups.classes = true;
 }
 
 function navClasses(tome) {
-    return Handlebars.templates.class_nav(tome[versions.current].classes);
+    return Handlebars.templates.class_nav(getData().classes);
 }
 
 function listClasses(tome, cls) {
-    return Handlebars.templates.class(tome[versions.current].classes.classes_by_id[cls]);
+    return Handlebars.templates.class(getData().classes.classes_by_id[cls]);
 }
 
 function fillClassTalents(tome, cls) {
-    var subclasses = tome[versions.current].classes.classes_by_id[cls].subclass_list,
+    var data = getData();
+    var subclasses = data.classes.classes_by_id[cls].subclass_list,
         load_talents = {};
 
     function list_class_talents(value, key, list) {
@@ -54,7 +56,7 @@ function fillClassTalents(tome, cls) {
         loadDataIfNeeded('talents.' + category, function() {
             _.each(talents, function(value, this_type, list) {
                 // TODO: Should index talents by talent_type as well as sequential list to avoid the need to use _.find
-                var talent_details = _.find(tome[versions.current].talents[category], function(t) { return t.type == this_type; }),
+                var talent_details = _.find(getData().talents[category], function(t) { return t.type == this_type; }),
                     talent_html = Handlebars.partials.class_talents_detail(talent_details);
                 $('.class-talents-detail[data-talent-type="' + toHtmlId(this_type) + '"]').html(talent_html);
             });

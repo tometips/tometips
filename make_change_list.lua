@@ -27,7 +27,7 @@ for i, ver in ipairs({from_version, to_version}) do
     tome[ver] = loadJson(json_dir .. ver .. '/tome.json')
     tome[ver].talents = {}
     for j, cat in ipairs(tome[ver].talent_categories) do
-        tome[ver].talents[cat] = loadJson(json_dir .. ver .. '/talents.' .. cat .. '.json')
+        tome[ver].talents[cat] = loadJson(json_dir .. ver .. '/talents.' .. cat .. '-1.3.json')
     end
 end
 

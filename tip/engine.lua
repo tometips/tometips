@@ -4,7 +4,7 @@ package.path = package.path..(';%s/?.lua;./%s/thirdparty/?.lua'):format(tip.vers
 require 'versions'
 
 tip.outputDir = function()
-    local output_dir = (arg[2] or '.') .. '/'
+    local output_dir = (arg[2] or 'html/data/'..tip.version) .. '/'
     print("OUTPUT DIRECTORY: " .. output_dir)
     os.execute('mkdir -p ' .. output_dir)
     return output_dir

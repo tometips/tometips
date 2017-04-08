@@ -6,7 +6,7 @@ function talentImgError(image) {
 }
 
 function navTalents(tome) {
-    return Handlebars.templates.talent_by_type_nav(tome[versions.current]);
+    return Handlebars.templates.talent_by_type_nav(getData());
 }
 
 function loadNavTalents($el) {
@@ -18,7 +18,7 @@ function loadNavTalents($el) {
 
 function fillNavTalents(tome, category) {
     var $el = $("#nav-" + category),
-        talent_types = tome[versions.current].talents[category];
+        talent_types = getData().talents[category];
     if ($.trim($el.html())) {
         // Nav already exists; no need to do more.
         return;
@@ -31,15 +31,15 @@ function fillNavTalents(tome, category) {
 }
 
 function listTalents(tome, category) {
-    return Handlebars.templates.talent_by_type(tome[versions.current].talents[category]);
+    return Handlebars.templates.talent_by_type(getData().talents[category]);
 }
 
 function listChangesTalents(tome) {
-    return Handlebars.templates.changes_talents(tome[versions.current].changes.talents);
+    return Handlebars.templates.changes_talents(getData().changes.talents);
 }
 
 function listRecentChangesTalents(tome) {
-    return Handlebars.templates.changes_talents(tome[versions.current]["recent-changes"].talents);
+    return Handlebars.templates.changes_talents(getData()["recent-changes"].talents);
 }
 
 /**Adds "Availability:" paragraphs to already rendered talent listings,
@@ -48,12 +48,12 @@ function fillTalentAvailability(tome, category) {
     var show;
 
     // The set of talent types we're interested in showing
-    show = _.object(_.map(tome[versions.current].talents[category], function(t) {
+    show = _.object(_.map(getData().talents[category], function(t) {
         return [t.type, []];
     }));
 
     loadClassesIfNeeded(function() {
-        var subclasses = tome[versions.current].classes.subclasses,
+        var subclasses = getData().classes.subclasses,
             sorted_subclasses = _.sortBy(subclasses, 'name');
         _.each(sorted_subclasses, function(sub) {
             _.each([ sub.talents_types_class, sub.talents_types_generic ], function(sub_talents_types) {

@@ -1,7 +1,8 @@
 function fixupRaces(tome) {
-    var r = tome[versions.current].races;
+    var data = getData();
+    var r = data.races;
 
-    if (tome[versions.current].fixups.races) {
+    if (data.fixups.races) {
         return;
     }
 
@@ -34,15 +35,15 @@ function fixupRaces(tome) {
 
     r.races_by_id = indexByHtmlId(r.races, 'short_name');
 
-    tome[versions.current].fixups.races = true;
+    data.fixups.races = true;
 }
 
 function navRaces(tome) {
-    return Handlebars.templates.race_nav(tome[versions.current].races);
+    return Handlebars.templates.race_nav(getData().races);
 }
 
 function listRaces(tome, r) {
-    return Handlebars.templates.race(tome[versions.current].races.races_by_id[r]);
+    return Handlebars.templates.race(getData().races.races_by_id[r]);
 }
 
 /**loadDataIfNeeded for races */
