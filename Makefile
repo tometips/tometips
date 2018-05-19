@@ -4,15 +4,13 @@ LUA := luajit
 
 TOME_GIT_URL := http://git.net-core.org/tome/t-engine4.git
 
-RELEASE_VERSIONS := 1.1.5 1.2.5 1.3.3 1.4.9 1.5.0 1.5.1 1.5.2
-VERSIONS := $(RELEASE_VERSIONS) master
+RELEASE_VERSIONS := 1.4.9 1.5.0 1.5.1 1.5.2 1.5.3 1.5.9
+VERSIONS := $(RELEASE_VERSIONS)
 
 # GitHub Pages output
 PAGES_OUTPUT = ../tometips.github.io
 
-all: t-engine4 img html/js/templates.js html/js/partials.js json \
-	$(patsubst %,html/data/%/changes.talents.json,$(VERSIONS)) \
-	$(patsubst %,html/data/%/recent-changes.talents.json,$(VERSIONS))
+all: t-engine4 img html/js/templates.js html/js/partials.js json recent
 
 json:
 	$(LUA) spoilers.lua $(LUA)

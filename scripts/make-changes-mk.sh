@@ -5,7 +5,6 @@ make_entry() {
     local ver=$2
     local prefix=$3
 cat <<EOF
-html/data/$ver/${prefix}changes.talents.json: html/data/$prev/tome.json html/data/$ver/tome.json make_change_list.lua
 	\$(LUA) make_change_list.lua html/data/ $prev $ver $prefix
 EOF
 }
@@ -15,9 +14,10 @@ make_dummy_entry() {
     local ver=$1
     local prefix=$2
 cat <<EOF
-html/data/$ver/${prefix}changes.talents.json:
 EOF
 }
+
+echo recent:
 
 for ver in $*; do
     # Special case: master

@@ -521,6 +521,8 @@ end
 
 
 
+local search_indexed = false
+
 -- Loop the data gathering across various mastery levels
 for i,mastery in ipairs(masteries) do
     spoilers.active.mastery = mastery
@@ -815,27 +817,32 @@ for i,mastery in ipairs(masteries) do
         out:close()
     end
 
-end
-
--- Output search indexes
--- Search indexes are sorted by name for more stable diffs
-local talents_types_json = {}
-local talents_json = {}
-for cat_k, cat_v in pairs(talents_by_category) do    -- iterate over "categories" (celestial, cursed, etc.)
-    for type_i, type_v in ipairs(cat_v) do           -- iterate over talent types (celestial/chants, celestial/combat, etc.)
-        local type_name = cat_k .. '/' .. type_v.name
-        talents_types_json[#talents_types_json+1] = { name=type_name, desc=type_v.description, href='talents/'..type_v.type }
-        for talent_i, talent_v in ipairs(type_v.talents) do
-            talents_json[#talents_json+1] = { name=talent_v.name, desc=("%s %i"):format(talent_v.type[1], talent_v.type[2]), href='talents/'..talent_v.type[1] }
+    -- search indexes; this only needs to be ran once
+    if not search_indexed then
+        -- Output search indexes
+        -- Search indexes are sorted by name for more stable diffs
+        local talents_types_json = {}
+        local talents_json = {}
+        for cat_k, cat_v in pairs(talents_by_category) do    -- iterate over "categories" (celestial, cursed, etc.)
+            for type_i, type_v in ipairs(cat_v) do           -- iterate over talent types (celestial/chants, celestial/combat, etc.)
+                local type_name = cat_k .. '/' .. type_v.name
+                talents_types_json[#talents_types_json+1] = { name=type_name, desc=type_v.description, href='talents/'..type_v.type }
+                for talent_i, talent_v in ipairs(type_v.talents) do
+                    talents_json[#talents_json+1] = { name=talent_v.name, desc=("%s %i"):format(talent_v.type[1], talent_v.type[2]), href='talents/'..talent_v.type[1] }
+                end
+            end
         end
+        table.sort(talents_types_json, function(a, b) return a.name < b.name end)
+        table.sort(talents_json, function(a, b) return a.name < b.name end)
+        local talents_types_out = io.open(output_dir .. 'search.talents-types.json', 'w')
+        local talents_out = io.open(output_dir .. 'search.talents.json', 'w')
+        talents_types_out:write(json.encode(talents_types_json, {sort_keys=true}))
+        talents_out:write(json.encode(talents_json, {sort_keys=true}))
+        talents_types_out:close()
+        talents_out:close()
+
+        search_indexed = true
     end
 end
-table.sort(talents_types_json, function(a, b) return a.name < b.name end)
-table.sort(talents_json, function(a, b) return a.name < b.name end)
-local talents_types_out = io.open(output_dir .. 'search.talents-types.json', 'w')
-local talents_out = io.open(output_dir .. 'search.talents.json', 'w')
-talents_types_out:write(json.encode(talents_types_json, {sort_keys=true}))
-talents_out:write(json.encode(talents_json, {sort_keys=true}))
-talents_types_out:close()
-talents_out:close()
+
 

@@ -178,6 +178,12 @@ ActorInventory:defineInventory("QS_MAINHAND", "Second weapon set: In main hand",
 ActorInventory:defineInventory("QS_OFFHAND", "Second weapon set: In off hand", false, "Weapon Set 2: You can use shields or a second weapon in your off-hand, if you have the talents for it. Press 'x' to switch weapon sets.", true)
 ActorInventory:defineInventory("QS_PSIONIC_FOCUS", "Second weapon set: psionic focus", false, "Weapon Set 2: Object held in your telekinetic grasp. It can be a weapon or some other item to provide a benefit to your psionic powers. Press 'x' to switch weapon sets.", true)
 ActorInventory:defineInventory("QS_QUIVER", "Second weapon set: Quiver", false, "Weapon Set 2: Your readied ammo.", true)
+ActorInventory.equipdolls = {
+	default = { w=48, h=48, itemframe="ui/equipdoll/itemframe48.png", itemframe_sel="ui/equipdoll/itemframe-sel48.png", ix=3, iy=3, iw=42, ih=42, doll_x=116, doll_y=168+64, doll_w=128, doll_h=128,
+	list={
+	}},
+}
+
 
 -- Copied from ToME's load.lua
 DamageType:loadDefinition("/data/damage_types.lua")
@@ -253,6 +259,7 @@ for i, v in ipairs(all_dlc) do
     -- hooks and overload are enabled and can hard-code needed
     -- superload modules.
     package.path = package.path..(';%s/overload/?.lua;%s/?.lua'):format(dlc, dlc)
+    class:setCurrentHookDir('/../'..dlc..'/hooks')
     old_loadfile(('%s/hooks/load.lua'):format(dlc))()
 
     -- Hack: Hard-code loading Combat.lua.
@@ -279,7 +286,7 @@ for i, v in ipairs(all_dlc) do
 end
 class:triggerHook({'ToME:load'})
 
-tip.raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_stamina', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback', 'steam', 'sustain_steam' }
+tip.raw_resources = {'mana', 'soul', 'stamina', 'equilibrium', 'vim', 'positive', 'negative', 'hate', 'paradox', 'psi', 'feedback', 'fortress_energy', 'sustain_mana', 'sustain_stamina', 'sustain_equilibrium', 'sustain_vim', 'drain_vim', 'sustain_positive', 'sustain_negative', 'sustain_hate', 'sustain_paradox', 'sustain_psi', 'sustain_feedback', 'steam', 'sustain_steam', 'insanity', 'sustain_insanity' }
 
 tip.resources = {}
 for i, v in ipairs(tip.raw_resources) do
