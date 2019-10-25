@@ -5,6 +5,7 @@ local Actor = require 'mod.class.Actor'
 local ActorTalents = require 'engine.interface.ActorTalents'
 
 masteries = { 0.8, 1.0, 1.1, 1.2, 1.3, 1.5 }
+-- masteries = { 1.3 }
 
 spoilers = {
     -- Currently active parameters.  TODO: Configurable
@@ -380,6 +381,15 @@ player.getInscriptionData = function()
         mana = 0,
         apply = 0,
         radius = 0,
+        reduction = 0,
+        resist = 0,
+        move = 0,
+        shield = 0,
+        blocks = 0,
+        threshold = 0,
+        inc_stat = 0,
+        inheritance = 0,
+        wards = {},
         what = { ["physical, mental, or magical"] = true },
         cooldown_mod = 100,
     }

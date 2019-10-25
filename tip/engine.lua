@@ -128,6 +128,10 @@ resolvers = {
     racials_defs = {
     },
 
+    racials_visuals_defs = {
+      Giant={},
+    },
+
     equip = function() end,
     inscriptions = function() end,
     levelup = function() end,
@@ -149,6 +153,8 @@ resolvers = {
     equipbirth = function() end,
     inventorybirth = function() end,
     attachtinkerbirth = function() end,
+    birth_extra_tier1_zone = function() end,
+    auto_equip_filters = function() end,
 }
 
 config.settings.tome = {}
